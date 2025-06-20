@@ -12,13 +12,6 @@ const Login = () => {
     const [showPassword, setShowPassword] = useState(false);
     const navigate = useNavigate();
 
-    useEffect(() => {
-        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-        if (token) {
-            navigate('/student/'); 
-        }
-    }, [navigate]);
-
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
