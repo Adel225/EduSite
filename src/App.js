@@ -16,7 +16,6 @@ import StudentAssignments from './components/student/pages/Assignments';
 import StudentExams from './components/student/pages/Exams';
 import StudentMaterials from './components/student/pages/Materials';
 import Profile from './components/student/pages/Profile';
-import TeacherProfile from './components/teacher/Profile';
 import Login from './components/auth/login';
 import SignUp from './components/auth/SignUp';
 import AdminLogin from './components/auth/teacherLogin';
@@ -169,7 +168,6 @@ return (
                     <Route path="materials" element={<Materials />} />
                     <Route path="groups" element={<Groups />} />
                     <Route path="groups/:grade/:group" element={<GroupDetails />} />
-                    <Route path="profile" element={<TeacherProfile />} />
                 </Routes>
                 </div>
             </div>
