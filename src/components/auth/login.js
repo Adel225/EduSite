@@ -1,8 +1,9 @@
+// src/components/auth/login.js (example path)
 import React, { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
-import '../auth/auth.css';
-import { API_URL } from '../../config';
+import './auth.css'; // Path from src/components/auth/login.js to src/components/auth/auth.css
+import { API_URL } from '../../config'; // Path from src/components/auth/login.js to src/config.js
 
 const Login = () => {
     const [email, setEmail] = useState('');
@@ -11,13 +12,22 @@ const Login = () => {
     const [error, setError] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const navigate = useNavigate();
+    const location = useLocation();
+
+    useEffect(() => {
+        if (location.state?.error) {
+            setError(location.state.error);
+            // Clear error from location state to prevent it from reappearing on refresh/back
+            navigate(location.pathname, { replace: true, state: {} });
+        }
+    }, [location.state, location.pathname, navigate]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setError('');
+        setError(''); 
 
         try {
-            const response = await fetch(`${API_URL}/student/login`, {
+            const response = await fetch(`${API_URL}/student/login`, { // Assuming student login endpoint
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -29,22 +39,22 @@ const Login = () => {
             });
 
             const data = await response.json();
-            console.log('Login response:', data); // Debug log
             
             if (data.token) {
-                // Store token based on Remember Me choice
                 if (rememberMe) {
                     localStorage.setItem('token', data.token);
                 } else {
                     sessionStorage.setItem('token', data.token);
                 }
-                navigate('/student/');
+                // After successful login, navigate to a neutral path or the expected dashboard.
+                // The AuthInitializerAndMainApp will then pick up the new token and redirect.
+                // Navigating to '/' is a safe bet to trigger the AuthInitializer.
+                navigate('/', { replace: true }); 
             } else {
-                // Display error message from API
                 setError(data.Message || 'Login failed');
             }
         } catch (err) {
-            setError('An error occurred during login');
+            setError('An error occurred during login. Please check your connection.');
             console.error('Login error:', err);
         }
     };
