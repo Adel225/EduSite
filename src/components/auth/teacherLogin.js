@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState , useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import './auth.css';
 import { API_URL } from '../../config';
@@ -9,6 +9,13 @@ const AdminLogin = () => {
     const [rememberMe, setRememberMe] = useState(false);
     const [error, setError] = useState('');
     const navigate = useNavigate();
+
+    useEffect(() => {
+        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        if (token) {
+            navigate('/student/'); 
+        }
+    }, [navigate]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
