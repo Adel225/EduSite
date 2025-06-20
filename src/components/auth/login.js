@@ -49,7 +49,7 @@ const Login = () => {
                 // After successful login, navigate to a neutral path or the expected dashboard.
                 // The AuthInitializerAndMainApp will then pick up the new token and redirect.
                 // Navigating to '/' is a safe bet to trigger the AuthInitializer.
-                navigate('/', { replace: true }); 
+                navigate('/student', { replace: true }); 
             } else {
                 setError(data.Message || 'Login failed');
             }
