@@ -27,24 +27,29 @@ import { API_URL } from './config'; // This path is correct as App.js and config
 Modal.setAppElement('#root');
 
 const GlobalLoadingIndicator = () => (
-  <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', fontSize: '24px', color: '#333' }}>
+<div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', fontSize: '24px', color: '#333' }}>
     Loading, please wait...
-  </div>
+</div>
 );
 
 const AuthInitializerAndMainApp = () => {
-  const [isLoading, setIsLoading] = useState(true); // Start with loading true
-  const navigate = useNavigate();
-  const location = useLocation(); // Get location here to pass to navigate if needed
+const [isLoading, setIsLoading] = useState(true); // Start with loading true
+const navigate = useNavigate();
+const location = useLocation(); // Get location here to pass to navigate if needed
 
-  useEffect(() => {
+
+useEffect(() => {
     let isMounted = true;
+    // No need to set isLoading(true) here as initial state is true.
 
     const performCheck = async () => {
       const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-      
+      const currentPath = location.pathname;
+
       if (!token) {
         if (isMounted) setIsLoading(false);
+        // If no token and user is on a protected route, PrivateRoute will handle redirection.
+        // If on /login, /admin/login, or /signup, they should stay there.
         return;
       }
 
@@ -62,44 +67,56 @@ const AuthInitializerAndMainApp = () => {
         if (response.ok) {
           const profileData = await response.json();
           if (profileData.data) {
-            if (profileData.data.Main === true) { // Teacher
-              navigate('/dashboard/', { replace: true });
-            } else if (profileData.data.userName) { // Student
-              navigate('/student/', { replace: true });
+            const isTeacher = profileData.data.Main === true;
+            const isStudent = !!profileData.data.userName;
+
+            if (isTeacher) {
+              // If teacher is on a login page or root, redirect to their dashboard
+              if (['/login', '/admin/login', '/signup', '/'].includes(currentPath)) {
+                navigate('/dashboard/', { replace: true });
+              }
+            } else if (isStudent) {
+              // If student is on a login page or root, redirect to their dashboard
+              if (['/login', '/admin/login', '/signup', '/'].includes(currentPath)) {
+                navigate('/student/', { replace: true });
+              }
             } else { // Ambiguous role
               localStorage.removeItem('token');
               sessionStorage.removeItem('token');
-              navigate('/login', { state: { error: "The login credentials aren't right." }, replace: true });
+              if (!['/login', '/admin/login', '/signup'].includes(currentPath)) {
+                navigate('/login', { state: { error: "The login credentials aren't right." }, replace: true });
+              }
             }
           } else { // Unexpected response structure
             localStorage.removeItem('token');
             sessionStorage.removeItem('token');
-            navigate('/login', { state: { error: "Failed to verify login. Please try again." }, replace: true });
+            if (!['/login', '/admin/login', '/signup'].includes(currentPath)) {
+              navigate('/login', { state: { error: "Failed to verify login. Please try again." }, replace: true });
+            }
           }
-        } else { // Token invalid or other API error
+        } else { // Token invalid or other API error (e.g., 401, 403)
           localStorage.removeItem('token');
           sessionStorage.removeItem('token');
-          // Based on your answer 5, if token is invalid, redirect to student login.
-          // If you want to show a specific error for invalid token, pass it in state.
-          navigate('/login', { replace: true, state: { error: "Session expired or invalid. Please login again." } });
+          // Redirect to student login with an error if not already on a login/signup page
+          if (!['/login', '/admin/login', '/signup'].includes(currentPath)) {
+             navigate('/login', { replace: true, state: { error: "Session expired or invalid. Please login again." } });
+          }
         }
       } catch (error) {
         if (isMounted) {
           console.error('Error during initial auth check:', error);
           localStorage.removeItem('token');
           sessionStorage.removeItem('token');
-          navigate('/login', { state: { error: "A network error occurred. Please try again." }, replace: true });
+          if (!['/login', '/admin/login', '/signup'].includes(currentPath)) {
+            navigate('/login', { state: { error: "A network error occurred. Please try again." }, replace: true });
+          }
         }
       } finally {
         if (isMounted) setIsLoading(false);
       }
     };
 
-    // Only run performCheck if we haven't determined the auth state yet (i.e., isLoading is true)
-    // This also implicitly means the check runs once on mount.
-    if (isLoading) {
-        performCheck();
-    }
+    performCheck(); // This will run once on mount due to the dependency array below.
     
     return () => {
       isMounted = false;
@@ -107,43 +124,43 @@ const AuthInitializerAndMainApp = () => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [navigate]); // `isLoading` removed from deps to prevent re-triggering on its own change. Effect runs once.
 
-  if (isLoading) {
+if (isLoading) {
     return <GlobalLoadingIndicator />;
-  }
+}
 
-  const isAuthenticated = () => {
+const isAuthenticated = () => {
     const token = localStorage.getItem('token') || sessionStorage.getItem('token');
     return !!token;
-  };
+};
 
-  const PrivateRoute = ({ children }) => {
+const PrivateRoute = ({ children }) => {
     const currentRouteLocation = useLocation(); // Use a different name to avoid conflict with outer scope location
     const auth = isAuthenticated();
     
     if (!auth) {
-      // Original logic: Redirect to admin login for any private route if not authenticated.
-      // This might need refinement if you want different unauth redirects for student vs teacher areas.
-      return <Navigate to="/admin/login" state={{ from: currentRouteLocation }} replace />;
+    // Original logic: Redirect to admin login for any private route if not authenticated.
+    // This might need refinement if you want different unauth redirects for student vs teacher areas.
+    return <Navigate to="/login" state={{ from: currentRouteLocation }} replace />;
     }
     return children;
-  };
+};
 
-  return (
+return (
     <Routes>
-      <Route path="/admin/login" element={<AdminLogin />} />
-      <Route path="/login" element={<Login />} />
-      <Route path="/signup" element={<SignUp />} />
+    <Route path="/admin/login" element={<AdminLogin />} />
+    <Route path="/login" element={<Login />} />
+    <Route path="/signup" element={<SignUp />} />
 
-      <Route
+    <Route
         path="/dashboard/*"
         element={
-          <PrivateRoute>
+        <PrivateRoute>
             <>
-              <Header />
-              <div className="app">
+            <Header />
+            <div className="app">
                 <Sidebar />
                 <div className="main-content">
-                  <Routes>
+                <Routes>
                     <Route path="/" element={<Dashboard />} />
                     <Route path="exams" element={<Exams />} />
                     <Route path="assignments" element={<Assignments />} />
@@ -152,37 +169,37 @@ const AuthInitializerAndMainApp = () => {
                     <Route path="materials" element={<Materials />} />
                     <Route path="groups" element={<Groups />} />
                     <Route path="groups/:grade/:group" element={<GroupDetails />} />
-                  </Routes>
+                </Routes>
                 </div>
-              </div>
+            </div>
             </>
-          </PrivateRoute>
+        </PrivateRoute>
         }
-      />
+    />
 
-      <Route
+    <Route
         path="/student/*"
         element={
-          <PrivateRoute>
+        <PrivateRoute>
             <>
-              <Header />
-              <div className="app">
+            <Header />
+            <div className="app">
                 <StudentSidebar />
                 <div className="main-content">
-                  <Routes>
+                <Routes>
                     <Route index element={<StudentDashboard />} />
                     <Route path="assignments" element={<StudentAssignments />} />
                     <Route path="exams" element={<StudentExams />} />
                     <Route path="materials" element={<StudentMaterials />} />
                     <Route path="profile" element={<Profile />} /> {/* Uses the imported student Profile */}
-                  </Routes>
+                </Routes>
                 </div>
-              </div>
+            </div>
             </>
-          </PrivateRoute>
+        </PrivateRoute>
         }
-      />
-      {/* 
+    />
+    {/* 
         Catch-all route:
         If the initial auth check is done, and the user is not authenticated (no token),
         and they try to access a path not explicitly handled (like '/'), this will redirect to '/login'.
@@ -190,18 +207,18 @@ const AuthInitializerAndMainApp = () => {
         If they are authenticated and type a completely random URL, this will also redirect to '/login'.
         You might want to change this to a <NotFound /> component or redirect to their dashboard if authenticated.
         For now, it aligns with your original catch-all.
-      */}
-      <Route path="*" element={<Navigate to="/login" replace />} />
+    */}
+    <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
-  );
+);
 };
 
 const App = () => {
-  return (
+return (
     <Router>
-      <AuthInitializerAndMainApp />
+    <AuthInitializerAndMainApp />
     </Router>
-  );
+);
 };
 
 export default App;
