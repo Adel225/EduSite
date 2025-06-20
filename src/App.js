@@ -16,11 +16,7 @@ import StudentAssignments from './components/student/pages/Assignments';
 import StudentExams from './components/student/pages/Exams';
 import StudentMaterials from './components/student/pages/Materials';
 import Profile from './components/student/pages/Profile'; // This is Student's Profile
-// VVVV ERROR HERE VVVV - Check the path to your TeacherProfile component.
-// The path './components/teacher/Profile' suggests src/components/teacher/Profile.js
-// Your screenshot does not show a 'teacher' folder in 'src/components/'.
-// Please verify the actual location of TeacherProfile.js and update this import.
-import TeacherProfile from './components/teacher/Profile'; // Line 23 in previous example
+
 import Login from './components/auth/login';
 import SignUp from './components/auth/SignUp';
 import AdminLogin from './components/auth/teacherLogin';
@@ -156,7 +152,6 @@ const AuthInitializerAndMainApp = () => {
                     <Route path="materials" element={<Materials />} />
                     <Route path="groups" element={<Groups />} />
                     <Route path="groups/:grade/:group" element={<GroupDetails />} />
-                    <Route path="profile" element={<TeacherProfile />} /> {/* Uses the imported TeacherProfile */}
                   </Routes>
                 </div>
               </div>
