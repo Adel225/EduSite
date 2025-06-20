@@ -27,123 +27,128 @@ import { API_URL } from './config'; // This path is correct as App.js and config
 Modal.setAppElement('#root');
 
 const GlobalLoadingIndicator = () => (
-  <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', fontSize: '24px', color: '#333' }}>
+<div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', fontSize: '24px', color: '#333' }}>
     Loading, please wait...
-  </div>
+</div>
 );
 
 const AuthInitializerAndMainApp = () => {
-  const [isLoading, setIsLoading] = useState(true); // Start with loading true
-  const navigate = useNavigate();
-  const location = useLocation(); // Get location here to pass to navigate if needed
+const [isLoading, setIsLoading] = useState(true); // Start with loading true
+const navigate = useNavigate();
+const location = useLocation();
 
-  useEffect(() => {
-    let isMounted = true;
-
+useEffect(() => {
+    // ...
     const performCheck = async () => {
-      const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-      
-      if (!token) {
-        if (isMounted) setIsLoading(false);
-        return;
-      }
+        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        console.log('AuthCheck: Token:', token); // Check if token exists
 
-      try {
-        const response = await fetch(`${API_URL}/student/profile`, {
-          method: 'GET',
-          headers: {
-            'Authorization': `MonaEdu ${token}`,
-            'Content-Type': 'application/json',
-          },
-        });
+        if (!token) {
+            if (isMounted) setIsLoading(false);
+            console.log('AuthCheck: No token found, setting isLoading false.');
+            return;
+        }
 
-        if (!isMounted) return;
+        try {
+            console.log('AuthCheck: Fetching /student/profile');
+            const response = await fetch(`${API_URL}/student/profile`, { /* ... */ });
+            console.log('AuthCheck: API Response Status:', response.status);
+            console.log('AuthCheck: API Response OK?:', response.ok);
 
-        if (response.ok) {
-          const profileData = await response.json();
-          if (profileData.data) {
-            if (profileData.data.Main === true) { // Teacher
-              navigate('/dashboard/', { replace: true });
-            } else if (profileData.data.userName) { // Student
-              navigate('/student/', { replace: true });
-            } else { // Ambiguous role
-              localStorage.removeItem('token');
-              sessionStorage.removeItem('token');
-              navigate('/login', { state: { error: "The login credentials aren't right." }, replace: true });
+            if (!isMounted) return;
+
+            if (response.ok) {
+                const profileData = await response.json();
+                console.log('AuthCheck: API Profile Data:', JSON.stringify(profileData, null, 2)); // Log the WHOLE structure
+
+                if (profileData.data) {
+                    console.log('AuthCheck: profileData.data.Main:', profileData.data.Main);
+                    console.log('AuthCheck: profileData.data.confirmEmail:', profileData.data.confirmEmail);
+
+                    if (profileData.data.Main !== undefined && profileData.data.Main) {
+                        console.log('AuthCheck: Navigating to /dashboard/ (Teacher)');
+                        navigate('/dashboard/', { replace: true });
+                    } 
+                    else if (profileData.data.confirmEmail) {
+                        console.log('AuthCheck: Navigating to /student/ (Student)');
+                        navigate('/student/', { replace: true });
+                    } 
+                    else {
+                        console.log('AuthCheck: Ambiguous role, navigating to /login');
+                        localStorage.removeItem('token');
+                        sessionStorage.removeItem('token');
+                        navigate('/login', { state: { error: "The login credentials aren't right." }, replace: true });
+                    }
+                } else {
+                    console.log('AuthCheck: Unexpected response structure (no profileData.data), navigating to /login');
+                    navigate('/login');
+                }
+            } else {
+                console.log('AuthCheck: Token invalid or API error, navigating to /login');
+                const errorBody = await response.text(); // See if there's an error message from API
+                console.log('AuthCheck: API Error Body:', errorBody);
+                navigate('/login');
             }
-          } else { // Unexpected response structure
-            localStorage.removeItem('token');
-            sessionStorage.removeItem('token');
-            navigate('/login', { state: { error: "Failed to verify login. Please try again." }, replace: true });
-          }
-        } else { // Token invalid or other API error
-          localStorage.removeItem('token');
-          sessionStorage.removeItem('token');
-          // Based on your answer 5, if token is invalid, redirect to student login.
-          // If you want to show a specific error for invalid token, pass it in state.
-          navigate('/login', { replace: true, state: { error: "Session expired or invalid. Please login again." } });
+        } catch (error) {
+            if (isMounted) {
+                console.error('AuthCheck: Error during initial auth check:', error);
+                navigate('/login');
+            }
+        } finally {
+            if (isMounted) {
+                console.log('AuthCheck: Setting isLoading to false.');
+                setIsLoading(false);
+            }
         }
-      } catch (error) {
-        if (isMounted) {
-          console.error('Error during initial auth check:', error);
-          localStorage.removeItem('token');
-          sessionStorage.removeItem('token');
-          navigate('/login', { state: { error: "A network error occurred. Please try again." }, replace: true });
-        }
-      } finally {
-        if (isMounted) setIsLoading(false);
-      }
     };
 
-    // Only run performCheck if we haven't determined the auth state yet (i.e., isLoading is true)
-    // This also implicitly means the check runs once on mount.
-    if (isLoading) {
+    if (isLoading) { // This condition is good
+        console.log('AuthCheck: isLoading is true, performing check.');
         performCheck();
+    } else {
+        console.log('AuthCheck: isLoading is false, not performing check on this render.');
     }
-    
-    return () => {
-      isMounted = false;
-    };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [navigate]); // `isLoading` removed from deps to prevent re-triggering on its own change. Effect runs once.
 
-  if (isLoading) {
+    // ...
+// eslint-disable-next-line react-hooks/exhaustive-deps
+}, [navigate]); // Keeping `isLoading` out of deps is correct here to run once.
+
+
+if (isLoading) {
     return <GlobalLoadingIndicator />;
-  }
+}
 
-  const isAuthenticated = () => {
+const isAuthenticated = () => {
     const token = localStorage.getItem('token') || sessionStorage.getItem('token');
     return !!token;
-  };
+};
+const PrivateRoute = ({ children, redirectTo }) => { // Added redirectTo prop
+  const currentRouteLocation = useLocation();
+  const auth = isAuthenticated();
+  
+  if (!auth) {
+    return <Navigate to={redirectTo} state={{ from: currentRouteLocation }} replace />; // Uses redirectTo
+  }
+  return children;
+};
 
-  const PrivateRoute = ({ children }) => {
-    const currentRouteLocation = useLocation(); // Use a different name to avoid conflict with outer scope location
-    const auth = isAuthenticated();
-    
-    if (!auth) {
-      // Original logic: Redirect to admin login for any private route if not authenticated.
-      // This might need refinement if you want different unauth redirects for student vs teacher areas.
-      return <Navigate to="/admin/login" state={{ from: currentRouteLocation }} replace />;
-    }
-    return children;
-  };
-
-  return (
+return (
     <Routes>
-      <Route path="/admin/login" element={<AdminLogin />} />
-      <Route path="/login" element={<Login />} />
-      <Route path="/signup" element={<SignUp />} />
+    <Route path="/admin/login" element={<AdminLogin />} />
+    <Route path="/login" element={<Login />} />
+    <Route path="/signup" element={<SignUp />} />
 
-      <Route
+    <Route
         path="/dashboard/*"
         element={
-          <PrivateRoute>
+            <PrivateRoute redirectTo="/admin/login"> 
+
             <>
-              <Header />
-              <div className="app">
+            <Header />
+            <div className="app">
                 <Sidebar />
                 <div className="main-content">
-                  <Routes>
+                <Routes>
                     <Route path="/" element={<Dashboard />} />
                     <Route path="exams" element={<Exams />} />
                     <Route path="assignments" element={<Assignments />} />
@@ -152,37 +157,38 @@ const AuthInitializerAndMainApp = () => {
                     <Route path="materials" element={<Materials />} />
                     <Route path="groups" element={<Groups />} />
                     <Route path="groups/:grade/:group" element={<GroupDetails />} />
-                  </Routes>
+                </Routes>
                 </div>
-              </div>
+            </div>
             </>
-          </PrivateRoute>
+        </PrivateRoute>
         }
-      />
+    />
 
-      <Route
+    <Route
         path="/student/*"
         element={
-          <PrivateRoute>
+            <PrivateRoute redirectTo="/login">
+
             <>
-              <Header />
-              <div className="app">
+            <Header />
+            <div className="app">
                 <StudentSidebar />
                 <div className="main-content">
-                  <Routes>
+                <Routes>
                     <Route index element={<StudentDashboard />} />
                     <Route path="assignments" element={<StudentAssignments />} />
                     <Route path="exams" element={<StudentExams />} />
                     <Route path="materials" element={<StudentMaterials />} />
                     <Route path="profile" element={<Profile />} /> {/* Uses the imported student Profile */}
-                  </Routes>
+                </Routes>
                 </div>
-              </div>
+            </div>
             </>
-          </PrivateRoute>
+        </PrivateRoute>
         }
-      />
-      {/* 
+    />
+    {/* 
         Catch-all route:
         If the initial auth check is done, and the user is not authenticated (no token),
         and they try to access a path not explicitly handled (like '/'), this will redirect to '/login'.
@@ -190,18 +196,18 @@ const AuthInitializerAndMainApp = () => {
         If they are authenticated and type a completely random URL, this will also redirect to '/login'.
         You might want to change this to a <NotFound /> component or redirect to their dashboard if authenticated.
         For now, it aligns with your original catch-all.
-      */}
-      <Route path="*" element={<Navigate to="/login" replace />} />
+    */}
+    <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
-  );
+);
 };
 
 const App = () => {
-  return (
+return (
     <Router>
-      <AuthInitializerAndMainApp />
+    <AuthInitializerAndMainApp />
     </Router>
-  );
+);
 };
 
 export default App;

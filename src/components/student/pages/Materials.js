@@ -75,19 +75,18 @@ const Materials = () => {
             }
 
             const data = await response.json();
-            // Assuming the response for a single material is { material: { presignedUrl: '...' } }
-            // or directly { presignedUrl: '...' }. Adjust based on your actual API response.
-            // Let's assume data.material is the object containing presignedUrl
-            const materialToView = data.material || data; // Adapt this line based on response structure
+            const materialToView = data; 
 
             if (materialToView && materialToView.presignedUrl) {
                 setPdfUrlToView(materialToView.presignedUrl);
                 setCurrentMaterialTitle(materialName || 'View Material'); // Use provided name or default
                 setIsPdfModalOpen(true);
-            } else {
+            } 
+            else {
                 throw new Error('No presigned URL available for this material.');
             }
-        } catch (error) {
+        } 
+        catch (error) {
             console.error('Error opening material in viewer:', error);
             alert('An error occurred while preparing the material for viewing: ' + error.message);
             // setError('An error occurred while opening the material'); // Or set a specific error state
