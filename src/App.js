@@ -141,7 +141,7 @@ return (
     <Route
         path="/dashboard/*"
         element={
-            <PrivateRoute redirectTo="/admin/login"> 
+            <PrivateRoute redirectTo="/login"> 
 
             <>
             <Header />
