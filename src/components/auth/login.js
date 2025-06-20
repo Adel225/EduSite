@@ -15,6 +15,7 @@ const Login = () => {
     useEffect(() => {
         const token = localStorage.getItem('token') || sessionStorage.getItem('token');
         if (token) {
+            handleSubmit();
             navigate('/student/'); 
         }
     }, [navigate]);
