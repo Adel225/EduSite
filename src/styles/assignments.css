@@ -273,6 +273,28 @@ option {
   padding: 10px;
 }
 
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .assignments-page {
+      flex-direction: column;
+      padding: 15px; /* Add back padding for mobile if you removed it from base .exams-page */
+  }
+  
+  .exam-cards {
+      grid-template-columns: 1fr; /* Single column for cards on mobile */
+  }
+  
+  .grades-list {
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  }
+
+  .exams-left, .exams-right, .exams-list {
+      padding: 1rem; /* Reduce internal padding for these blocks on mobile */
+      margin-right: 0; /* Remove horizontal margins for stacked items */
+      margin-left: 0;
+  }
+}
+
 .delete-btn {
   display: inline-flex; 
   align-items: center;

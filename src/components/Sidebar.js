@@ -19,7 +19,6 @@ const Sidebar = ({ isOpen, onNavLinkClick, isMobile }) => {
     <div className={sidebarClasses}> {/* Apply dynamic classes */}
       <div className='menu'>Menu</div><br/><br/>
       <div>
-        <NavLink className={({ isActive }) => (isActive ? 'active-link' : 'li')} to="/dashboard/" end onClick={onNavLinkClick}><img src={DashboardIcon} alt="Dashboard" /> Dashboard</NavLink><br/><br/>
         <NavLink className={({ isActive }) => (isActive ? 'active-link' : 'li')} to="/dashboard/exams" onClick={onNavLinkClick}><img src={ExamsIcon} alt="Exams" /> Exams</NavLink><br/><br/>
         <NavLink className={({ isActive }) => (isActive ? 'active-link' : 'li')} to="/dashboard/assignments" onClick={onNavLinkClick}><img src={AssignmentIcon} alt="Assignments" /> Assignments</NavLink><br/><br/>
         <NavLink className={({ isActive }) => (isActive ? 'active-link' : 'li')} to="/dashboard/materials" onClick={onNavLinkClick}><img src={MaterialsIcon} alt="Materials" /> Materials</NavLink><br/><br/>

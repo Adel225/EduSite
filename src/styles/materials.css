@@ -265,3 +265,21 @@
     color: #666;
     margin-bottom: 20px;
   }
+
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .materials-page {
+      flex-direction: column;
+      padding: 15px;
+    }
+    .materials-left, .upload-material {
+      padding: 1rem;
+      margin-right: 0;
+      margin-left: 0;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    .grades-list {
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    }
+  }

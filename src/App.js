@@ -9,7 +9,6 @@ import Sidebar from './components/Sidebar'; // Teacher's Sidebar
 import StudentSidebar from './components/student/StudentSidebar'; // Student's Sidebar
 
 // Page/Feature Components (no changes to these imports)
-import Dashboard from './components/Dashboard';
 import Exams from './components/exams/exams';
 import Assignments from './components/assignments/Assignments';
 import Materials from './components/materials/Materials';
@@ -17,6 +16,7 @@ import Groups from './components/groups/Groups';
 import GroupDetails from './components/groups/GroupDetails';
 import AssignmentSubmissions from './components/assignments/AssignmentSubmissions';
 import ExamSubmissions from './components/exams/ExamSubmissions';
+
 // Student Pages
 import StudentDashboard from './components/student/StudentDashboard';
 import StudentAssignments from './components/student/pages/Assignments';
@@ -172,7 +172,6 @@ return (
                     {/* <Sidebar /> is removed; ResponsiveLayout handles it via SidebarComponent prop */}
                     {/* <div className="main-content"> -- This class might be handled by ResponsiveLayout or its CSS now */}
                         <Routes>
-                            <Route path="/" element={<Dashboard />} />
                             <Route path="exams" element={<Exams />} />
                             <Route path="assignments" element={<Assignments />} />
                             <Route path="assignments/grade/:grade/group/:groupId/assignment/:assignmentId" element={<AssignmentSubmissions />} />
