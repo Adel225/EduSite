@@ -1,0 +1,106 @@
+/* src/components/layout/ResponsiveLayout.css */
+
+/* --- Base styles for .app and .main-content --- */
+.app {
+  display: flex;
+  /* If your header is sticky (e.g., 70px tall), .app might need to be constrained in height
+     if you want .sidebar and .main-content to scroll independently within the remaining space. */
+  /* height: calc(100vh - 70px); */ /* Example: Assuming 70px sticky header */
+}
+
+.main-content {
+  flex-grow: 1; /* This is key for taking up remaining space */
+  overflow-y: auto; 
+  padding-top: 70px; /* Adjust to your header's actual height for sticky header */
+  box-sizing: border-box;
+  /* The width of .main-content itself should be flexible due to flex-grow.
+     The issue is likely with the content *inside* .main-content. */
+  padding-left: 20px; /* Add some padding so content isn't flush against sidebar */
+  padding-right: 20px; /* Add some padding on the other side */
+  padding-bottom: 20px; /* General padding */
+}
+
+.layout-wrapper {
+  /* This is the root in ResponsiveLayout.js. Usually, no special styles needed here unless
+     it's part of a larger page structure with its own layout constraints. */
+}
+
+/* --- MOBILE STYLES (Screen width LESS THAN 768px) --- */
+@media (max-width: 767.98px) {
+  .app .sidebar {
+    position: fixed !important;
+    left: -240px; 
+    width: 200px; 
+    padding: 20px;
+    top: 0;
+    height: 100vh;
+    z-index: 1000; 
+    background: #f4f4f4; 
+    box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+    transition: left 0.3s ease-in-out;
+    overflow-y: auto; 
+  }
+
+  .app .sidebar.open {
+    left: 0; 
+  }
+
+  .app .main-content {
+    margin-left: 0 !important;
+    width: 100% !important;
+    padding-left: 15px; 
+    padding-right: 15px;
+  }
+
+  .overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 999; 
+  }
+}
+
+/* --- DESKTOP STYLES (Screen width 768px AND GREATER) --- */
+@media (min-width: 768px) {
+  .app .sidebar.desktop-visible {
+    display: block; 
+    position: static !important;
+    width: 200px; /* From Sidebar.css */
+    padding: 20px; /* From Sidebar.css */
+    flex-shrink: 0;
+    height: calc(100vh - 70px); /* Adjust 70px to your actual header height */
+    overflow-y: auto;
+    background: #f4f4f4;
+    
+    /* EXPLICIT MARGIN CONTROL FOR SIDEBAR */
+    margin-left: 0 !important;
+    margin-right: 0 !important; /* Sidebar shouldn't push main content with its own margin */
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+  }
+
+  .app .main-content {
+    flex-grow: 1;
+    height: calc(100vh - 70px); /* Adjust 70px to your actual header height */
+    overflow-y: auto;
+    padding-top: 70px; /* For sticky header */
+    padding-left: 20px;  /* Internal spacing for content within .main-content */
+    padding-right: 20px; /* Internal spacing */
+    padding-bottom: 20px;/* Internal spacing */
+    box-sizing: border-box;
+
+    /* EXPLICIT MARGIN CONTROL FOR MAIN CONTENT AREA */
+    margin-left: 0 !important; /* Crucial: Ensure no accidental left margin pushing it from sidebar */
+    margin-right: 0 !important;
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+    /* background-color: lightblue !important; /* For debugging */
+  }
+
+  .overlay {
+    display: none !important; 
+  }
+}

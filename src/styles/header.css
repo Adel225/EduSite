@@ -1,42 +1,93 @@
+/* src/styles/header.css */
 .header {
-    display: flex;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 15px; /* Keep padding consistent */
+  background-color: #f4f4f4;
+  border-bottom: 1px solid #ddd;
+  width: 100%;
+  top: 0;
+  position: sticky; /* For the sticky behavior */
+  z-index: 1050;   /* Ensure header is above sidebar overlay and content */
+  box-sizing: border-box; /* Important for width calculations with padding */
+}
+
+.hamburger-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 5px;
+  margin-right: 10px; /* Space between hamburger and name/title */
+  display: none; /* Default hidden, shown in media query */
+  flex-shrink: 0; /* Prevent shrinking */
+}
+
+.hamburger-button svg {
+  width: 24px;
+  height: 24px;
+}
+
+.header-name {
+  font-size: 22px;
+  font-weight: bold;
+  color: #5A67BA;
+  margin-right: 20px; /* Space after name before title */
+  flex-shrink: 0; /* Prevent shrinking */
+  white-space: nowrap; /* Prevent name from wrapping */
+}
+
+.header-title {
+  font-size: 18px;
+  font-weight: normal;
+  color: #666;
+  /* flex-grow: 1; Remove this if it pushes logout button too far */
+  /* text-align: center; If you want it centered between name and logout */
+  margin-right: auto; /* Pushes logout button to the right */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis; /* Prevent long titles from breaking layout */
+}
+
+.logout-button {
+  margin-left: 15px; /* Explicit space before logout button */
+  padding: 8px 16px;
+  background-color: #5A67BA;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s ease;
+  flex-shrink: 0; /* Prevent shrinking */
+  white-space: nowrap;
+}
+
+.logout-button:hover {
+  background-color: #4a56a0;
+}
+
+/* --- Mobile Specific Header Styles --- */
+@media (max-width: 767.98px) {
+  .header {
+    padding: 10px 15px; /* Slightly less padding on mobile if needed */
+  }
+  .hamburger-button {
+    display: inline-flex;
     align-items: center;
-    padding: 15px;
-    background-color: #f4f4f4;
-    border-bottom: 1px solid #ddd;
-    width: 100%;
-    top: 0;
-    position: sticky;
-    bottom: 0;
-    justify-content: space-between;
   }
-  
   .header-name {
-    font-size: 22px;
-    font-weight: bold;
-    color: #5A67BA;
-    margin-left: 50px;
-  }
-  
-  .header-title {
     font-size: 18px;
-    font-weight: normal;
-    color: #666;
+    margin-right: 10px; /* Adjust spacing */
   }
-  
+  .header-title {
+    font-size: 16px;
+    /* On mobile, if space is tight, you might want the title to be more flexible
+       or even hide it if absolutely necessary, but margin-right: auto should work. */
+  }
   .logout-button {
-    margin-right: 50px;
-    padding: 8px 16px;
-    background-color: #5A67BA;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 14px;
-    transition: background-color 0.3s ease;
+    padding: 6px 10px;
+    font-size: 13px;
+    margin-left: 10px; /* Adjust spacing */
   }
-  
-  .logout-button:hover {
-    background-color: #4a56a0;
-  }
-  
+}

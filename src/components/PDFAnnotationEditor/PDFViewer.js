@@ -1,5 +1,5 @@
 // PDFViewer.jsx
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Document, Page, pdfjs } from 'react-pdf';
 import 'react-pdf/dist/esm/Page/AnnotationLayer.css'; // Required for styling, even if layer not rendered
 // No TextLayer.css needed if renderTextLayer is false
@@ -37,6 +37,8 @@ const styles = {
         display: 'flex',
         justifyContent: 'center',
         boxShadow: '0 2px 8px rgba(0,0,0,0.1)', // Shadow for each page
+        width: '100%',
+        maxWidth: '100%',
     },
     errorMessage: {
         display: 'flex',
@@ -52,6 +54,19 @@ const PDFViewer = ({ pdfUrl }) => {
     const [numPages, setNumPages] = useState(null);
     const [currentPageNumber, setCurrentPageNumber] = useState(1); // For display purposes
     const [loadError, setLoadError] = useState(false);
+    const [containerWidth, setContainerWidth] = useState(null);
+    const containerRef = useRef();
+
+    useEffect(() => {
+        function updateWidth() {
+            if (containerRef.current) {
+                setContainerWidth(containerRef.current.offsetWidth);
+            }
+        }
+        updateWidth();
+        window.addEventListener('resize', updateWidth);
+        return () => window.removeEventListener('resize', updateWidth);
+    }, []);
 
     function onDocumentLoadSuccess({ numPages: nextNumPages }) {
         setNumPages(nextNumPages);
@@ -88,8 +103,14 @@ const PDFViewer = ({ pdfUrl }) => {
         );
     }
 
+    // Responsive margin for mobile
+    const pageContainerStyle = {
+        ...styles.pageContainer,
+        margin: window.innerWidth <= 600 ? '5px 0' : '15px auto',
+    };
+
     return (
-        <div style={styles.viewerContainer}>
+        <div style={styles.viewerContainer} ref={containerRef}>
             <div style={styles.toolbar}>
                 {numPages ? `Total Pages: ${numPages}` : 'Loading PDF...'}
             </div>
@@ -102,12 +123,13 @@ const PDFViewer = ({ pdfUrl }) => {
                     noData={<div style={styles.errorMessage}>No PDF file specified.</div>}
                 >
                     {Array.from(new Array(numPages || 0), (el, index) => (
-                        <div key={`page_container_${index + 1}`} style={styles.pageContainer}>
+                        <div key={`page_container_${index + 1}`} style={pageContainerStyle}>
                             <Page
                                 key={`page_${index + 1}`}
                                 pageNumber={index + 1}
                                 renderAnnotationLayer={false} // No annotations
                                 renderTextLayer={false}       // As requested: no text selection
+                                width={containerWidth ? Math.min(containerWidth - 16, 800) : undefined}
                                 // width can be set to make pages responsive, e.g., fit container width
                                 // Or let react-pdf handle default sizing based on its container.
                                 // For responsiveness, ensure the parent of PDFViewer is width-constrained.

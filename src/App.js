@@ -1,7 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { HashRouter as Router, Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
-import Sidebar from './components/Sidebar';
-import Header from './components/header';
+
+// Layout Component
+import ResponsiveLayout from './components/layout/ResponsiveLayout'; // ++ IMPORTED RESPONSIVE LAYOUT
+
+// Sidebar Components
+import Sidebar from './components/Sidebar'; // Teacher's Sidebar
+import StudentSidebar from './components/student/StudentSidebar'; // Student's Sidebar
+
+// Page/Feature Components (no changes to these imports)
 import Dashboard from './components/Dashboard';
 import Exams from './components/exams/exams';
 import Assignments from './components/assignments/Assignments';
@@ -10,19 +17,29 @@ import Groups from './components/groups/Groups';
 import GroupDetails from './components/groups/GroupDetails';
 import AssignmentSubmissions from './components/assignments/AssignmentSubmissions';
 import ExamSubmissions from './components/exams/ExamSubmissions';
-import StudentSidebar from './components/student/StudentSidebar';
+// Student Pages
 import StudentDashboard from './components/student/StudentDashboard';
 import StudentAssignments from './components/student/pages/Assignments';
 import StudentExams from './components/student/pages/Exams';
 import StudentMaterials from './components/student/pages/Materials';
-import Profile from './components/student/pages/Profile'; // This is Student's Profile
+import Profile from './components/student/pages/Profile';
 
+// Auth Components
 import Login from './components/auth/login';
 import SignUp from './components/auth/SignUp';
 import AdminLogin from './components/auth/teacherLogin';
+
+// Styles & Config
 import './App.css';
 import Modal from 'react-modal';
-import { API_URL } from './config'; // This path is correct as App.js and config.js are both in src/
+import { API_URL } from './config';
+
+// Header component - ResponsiveLayout will import and use this.
+// If ResponsiveLayout handles its own Header import, this one might be redundant
+// unless Header is used elsewhere outside of ResponsiveLayout.
+// For now, keeping it as ResponsiveLayout might rely on this path.
+import Header from './components/header';
+
 
 Modal.setAppElement('#root');
 
@@ -33,23 +50,19 @@ const GlobalLoadingIndicator = () => (
 );
 
 const AuthInitializerAndMainApp = () => {
-const [isLoading, setIsLoading] = useState(true); // Start with loading true
+const [isLoading, setIsLoading] = useState(true);
 const navigate = useNavigate();
-const location = useLocation(); // Get location here to pass to navigate if needed
+const location = useLocation();
 
 
 useEffect(() => {
     let isMounted = true;
-    // No need to set isLoading(true) here as initial state is true.
-
     const performCheck = async () => {
       const token = localStorage.getItem('token') || sessionStorage.getItem('token');
       const currentPath = location.pathname;
 
       if (!token) {
         if (isMounted) setIsLoading(false);
-        // If no token and user is on a protected route, PrivateRoute will handle redirection.
-        // If on /login, /admin/login, or /signup, they should stay there.
         return;
       }
 
@@ -71,33 +84,30 @@ useEffect(() => {
             const isStudent = !!profileData.data.userName;
 
             if (isTeacher) {
-              // If teacher is on a login page or root, redirect to their dashboard
               if (['/login', '/admin/login', '/signup', '/'].includes(currentPath)) {
                 navigate('/dashboard/', { replace: true });
               }
             } else if (isStudent) {
-              // If student is on a login page or root, redirect to their dashboard
               if (['/login', '/admin/login', '/signup', '/'].includes(currentPath)) {
                 navigate('/student/', { replace: true });
               }
-            } else { // Ambiguous role
+            } else { 
               localStorage.removeItem('token');
               sessionStorage.removeItem('token');
               if (!['/login', '/admin/login', '/signup'].includes(currentPath)) {
                 navigate('/login', { state: { error: "The login credentials aren't right." }, replace: true });
               }
             }
-          } else { // Unexpected response structure
+          } else { 
             localStorage.removeItem('token');
             sessionStorage.removeItem('token');
             if (!['/login', '/admin/login', '/signup'].includes(currentPath)) {
               navigate('/login', { state: { error: "Failed to verify login. Please try again." }, replace: true });
             }
           }
-        } else { // Token invalid or other API error (e.g., 401, 403)
+        } else { 
           localStorage.removeItem('token');
           sessionStorage.removeItem('token');
-          // Redirect to student login with an error if not already on a login/signup page
           if (!['/login', '/admin/login', '/signup'].includes(currentPath)) {
              navigate('/login', { replace: true, state: { error: "Session expired or invalid. Please login again." } });
           }
@@ -116,13 +126,13 @@ useEffect(() => {
       }
     };
 
-    performCheck(); // This will run once on mount due to the dependency array below.
+    performCheck();
     
     return () => {
       isMounted = false;
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [navigate]); // `isLoading` removed from deps to prevent re-triggering on its own change. Effect runs once.
+  }, [navigate]); 
 
 if (isLoading) {
     return <GlobalLoadingIndicator />;
@@ -134,12 +144,10 @@ const isAuthenticated = () => {
 };
 
 const PrivateRoute = ({ children }) => {
-    const currentRouteLocation = useLocation(); // Use a different name to avoid conflict with outer scope location
+    const currentRouteLocation = useLocation(); 
     const auth = isAuthenticated();
     
     if (!auth) {
-    // Original logic: Redirect to admin login for any private route if not authenticated.
-    // This might need refinement if you want different unauth redirects for student vs teacher areas.
     return <Navigate to="/login" state={{ from: currentRouteLocation }} replace />;
     }
     return children;
@@ -151,63 +159,52 @@ return (
     <Route path="/login" element={<Login />} />
     <Route path="/signup" element={<SignUp />} />
 
+    {/* TEACHER DASHBOARD ROUTES - USING RESPONSIVE LAYOUT */}
     <Route
         path="/dashboard/*"
         element={
         <PrivateRoute>
-            <>
-            <Header />
-            <div className="app">
-                <Sidebar />
-                <div className="main-content">
-                <Routes>
-                    <Route path="/" element={<Dashboard />} />
-                    <Route path="exams" element={<Exams />} />
-                    <Route path="assignments" element={<Assignments />} />
-                    <Route path="assignments/grade/:grade/group/:groupId/assignment/:assignmentId" element={<AssignmentSubmissions />} />
-                    <Route path="exams/grade/:grade/group/:groupId/exam/:examId" element={<ExamSubmissions />} />
-                    <Route path="materials" element={<Materials />} />
-                    <Route path="groups" element={<Groups />} />
-                    <Route path="groups/:grade/:group" element={<GroupDetails />} />
-                </Routes>
-                </div>
-            </div>
-            </>
+            {/* ++ WRAPPED WITH RESPONSIVE LAYOUT, PASSING TEACHER'S SIDEBAR */}
+            <ResponsiveLayout SidebarComponent={Sidebar}>
+                {/* Original structure of .app, .main-content, and nested Routes is now children */}
+                {/* <Header /> is removed from here; ResponsiveLayout handles it. */}
+                {/* <div className="app"> -- This class might be handled by ResponsiveLayout or its CSS now */}
+                    {/* <Sidebar /> is removed; ResponsiveLayout handles it via SidebarComponent prop */}
+                    {/* <div className="main-content"> -- This class might be handled by ResponsiveLayout or its CSS now */}
+                        <Routes>
+                            <Route path="/" element={<Dashboard />} />
+                            <Route path="exams" element={<Exams />} />
+                            <Route path="assignments" element={<Assignments />} />
+                            <Route path="assignments/grade/:grade/group/:groupId/assignment/:assignmentId" element={<AssignmentSubmissions />} />
+                            <Route path="exams/grade/:grade/group/:groupId/exam/:examId" element={<ExamSubmissions />} />
+                            <Route path="materials" element={<Materials />} />
+                            <Route path="groups" element={<Groups />} />
+                            <Route path="groups/:grade/:group" element={<GroupDetails />} />
+                        </Routes>
+                    {/* </div> */}
+                {/* </div> */}
+            </ResponsiveLayout>
         </PrivateRoute>
         }
     />
 
+    {/* STUDENT DASHBOARD ROUTES - USING RESPONSIVE LAYOUT */}
     <Route
         path="/student/*"
         element={
         <PrivateRoute>
-            <>
-            <Header />
-            <div className="app">
-                <StudentSidebar />
-                <div className="main-content">
-                <Routes>
-                    <Route index element={<StudentDashboard />} />
-                    <Route path="assignments" element={<StudentAssignments />} />
-                    <Route path="exams" element={<StudentExams />} />
-                    <Route path="materials" element={<StudentMaterials />} />
-                    <Route path="profile" element={<Profile />} /> {/* Uses the imported student Profile */}
-                </Routes>
-                </div>
-            </div>
-            </>
+            <ResponsiveLayout SidebarComponent={StudentSidebar}>
+                        <Routes>
+                            <Route index element={<StudentDashboard />} />
+                            <Route path="assignments" element={<StudentAssignments />} />
+                            <Route path="exams" element={<StudentExams />} />
+                            <Route path="materials" element={<StudentMaterials />} />
+                            <Route path="profile" element={<Profile />} />
+                        </Routes>
+            </ResponsiveLayout>
         </PrivateRoute>
-        }
+        } 
     />
-    {/* 
-        Catch-all route:
-        If the initial auth check is done, and the user is not authenticated (no token),
-        and they try to access a path not explicitly handled (like '/'), this will redirect to '/login'.
-        If they are authenticated, they should have been redirected to their dashboard by AuthInitializerAndMainApp.
-        If they are authenticated and type a completely random URL, this will also redirect to '/login'.
-        You might want to change this to a <NotFound /> component or redirect to their dashboard if authenticated.
-        For now, it aligns with your original catch-all.
-    */}
     <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
 );

@@ -1,8 +1,12 @@
-import React from 'react';
+import React, { useState } from 'react';
 import DashboardSection from './DashboardSection';
 import '../styles/Dashboard.css';
+import Sidebar from './Sidebar';
+import Header from './header';
 
 const Dashboard = () => {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
   const assignmentsData = [
     { grade: 'Grade 12', count: 2, type: ' Assignments', },
     { grade: 'Grade 11', count: 1, type: ' Assignment', },
@@ -32,19 +36,23 @@ const Dashboard = () => {
   ];
 
   return (
-    <div className="dashboard">
-      <div className="dashboard-row">
-        <DashboardSection title="Assignments" data={assignmentsData} />
-        <hr className='vertical'></hr>
-        <DashboardSection title="Materials" data={materialsData} />
-      </div>
-      
-      <hr className='horizontal-line'></hr>
+    <div className="dashboard-container">
+      <Header onHamburgerClick={() => setSidebarOpen(true)} />
+      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+      <div className="dashboard">
+        <div className="dashboard-row">
+          <DashboardSection title="Assignments" data={assignmentsData} />
+          <hr className='vertical'></hr>
+          <DashboardSection title="Materials" data={materialsData} />
+        </div>
+        
+        <hr className='horizontal-line'></hr>
 
-      <div className="dashboard-row">
-        <DashboardSection title="Exams" data={examsData} />
-        <hr className='vertical'></hr>
-        <DashboardSection title="Groups" data={groupsData} />
+        <div className="dashboard-row">
+          <DashboardSection title="Exams" data={examsData} />
+          <hr className='vertical'></hr>
+          <DashboardSection title="Groups" data={groupsData} />
+        </div>
       </div>
     </div>
   );
