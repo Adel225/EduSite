@@ -136,7 +136,7 @@ const Materials = () => {
 
       formData.links.forEach(link => {
         if (link.trim() !== '') {
-          formDataToSend.append('links[]', link.trim()); 
+          formDataToSend.append('linksArray', link.trim()); 
         }
       });
 
@@ -155,7 +155,7 @@ const Materials = () => {
       if (result.message === "invalid extension") {
         alert("Materials must be in pdf format!")
       }
-      else if (result.message === "Material uploaded successfully" && result.material) {
+      else if (result.message === "Material created and files uploaded successfully" && result.material) {
         setSubmitStatus(`Material "${result.material.name}" uploaded successfully`);
         setFormData({
           name: '',

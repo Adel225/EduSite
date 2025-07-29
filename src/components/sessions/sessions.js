@@ -1,5 +1,6 @@
     import React, { useState } from 'react';
     import '../../styles/sessions.css';
+    import '../../styles/exams.css';
     import { API_URL } from '../../config';
     import { useNavigate } from 'react-router-dom';
 
@@ -24,23 +25,6 @@
     });
 
     const grades = [12, 11, 10, 9];
-
-    const formatDate = (dateString) => {
-        try {
-        const date = new Date(dateString);
-        if (isNaN(date.getTime())) {
-            return 'Invalid Date';
-        }
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
-        const hours = String(date.getHours()).padStart(2, '0');
-        const minutes = String(date.getMinutes()).padStart(2, '0');
-        return `${year}-${month}-${day}  T ${hours}:${minutes}`;
-        } catch (error) {
-        return 'Invalid Date';
-        }
-    };
 
     const fetchGroups = async (grade) => {
         setLoadingGroups(true);
@@ -80,11 +64,6 @@
         }
     };
 
-    const handleGroupChange = (e) => {
-        const selectedOptions = Array.from(e.target.selectedOptions, option => option.value);
-        setSelectedGroups(selectedOptions);
-    };
-
     const handleGroupClick = async (groupId) => {
         setSelectedGroupId(groupId);
         setLoadingSessions(true);
@@ -114,7 +93,7 @@
         }
     };
 
-        const handleSessionClick = (session) => {
+    const handleSessionClick = (session) => {
         if (!selectedGroupId) {
         setError('No group selected');
         return;
@@ -123,7 +102,7 @@
         navigate(`/dashboard/sessions/${session._id}`);
     };
 
-        const handleSubmit = async (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         if (!selectedGrade || selectedGroups.length === 0 || !formData.name || !formData.description) {
         setError('Please select grade, group(s), and provide a session name and description.');
@@ -178,9 +157,7 @@
         }
     };
 
-    // Add this function inside your Sessions component in Sessions.js
-
-const handleDeleteSession = async (sessionIdToDelete) => {
+    const handleDeleteSession = async (sessionIdToDelete) => {
     if (window.confirm('Are you sure you want to delete this session?')) {
         try {
         const token = localStorage.getItem('token') || sessionStorage.getItem('token');
@@ -259,9 +236,9 @@ const handleDeleteSession = async (sessionIdToDelete) => {
                             className="session-card"
                             onClick={() => handleSessionClick(session)}
                         >
-                            <div className="session-info">
-                                <span className="session-name">{session.name}</span>
-                                <span className="session-description">{session.description}</span>
+                            <div className="exam-info">
+                                <span className="exam-name">{session.name}</span>
+                                <span className="exam-dates">{session.description}</span>
                             </div>
                             <button
                                 className="delete-btn"

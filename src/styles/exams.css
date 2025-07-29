@@ -12,8 +12,6 @@
     /* background-color: pink !important; /* For debugging: to see .exams-page area */
 }
 
-/* Admin specific styles */
-/* These will work as flex items if .exams-page is display:flex */
 .exams-left {
     flex: 1;
     background: white;

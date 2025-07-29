@@ -80,34 +80,48 @@
   .session-content-item:last-child {
     border-bottom: none;
   }
-  
-  .item-details {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-  }
-  
-  .item-icon {
-    width: 24px;
-    height: 24px;
-  }
-  
-  .item-name {
-    font-weight: 500;
-    color: #2c3e50;
-  }
-  
-  .view-item-btn {
-    background-color: #5A67BA;
-    color: white;
-    border: none;
-    padding: 0.5rem 1rem;
-    border-radius: 5px;
-    cursor: pointer;
-    font-weight: 500;
-    transition: background-color 0.2s ease;
-  }
-  
-  .view-item-btn:hover {
-    background-color: #4c569b;
-  }
+
+.pdf-viewer-container {
+  height: 65vh; 
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  margin-bottom: 1.5rem;
+  background-color: #f0f0f0;
+  overflow: hidden; 
+}
+
+.item-details {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.item-icon {
+  width: 24px;   /* Set a specific width */
+  height: 24px;  /* Set a specific height */
+  flex-shrink: 0; /* Prevent the icon from shrinking */
+}
+
+.item-name {
+  font-weight: 500;
+  color: #2c3e50;
+}
+
+.view-item-btn {
+  background-color: #5A67BA; 
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 0.9rem;
+  text-align: center;
+  flex-shrink: 0; /* Prevents the button from shrinking */
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.view-item-btn:hover {
+  background-color: #4c569b; /* A slightly darker shade for hover */
+  transform: translateY(-1px); /* Adds a subtle lift effect */
+}

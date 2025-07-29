@@ -2,11 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { API_URL } from '../../../config';
 import '../../../styles/studentSessions.css';
 import Modal from 'react-modal';
+import PDFViewer from '../../PDFAnnotationEditor/PDFViewer'; 
 
 // You can reuse icons from the teacher's section
-import ExamIcon from '../../../icons/exams.svg';
-import AssignmentIcon from '../../../icons/assignment.svg';
-import MaterialIcon from '../../../icons/materials.svg';
+import ExamIconSrc from '../../../icons/exams.svg';
+import AssignmentIconSrc from '../../../icons/assignment.svg';
+import MaterialIconSrc from '../../../icons/materials.svg';
+import "../../../styles/materialViewer.css"
+
+Modal.setAppElement('#root');
 
 const StudentSessions = () => {
     const [sessions, setSessions] = useState([]);
@@ -20,6 +24,7 @@ const StudentSessions = () => {
 
     const [isMaterialModalOpen, setIsMaterialModalOpen] = useState(false);
     const [selectedMaterial, setSelectedMaterial] = useState(null);
+    const [pdfUrlToView, setPdfUrlToView] = useState('');
     const [modalLoading, setModalLoading] = useState(false);
 
     useEffect(() => {
@@ -59,14 +64,12 @@ const StudentSessions = () => {
             return;
         }
 
-        // Open the new one
         setExpandedSessionId(sessionId);
         setContentLoading(true);
-        setError(null); // Clear previous content errors
+        setError(null); 
 
         try {
             const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-            // Fetch the detailed content for the clicked session
             const response = await fetch(`${API_URL}/sections/${sessionId}`, {
                 headers: { 'Authorization': `MonaEdu ${token}` }
             });
@@ -158,11 +161,24 @@ const StudentSessions = () => {
             if (!response.ok) throw new Error('Failed to fetch material details.');
             const data = await response.json();
             setSelectedMaterial(data);
+            
+            if (data.files && data.files.length > 0) {
+                setPdfUrlToView(data.files[0].url);
+            } else {
+                setPdfUrlToView(''); 
+            }
+
         } catch (err) {
             setError(err.message);
         } finally {
             setModalLoading(false);
         }
+    };
+    
+    const closeMaterialModal = () => {
+        setIsMaterialModalOpen(false);
+        setSelectedMaterial(null);
+        setPdfUrlToView('');
     };
 
     const handleItemClick = (item) => {
@@ -183,10 +199,10 @@ const StudentSessions = () => {
 
     const getItemIcon = (type) => {
         switch (type) {
-            case 'exam': return ExamIcon;
-            case 'assignment': return AssignmentIcon;
-            case 'material': return MaterialIcon;
-            default: return MaterialIcon;
+            case 'exam': return ExamIconSrc;
+            case 'assignment': return AssignmentIconSrc;
+            case 'material': return MaterialIconSrc;
+            default: return MaterialIconSrc;
         }
     };
 
@@ -217,7 +233,7 @@ const StudentSessions = () => {
                                         {sessionContent.length > 0 ? sessionContent.map(item => (
                                             <li key={item.id} className="session-content-item">
                                                 <div className="item-details">
-                                                    <img src={getItemIcon(item.type)} alt={item.type} className="item-icon" />
+                                                    <img src={getItemIcon(item.type)} alt={`${item.type} icon`} className="item-icon" />
                                                     <span className="item-name">{item.name}</span>
                                                 </div>
                                                 <button className="view-item-btn" onClick={() => handleItemClick(item)}>
@@ -236,52 +252,59 @@ const StudentSessions = () => {
             )}
         </div>
         <Modal
-        isOpen={isMaterialModalOpen}
-        onRequestClose={() => setIsMaterialModalOpen(false)}
-        contentLabel="Material Details"
-        className="material-modal"
-        overlayClassName="material-modal-overlay"
-    >
-        {modalLoading ? <div className="loading">Loading Material...</div> : (
-            selectedMaterial && (
-                <>
-                    <div className="material-modal-header">
-                        <h2>{selectedMaterial.name}</h2>
-                        <button className="close-modal-btn" onClick={() => setIsMaterialModalOpen(false)}>×</button>
-                    </div>
-                    <div className="material-modal-body">
-                        <p className="material-description">{selectedMaterial.description}</p>
-                        
-                        {selectedMaterial.files && selectedMaterial.files.length > 0 && (
-                            <div className="resource-section">
-                                <h3>Files</h3>
-                                <ul className="resource-list">
-                                    {selectedMaterial.files.map((file, index) => (
-                                        <li key={index} className="resource-item">
-                                            <a href={file.url} target="_blank" rel="noopener noreferrer">{file.originalName}</a>
-                                        </li>
-                                    ))}
-                                </ul>
+                isOpen={isMaterialModalOpen}
+                onRequestClose={closeMaterialModal}
+                contentLabel="View Material"
+                className="material-modal"
+                overlayClassName="material-modal-overlay"
+            >
+                {modalLoading ? <div className="loading">Loading...</div> : (
+                    selectedMaterial && (
+                        <>
+                            <div className="material-modal-header">
+                                <h2>{selectedMaterial.name}</h2>
+                                <button onClick={closeMaterialModal} className="close-modal-btn">×</button>
                             </div>
-                        )}
-                        
-                        {selectedMaterial.Links && selectedMaterial.Links.length > 0 && (
-                            <div className="resource-section">
-                                <h3>Links</h3>
-                                <ul className="resource-list">
-                                    {selectedMaterial.Links.map((link, index) => (
-                                        <li key={index} className="resource-item">
-                                            <a href={link} target="_blank" rel="noopener noreferrer">{link}</a>
-                                        </li>
-                                    ))}
-                                </ul>
+                            <div className="material-modal-body">
+                                <div className="content-sidebar">
+                                    <p className="material-description">{selectedMaterial.description}</p>
+                                    
+                                    <div className="resource-section">
+                                        <h3>Files</h3>
+                                        {selectedMaterial.files && selectedMaterial.files.length > 0 ? (
+                                            <ul className="resource-list">
+                                                {selectedMaterial.files.map((file, idx) => (
+                                                    <li key={idx} className="resource-item">
+                                                        <button className={pdfUrlToView === file.url ? 'active' : ''} onClick={() => setPdfUrlToView(file.url)}>
+                                                            {file.originalName || `File ${idx + 1}`}
+                                                        </button>
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        ) : <p className="no-resources-message">No files provided.</p>}
+                                    </div>
+
+                                    <div className="resource-section">
+                                        <h3>Links</h3>
+                                        {selectedMaterial.Links && selectedMaterial.Links.length > 0 ? (
+                                            <ul className="resource-list">
+                                                {selectedMaterial.Links.map((link, idx) => (
+                                                    <li key={idx} className="resource-item link-item">
+                                                        <a href={link} target="_blank" rel="noopener noreferrer">{link}</a>
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        ) : <p className="no-resources-message">No links provided.</p>}
+                                    </div>
+                                </div>
+                                <div className="pdf-viewer-main">
+                                    {pdfUrlToView ? <PDFViewer pdfUrl={pdfUrlToView} /> : <div className="loading">No PDF to display.</div>}
+                                </div>
                             </div>
-                        )}
-                    </div>
-                </>
-            )
-        )}
-    </Modal>
+                        </>
+                    )
+                )}
+            </Modal>
         </>
     );
 };

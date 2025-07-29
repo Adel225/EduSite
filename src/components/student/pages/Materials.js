@@ -4,8 +4,9 @@ import '../../../styles/exams.css'; // Assuming you might reuse or have specific
 import { API_URL } from "../../../config.js";
 
 // NEW IMPORTS
-import PDFViewer from '../../PDFAnnotationEditor/PDFViewer.js'; // Adjust path if needed
+import PDFViewer from '../../PDFAnnotationEditor/PDFViewer.js'; 
 import Modal from 'react-modal';
+// import '../../../styles/materialViewer.css'
 
 // If not set globally, set the app element for react-modal
 // Modal.setAppElement('#root'); // Or your app's root element ID
@@ -18,7 +19,11 @@ const Materials = () => {
     // NEW STATE FOR MODAL AND PDF URL TO VIEW
     const [isPdfModalOpen, setIsPdfModalOpen] = useState(false);
     const [pdfUrlToView, setPdfUrlToView] = useState('');
-    const [currentMaterialTitle, setCurrentMaterialTitle] = useState(''); // For modal title
+    const [currentMaterialTitle, setCurrentMaterialTitle] = useState('');
+    const [currentFiles, setCurrentFiles] = useState([]); 
+    const [Links, setLinks] = useState([]); 
+    const [selectedFileIndex, setSelectedFileIndex] = useState(0); 
+    const [currentMaterialDescription, setCurrentMaterialDescription] = useState(''); 
 
     useEffect(() => {
         fetchMaterials();
@@ -54,42 +59,39 @@ const Materials = () => {
         }
     };
 
-    // RENAMED and MODIFIED function to open PDF in modal
     const openMaterialInViewer = async (materialId, materialName) => {
         try {
-            // Show a temporary loading state for this specific action if desired
-            // For now, we rely on the overall page loading state for initial fetch.
             const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-            // The endpoint to get a single material's details including presignedUrl
-            // Assuming it's something like /material/:materialId
-            const response = await fetch(`${API_URL}/material/${materialId}`, { // Adjusted API_URL usage
+            const response = await fetch(`${API_URL}/material/${materialId}`, {
                 method: 'GET',
                 headers: {
                     'Authorization': `MonaEdu ${token}`
                 }
             });
 
+            
             if (!response.ok) {
-                const errData = await response.json().catch(() => ({})); // Try to parse error
+                const errData = await response.json().catch(() => ({}));
                 throw new Error(errData.message || `Failed to fetch material details (status: ${response.status})`);
             }
-
+            
             const data = await response.json();
-            const materialToView = data; 
+            console.log(data.Links);
 
-            if (materialToView && materialToView.presignedUrl) {
-                setPdfUrlToView(materialToView.presignedUrl);
-                setCurrentMaterialTitle(materialName || 'View Material'); // Use provided name or default
+            if (data.files && Array.isArray(data.files) && data.files.length > 0) {
+                setCurrentFiles(data.files);
+                setPdfUrlToView(data.files[0].url);
+                setSelectedFileIndex(0);
+                setCurrentMaterialTitle(materialName || 'View Material');
+                setCurrentMaterialDescription(data.description || ''); 
                 setIsPdfModalOpen(true);
-            } 
-            else {
-                throw new Error('No presigned URL available for this material.');
+                setLinks(data.Links);
+            } else {
+                throw new Error('No file available for this material.');
             }
-        } 
-        catch (error) {
+        } catch (error) {
             console.error('Error opening material in viewer:', error);
             alert('An error occurred while preparing the material for viewing: ' + error.message);
-            // setError('An error occurred while opening the material'); // Or set a specific error state
         }
     };
 
@@ -97,49 +99,52 @@ const Materials = () => {
         setIsPdfModalOpen(false);
         setPdfUrlToView('');
         setCurrentMaterialTitle('');
+        setCurrentFiles([]);
+        setLinks([]);
+        setSelectedFileIndex(0);
+        setCurrentMaterialDescription(''); 
     };
 
     if (loading) return <div className="loading">Loading materials...</div>;
-    // Display error prominently if it occurs during initial fetch
     if (error && materials.length === 0) return <div className="error">{error}</div>;
 
 
     return (
-        <div className="exams-page"> {/* Consider renaming class if styles differ: materials-page */}
-            <div className="exams-list"> {/* materials-list */}
-                <h2>Available Materials</h2>
-                {/* Display error message if materials couldn't be fetched but some might still be shown (e.g. partial load) */}
-                {error && materials.length > 0 && <div className="error-inline">{error}</div>}
+        <>
+            <div className="exams-page"> 
+                <div className="exams-list"> 
+                    <h2>Available Materials</h2>
+                    {error && materials.length > 0 && <div className="error-inline">{error}</div>}
 
-                {materials.length === 0 && !loading ? ( // Show "No Materials" only if not loading and no error preventing display
-                    <div className="no-exams">{error ? error : 'No Materials yet'}</div> // no-materials
-                ) : (
-                    <div className="exam-cards"> {/* material-cards */}
-                        {materials.map((material) => (
-                            <div key={material._id} className="exam-card"> {/* material-card */}
-                                <h3>{material.name}</h3> {/* Assuming 'name' field, previously was 'title' */}
-                                <div className="exam-dates"> {/* material-details */}
-                                    <p>{material.description}</p>
+                    {materials.length === 0 && !loading ? ( 
+                        <div className="no-exams">{error ? error : 'No Materials yet'}</div> 
+                    ) : (
+                        <div className="exam-cards"> {/* material-cards */}
+                            {materials.map((material) => (
+                                <div key={material._id} className="exam-card"> 
+                                    <h3>{material.name}</h3> 
+                                    <div className="exam-dates"> 
+                                        <p>{material.description}</p>
+                                    </div>
+                                    <button
+                                        className="download-btn" 
+                                        onClick={() => openMaterialInViewer(material._id, material.name)}
+                                    >
+                                        Open Material
+                                    </button>
                                 </div>
-                                <button
-                                    className="download-btn" // Consider renaming to "view-material-btn" or similar
-                                    onClick={() => openMaterialInViewer(material._id, material.name)} // Pass material name
-                                >
-                                    Open Material
-                                </button>
-                            </div>
-                        ))}
-                    </div>
-                )}
+                            ))}
+                        </div>
+                    )}
+                </div>
             </div>
 
-            {/* PDF Viewer Modal */}
-            {pdfUrlToView && ( // Only render Modal if pdfUrlToView is set
+            {isPdfModalOpen && (
                 <Modal
                     isOpen={isPdfModalOpen}
                     onRequestClose={handleClosePdfModal}
                     contentLabel="View Material PDF"
-                    style={{ // Basic modal styling, customize as needed
+                    style={{ 
                         overlay: { backgroundColor: 'rgba(0, 0, 0, 0.75)', zIndex: 1000 },
                         content: {
                             top: '50%', left: '50%', right: 'auto', bottom: 'auto',
@@ -153,12 +158,59 @@ const Materials = () => {
                         <h2 style={{ margin: 0, fontSize: '1.2em' }}>{currentMaterialTitle}</h2>
                         <button onClick={handleClosePdfModal} style={{ background: 'none', border: 'none', fontSize: '1.5em', cursor: 'pointer' }}>×</button>
                     </div>
+                    {currentMaterialDescription && (
+                        <div style={{ padding: '10px 20px', color: '#34495e', fontSize: '1rem', borderBottom: '1px solid #eee' }}>
+                            {currentMaterialDescription}
+                        </div>
+                    )}
+
+                    {currentFiles.length > 1 && (
+                        <div style={{ padding: '10px 20px', borderBottom: '1px solid #eee', display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                            {currentFiles.map((file, idx) => (
+                                <button
+                                    key={idx}
+                                    style={{
+                                        background: idx === selectedFileIndex ? '#3498db' : '#f4f4f4',
+                                        color: idx === selectedFileIndex ? 'white' : '#333',
+                                        border: '1px solid #ccc',
+                                        borderRadius: '4px',
+                                        padding: '6px 12px',
+                                        cursor: 'pointer',
+                                        fontWeight: 500
+                                    }}
+                                    onClick={() => {
+                                        setPdfUrlToView(file.url);
+                                        setSelectedFileIndex(idx);
+                                    }}
+                                >
+                                    {file.originalName || `File ${idx + 1}`}
+                                </button>
+                            ))}
+                        </div>
+                    )}
+
+                    <div className="resource-section">
+                        <h3>Links</h3>
+                        {Links && Links.length > 0 ? (
+                            <ul className="resource-list" >
+                                {Links.map((link, idx) => (
+                                    <li key={idx} className="resource-item link-item">
+                                        <a href={link} target="_blank" rel="noopener noreferrer">{link}</a>
+                                    </li>
+                                ))}
+                            </ul>
+                        ) : (
+                            <p className="no-resources-message">No links provided.</p>
+                        )}
+                    </div>
+
                     <div style={{ flexGrow: 1, overflow: 'hidden' }}>
                         <PDFViewer pdfUrl={pdfUrlToView} />
                     </div>
                 </Modal>
             )}
-        </div>
+        
+        </>
     );
 };
 
