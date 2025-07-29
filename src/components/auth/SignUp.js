@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import './auth.css';
 
 const SignUp = () => {
+    const navigate = useNavigate();
     const [formData, setFormData] = useState({
         username: '',
         firstName: '',
@@ -87,14 +88,14 @@ const SignUp = () => {
             if (data.Message === "Done " || data.Message === "Done") {
                 // Show success message and redirect to login
                 alert('Registration successful! Please check your email and proceed to login.');
-                // navigate('/login');
-            } else if (data === "User Email or Username or phone Exists") {
+                navigate('/login');
+            } else if (data.message === "User with this email, username, or phone already exists.") {
                 setError('Email, username, or phone number is already registered');
             } else {
-                setError(data.Message);
+                setError(data.Message || 'An unknown error occurred.');
             }
         } catch (err) {
-            setError(err.Message);
+            setError(err.message || 'An error occurred during registration.');
             console.error('Registration error:', err);
         }
     };

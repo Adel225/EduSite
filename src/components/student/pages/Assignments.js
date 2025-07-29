@@ -54,7 +54,7 @@ const Assignments = () => {
             // Create FormData and append all fields
             const formData = new FormData();
             formData.append('assignmentId', selectedAssignment);
-            formData.append('notes', notes || ''); // Ensure notes is never undefined
+            formData.append('notes', notes || '');
             formData.append('file', file);
 
             // Log the form data for debugging
@@ -77,9 +77,14 @@ const Assignments = () => {
             const data = await response.json();
             console.log('Server response:', data); // Log the server response
 
-            if (data.message === "Assignment submitted successfully" || data.message === "Assignment submitted successfully.") {
+            if (data.message === "Cannot submit because the deadline has passed.") {
+                alert("Submission deadline has passed!");
+                setSelectedAssignment('');
+                setNotes('');
+                setFile(null);
+            }
+            else if (data.message === "Assignment submitted successfully" || data.message === "Assignment submitted successfully.") {
                 setSubmitStatus('Assignment submitted successfully');
-                // Reset form
                 setSelectedAssignment('');
                 setNotes('');
                 setFile(null);
@@ -109,11 +114,8 @@ const Assignments = () => {
                     'Authorization': `MonaEdu ${token}`
                 }
             });
-            console.log('Response status:', response.status);
-            console.log('Response headers:', response.headers);
 
             if (!response.ok) {
-                // Try to parse JSON error message
                 try {
                     const data = await response.json();
                     console.log('Backend error response:', data);
@@ -133,11 +135,9 @@ const Assignments = () => {
                 throw new Error('Failed to download assignment');
             }
 
-            // Check for JSON error in a 200 response (edge case)
             const contentType = response.headers.get('content-type');
             if (contentType && contentType.includes('application/json')) {
                 const data = await response.json();
-                console.log('Backend JSON response (200):', data);
                 if (data && data.message && data.message.includes('This Assignment is not available at this time')) {
                     window.alert('This Assignment is not available at this time');
                     return;
@@ -150,10 +150,7 @@ const Assignments = () => {
 
             // Get the blob from the response
             const blob = await response.blob();
-            console.log('Blob:', blob);
-            // Create a URL for the blob
             const url = window.URL.createObjectURL(blob);
-            // Create a temporary link element
             const link = document.createElement('a');
             link.href = url;
             link.download = `assignment-${assignmentId}.pdf`;

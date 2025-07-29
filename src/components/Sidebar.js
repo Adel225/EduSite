@@ -1,10 +1,11 @@
+
 // src/components/Sidebar.js
 import React from 'react';
-import DashboardIcon from '../icons/dashboard.svg'; // Renamed for clarity
 import ExamsIcon from '../icons/exams.svg';
 import AssignmentIcon from '../icons/assignment.svg';
 import MaterialsIcon from '../icons/materials.svg';
 import GroupsIcon from '../icons/groups.svg';
+import SessionIcon from '../icons/session.svg'
 import '../styles/Sidebar.css'; // Ensure this CSS is adapted
 import { NavLink } from 'react-router-dom';
 
@@ -19,6 +20,7 @@ const Sidebar = ({ isOpen, onNavLinkClick, isMobile }) => {
     <div className={sidebarClasses}> {/* Apply dynamic classes */}
       <div className='menu'>Menu</div><br/><br/>
       <div>
+        <NavLink className={({ isActive }) => (isActive ? 'active-link' : 'li')} to="/dashboard/sessions" onClick={onNavLinkClick}><img src={SessionIcon} alt="Sessions" /> Sessions</NavLink><br/><br/>
         <NavLink className={({ isActive }) => (isActive ? 'active-link' : 'li')} to="/dashboard/exams" onClick={onNavLinkClick}><img src={ExamsIcon} alt="Exams" /> Exams</NavLink><br/><br/>
         <NavLink className={({ isActive }) => (isActive ? 'active-link' : 'li')} to="/dashboard/assignments" onClick={onNavLinkClick}><img src={AssignmentIcon} alt="Assignments" /> Assignments</NavLink><br/><br/>
         <NavLink className={({ isActive }) => (isActive ? 'active-link' : 'li')} to="/dashboard/materials" onClick={onNavLinkClick}><img src={MaterialsIcon} alt="Materials" /> Materials</NavLink><br/><br/>

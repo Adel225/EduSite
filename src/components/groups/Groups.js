@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import '../../styles/groups.css';
 import { NavLink } from 'react-router-dom';
+import Modal from 'react-modal'; // Import Modal
 import { API_URL } from '../../config';
 
 
@@ -15,8 +16,12 @@ const Groups = () => {
   const [deletingGroupId, setDeletingGroupId] = useState(null);
   const [addingStudentId, setAddingStudentId] = useState(null);
   const [viewingStudent, setViewingStudent] = useState(null);
-  const [newGroupName, setNewGroupName] = useState('');
+  
+  // --- NEW: State for modal-based group creation ---
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [isAddingGroup, setIsAddingGroup] = useState(false);
+  const [currentGrade, setCurrentGrade] = useState(null);
+  const [formData, setFormData] = useState({ groupName: '' });
 
   useEffect(() => {
     fetchAllGroups();
@@ -109,7 +114,7 @@ const Groups = () => {
           throw new Error(result.Message || 'Failed to delete group');
         }
 
-        fetchAllGroups(); // Refresh all groups
+        fetchAllGroups(); 
         alert(result.Message || `Group "${groupName}" deleted successfully.`);
       } catch (err) {
         console.error('Error deleting group:', err);
@@ -168,13 +173,28 @@ const Groups = () => {
     return unassignedStudentsByGrade[grade] || [];
   };
 
-  const handleAddGroup = async (grade) => {
-    if (!newGroupName.trim()) {
-      alert('Please enter a group name');
+  // --- REFACTORED: Group creation logic for modal ---
+  const handleOpenModal = (grade) => {
+    setCurrentGrade(grade);
+    setFormData({ groupName: '' });
+    setError(null);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setCurrentGrade(null);
+  };
+
+  const handleAddGroup = async (e) => {
+    e.preventDefault();
+    if (!formData.groupName.trim()) {
+      setError('Please enter a group name.');
       return;
     }
 
     setIsAddingGroup(true);
+    setError(null);
     try {
       const token = localStorage.getItem('token') || sessionStorage.getItem('token');
       const response = await fetch(`${API_URL}/group/create`, {
@@ -184,20 +204,24 @@ const Groups = () => {
           'Authorization': `MonaEdu ${token}`
         },
         body: JSON.stringify({
-          grade: parseInt(grade),
-          groupname: newGroupName.trim()
+          grade: parseInt(currentGrade),
+          groupname: formData.groupName.trim()
         })
       });
 
       const result = await response.json();
       
       if (!response.ok) {
+        if (response.status === 500 && result.message === 'Invalid Data') {
+          alert('This group name already exists. Please choose another one.');
+          return;
+        }
         throw new Error(result.Message || 'Failed to create group');
       }
 
-      setNewGroupName('');
       fetchAllGroups(); // Refresh the groups list
       alert(result.Message || 'Group created successfully');
+      handleCloseModal();
     } catch (err) {
       console.error('Error creating group:', err);
       setError(err.message || 'Error creating group. Please try again.');
@@ -214,46 +238,15 @@ const Groups = () => {
       <h2>Groups & Unassigned Students</h2>
       {Grades.map(grade => (
         <div key={grade} className="grade-section">
-          <h3>Grade {grade}</h3>
+          <div className="grade-header">
+            <h3>Grade {grade}</h3>
+            <button className="add-group-btn" onClick={() => handleOpenModal(grade)}>
+              + Add Group
+            </button>
+          </div>
           <div className="grade-content-container">
             <div className="groups-list-container">
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '15px' }}>
-                <h4 style={{ margin: 0 }}>Groups</h4>
-                <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-                  <input
-                    type="text"
-                    value={newGroupName}
-                    onChange={(e) => setNewGroupName(e.target.value)}
-                    placeholder="New group name"
-                    style={{
-                      padding: '5px 10px',
-                      borderRadius: '4px',
-                      border: '1px solid #ddd',
-                      fontSize: '0.9rem'
-                    }}
-                  />
-                  <button
-                    onClick={() => handleAddGroup(grade)}
-                    disabled={isAddingGroup}
-                    style={{
-                      backgroundColor: '#4CAF50',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '50%',
-                      width: '30px',
-                      height: '30px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      cursor: 'pointer',
-                      fontSize: '1.2rem',
-                      padding: 0
-                    }}
-                  >
-                    {isAddingGroup ? '...' : '+'}
-                  </button>
-                </div>
-              </div>
+              <h4 className="container-title">Groups</h4>
               {allGroups[grade] && allGroups[grade].length > 0 ? (
                 <div className="groups-container">
                   {allGroups[grade].map((group, index) => (
@@ -334,6 +327,40 @@ const Groups = () => {
           </div>
         </div>
       )}
+
+      <Modal
+        isOpen={isModalOpen}
+        onRequestClose={handleCloseModal}
+        contentLabel="Add New Group"
+        className="form-modal"
+        overlayClassName="form-modal-overlay"
+      >
+        <h2>Create New Group for Grade {currentGrade}</h2>
+        <form onSubmit={handleAddGroup}>
+          <div className="form-group">
+            <label htmlFor="groupName">Group Name:</label>
+            <input
+              type="text"
+              id="groupName"
+              value={formData.groupName}
+              onChange={(e) => setFormData({ ...formData, groupName: e.target.value })}
+              placeholder="Enter new group name"
+              required
+            />
+          </div>
+
+          {error && <div className="error-message">{error}</div>}
+
+          <div className="form-actions">
+            <button type="button" className="cancel-btn" onClick={handleCloseModal} disabled={isAddingGroup}>
+              Cancel
+            </button>
+            <button type="submit" disabled={isAddingGroup}>
+              {isAddingGroup ? 'Creating...' : 'Create Group'}
+            </button>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 };

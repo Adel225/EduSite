@@ -1,0 +1,113 @@
+/* src/styles/studentSessions.css */
+
+.sessions-student-page {
+    max-width: 900px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+  }
+  
+  .sessions-student-page h1 {
+    color: #2c3e50;
+    border-bottom: 2px solid #5A67BA;
+    padding-bottom: 0.5rem;
+    margin-bottom: 2rem;
+  }
+  
+  .session-accordion {
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    overflow: hidden; /* Important for border-radius */
+  }
+  
+  .session-header {
+    background-color: #ffffff;
+    padding: 1rem 1.5rem;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background-color 0.2s ease;
+  }
+  
+  .session-header:hover {
+    background-color: #f8f9fa;
+  }
+  
+  .session-header-title h2 {
+    margin: 0;
+    font-size: 1.25rem;
+    color: #34495e;
+  }
+  
+  .session-header-title p {
+    margin: 0.25rem 0 0;
+    font-size: 0.9rem;
+    color: #7f8c8d;
+  }
+  
+  .session-toggle-icon {
+    font-size: 1.5rem;
+    color: #5A67BA;
+    transition: transform 0.3s ease;
+  }
+  
+  .session-header.expanded .session-toggle-icon {
+    transform: rotate(180deg);
+  }
+  
+  .session-content {
+    padding: 1.5rem;
+    background-color: #fdfdfd;
+    border-top: 1px solid #e0e0e0;
+  }
+  
+  .session-content-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .session-content-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  
+  .session-content-item:last-child {
+    border-bottom: none;
+  }
+  
+  .item-details {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  
+  .item-icon {
+    width: 24px;
+    height: 24px;
+  }
+  
+  .item-name {
+    font-weight: 500;
+    color: #2c3e50;
+  }
+  
+  .view-item-btn {
+    background-color: #5A67BA;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.2s ease;
+  }
+  
+  .view-item-btn:hover {
+    background-color: #4c569b;
+  }

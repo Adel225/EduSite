@@ -66,9 +66,14 @@ const Exams = () => {
             });
 
             const data = await response.json();
-            if (data.message === "Exam submitted successfully.") {
+            if (data.message === "Cannot submit because the submission deadline has passed.") {
+                alert("Submission deadline has passed!");
+                setSelectedExam('');
+                setNotes('');
+                setFile(null);
+            }
+            else if (data.message === "Exam submitted successfully.") {
                 setSubmitStatus('Exam submitted successfully');
-                // Reset form
                 setSelectedExam('');
                 setNotes('');
                 setFile(null);

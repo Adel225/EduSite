@@ -17,12 +17,17 @@ import GroupDetails from './components/groups/GroupDetails';
 import AssignmentSubmissions from './components/assignments/AssignmentSubmissions';
 import ExamSubmissions from './components/exams/ExamSubmissions';
 
+import Sessions from './components/sessions/sessions';
+import SessionDetails from './components/sessions/sessionDetails';
+
+
 // Student Pages
 import StudentDashboard from './components/student/StudentDashboard';
 import StudentAssignments from './components/student/pages/Assignments';
 import StudentExams from './components/student/pages/Exams';
 import StudentMaterials from './components/student/pages/Materials';
 import Profile from './components/student/pages/Profile';
+import StudentSessions from './components/student/pages/Sessions'; 
 
 // Auth Components
 import Login from './components/auth/login';
@@ -176,6 +181,9 @@ return (
                             <Route path="assignments" element={<Assignments />} />
                             <Route path="assignments/grade/:grade/group/:groupId/assignment/:assignmentId" element={<AssignmentSubmissions />} />
                             <Route path="exams/grade/:grade/group/:groupId/exam/:examId" element={<ExamSubmissions />} />
+                            
+                            <Route path="sessions" element={<Sessions />} />
+                            <Route path="sessions/:sessionId" element={<SessionDetails />} />
                             <Route path="materials" element={<Materials />} />
                             <Route path="groups" element={<Groups />} />
                             <Route path="groups/:grade/:group" element={<GroupDetails />} />
@@ -196,6 +204,7 @@ return (
                         <Routes>
                             <Route index element={<StudentDashboard />} />
                             <Route path="assignments" element={<StudentAssignments />} />
+                            <Route path="sessions" element={<StudentSessions />} />
                             <Route path="exams" element={<StudentExams />} />
                             <Route path="materials" element={<StudentMaterials />} />
                             <Route path="profile" element={<Profile />} />

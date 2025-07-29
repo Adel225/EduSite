@@ -140,7 +140,12 @@ const Exams = () => {
       formDataToSend.append('file', formData.file);
       formDataToSend.append('startdate', formData.startDate);
       formDataToSend.append('enddate', formData.endDate);
-      formDataToSend.append('groupIds', JSON.stringify(selectedGroups));
+      
+      // Append each group ID individually to handle array in FormData
+      selectedGroups.forEach(groupId => {
+        formDataToSend.append('groupIds', groupId);
+      });
+
       formDataToSend.append('gradeId', gradeId);
 
       const response = await fetch(`${API_URL}/exams/create`, {
@@ -179,6 +184,7 @@ const Exams = () => {
 
   return (
     <div className="exams-page">
+      
       <div className="exams-left">
         <h2>Select Grade</h2>
         <div className="grades-list">
@@ -205,7 +211,7 @@ const Exams = () => {
                 {groups.map((group) => (
                   <div 
                     key={group._id} 
-                    className={`group-item ${selectedGroups.includes(group._id) ? 'selected' : ''}`}
+                    className={`group-item ${selectedGroupId === group._id ? 'selected' : ''}`}
                     onClick={() => handleGroupClick(group._id)}
                   >
                     {group.groupname}
@@ -216,7 +222,7 @@ const Exams = () => {
           </div>
         )}
 
-        {exams.length > 0 && (
+        {exams.length > 0 || loadingExams ? (
           <div className="exams-section">
             <h3>Exams</h3>
             {loadingExams ? (
@@ -284,7 +290,7 @@ const Exams = () => {
               </ul>
             )}
           </div>
-        )}
+        ) : null}
       </div>
 
       <div className="exams-right">
@@ -306,20 +312,48 @@ const Exams = () => {
 
           <div className="form-group">
             <label>Groups:</label>
-            <select 
-              multiple
-              value={selectedGroups}
-              onChange={handleGroupChange}
-              required
-              disabled={!selectedGrade || loadingGroups}
-            >
-              {groups.map(group => (
-                <option key={group._id} value={group._id}>
-                  {group.groupname}
-                </option>
-              ))}
-            </select>
-            <small>Hold Ctrl/Cmd to select multiple groups</small>
+            {loadingGroups ? (
+              <div>Loading groups...</div>
+            ) : (
+              <div className="groups-list">
+                <div className="select-all group-checkbox-row">
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={selectedGroups.length === groups.length && groups.length > 0}
+                      onChange={() => {
+                        if (selectedGroups.length === groups.length) {
+                          setSelectedGroups([]);
+                        } else {
+                          setSelectedGroups(groups.map(group => group._id));
+                        }
+                      }}
+                    />
+                    Select All Groups
+                  </label>
+                </div>
+                {groups.map((group) => (
+                  <div key={group._id} className="group-checkbox-row">
+                    <label>
+                      <input
+                        type="checkbox"
+                        checked={selectedGroups.includes(group._id)}
+                        onChange={() => {
+                          setSelectedGroups(prev => {
+                            if (prev.includes(group._id)) {
+                              return prev.filter(id => id !== group._id);
+                            } else {
+                              return [...prev, group._id];
+                            }
+                          });
+                        }}
+                      />
+                      {group.groupname}
+                    </label>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           <div className="form-group">

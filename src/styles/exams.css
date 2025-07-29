@@ -69,6 +69,7 @@
     border: 1px solid #e9ecef;
     display: flex;
     flex-direction: column;
+    margin-bottom: 1rem;
     gap: 1rem; /* Replaces margin-bottom on children for spacing */
 }
 
@@ -219,6 +220,8 @@
     border-radius: 4px;
     cursor: pointer;
     transition: all 0.2s;
+    padding-left: 1.5rem !important;
+    box-sizing: border-box;
 }
 
 .group-item:hover {
@@ -299,3 +302,112 @@
         align-self: stretch;
     }
 }
+
+/* Add this to BOTH assignments.css AND exams.css */
+
+/* Header above the list */
+.assignments-header, .exams-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #eee;
+  }
+  
+  .assignments-header h3, .exams-header h3 {
+    margin: 0;
+  }
+  
+  .upload-new-btn {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.2s ease;
+  }
+  
+  .upload-new-btn:hover {
+    background-color: #218838;
+  }
+  
+  /* Actions buttons on the card */
+  .assignment-actions, .exam-actions {
+    display: flex;
+    gap: 0.5rem;
+  }
+  
+  .edit-btn {
+    background-color: #ffc107;
+    color: #212529;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: 500;
+  }
+  
+  /* Modal styles */
+  .form-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.6);
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .form-modal {
+    background: white;
+    padding: 2rem;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 600px;
+    outline: none;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+  }
+  
+  .form-modal h2 {
+    margin-top: 0;
+    margin-bottom: 2rem;
+    color: #333;
+  }
+  
+  .checkbox-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .checkbox-group input[type="checkbox"] {
+    width: auto;
+    margin: 0;
+  }
+  
+  .form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 2rem;
+    border-top: 1px solid #eee;
+    padding-top: 1rem;
+  }
+  
+  .form-actions button {
+    padding: 0.75rem 1.5rem;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+    font-weight: 500;
+  }
+  
+  .form-actions .cancel-btn {
+    background-color: #6c757d;
+    color: white;
+  }
