@@ -255,6 +255,30 @@
   z-index: 10; /* Above the editor content */
 }
 
+.pdf-viewer-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.75);
+  z-index: 1000;
+}
+
+.pdf-viewer-modal {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 90vw;
+  height: 90vh;
+  background: #fff;
+  overflow: hidden; /* The viewer inside will scroll */
+  border-radius: 8px;
+  outline: none;
+  padding: 0;
+}
+
 /* Ensure your PDFAnnotationEditor component's main div takes up height */
 /* Example for PDFAnnotationEditor.jsx's root div if it doesn't have height: 100% */
 /*

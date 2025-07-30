@@ -3,8 +3,8 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Document, Page, pdfjs } from 'react-pdf';
 import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
 import 'react-pdf/dist/esm/Page/TextLayer.css';
-import { Canvas, PencilBrush, IText } from 'fabric';
-import { PDFDocument } from 'pdf-lib';
+import * as fabric from 'fabric';
+import { API_URL } from '../../config'; 
 
 pdfjs.GlobalWorkerOptions.workerSrc = `${process.env.PUBLIC_URL}/pdf.worker.min.mjs`;
 
@@ -94,244 +94,223 @@ const styles = {
     }
 };
 
-
 const PDFAnnotationEditor = ({
-    pdfUrl,
-    onSaveSuccess, // Callback for when save is successful (e.g., to close modal)
-    submissionId,  // Prop for submission ID
-    markType, // NEW: 'exam' or undefined
-    // isSaving is now internal to this component
+    pdfUrl, 
+    submissionId,
+    initialAnnotationData, 
+    initialScore, 
+    onSaveSuccess,
+    markType
 }) => {
-    // console.log(`Render. Tool: ${activeTool}`);
     const [numPages, setNumPages] = useState(null);
     const [fabricCanvases, setFabricCanvases] = useState({});
     const [activeTool, setActiveTool] = useState('pen');
     const [color, setColor] = useState('#000000');
     const [brushSize, setBrushSize] = useState(5);
     const pageCanvasRefs = useRef({});
-
-    // NEW state for score, notes, and internal saving indicator
     const [score, setScore] = useState('');
-    const [notes, setNotes] = useState('');
     const [internalIsSaving, setInternalIsSaving] = useState(false);
 
-    const hexToRgba = useCallback((hex, alpha) => {
-        if (!hex || typeof hex !== 'string' || !hex.startsWith('#') || (hex.length !== 7 && hex.length !== 4)) {
-            return 'rgba(255, 255, 0, 0.3)';
-        }
-        let r, g, b;
-        if (hex.length === 4) {
-            r = parseInt(hex[1] + hex[1], 16); g = parseInt(hex[2] + hex[2], 16); b = parseInt(hex[3] + hex[3], 16);
-        } else {
-            r = parseInt(hex.slice(1, 3), 16); g = parseInt(hex.slice(3, 5), 16); b = parseInt(hex.slice(5, 7), 16);
-        }
-        if (isNaN(r) || isNaN(g) || isNaN(b)) return 'rgba(255, 255, 0, 0.3)';
-        return `rgba(${r}, ${g}, ${b}, ${alpha})`;
-    }, []);
 
-    const onDocumentLoadSuccess = ({ numPages: nextNumPages }) => {
-        setNumPages(nextNumPages);
-        Object.values(fabricCanvases).forEach(canvas => {
-            if (canvas && typeof canvas.dispose === 'function') canvas.dispose();
-        });
-        setFabricCanvases({});
-        pageCanvasRefs.current = {};
-    };
-
-    const initFabricCanvas = (pageNumber, canvasElement, width, height) => {
-        if (fabricCanvases[pageNumber] && fabricCanvases[pageNumber] instanceof Canvas) {
-            fabricCanvases[pageNumber].setDimensions({ width, height });
-            fabricCanvases[pageNumber].renderAll();
-            return;
+ // Set initial score when component loads
+    useEffect(() => {
+        if (initialScore !== undefined && initialScore !== null) {
+            setScore(String(initialScore));
         }
-        if (canvasElement) {
-            const fabricCanvasInstance = new Canvas(canvasElement, { width, height });
-            setFabricCanvases(prev => ({ ...prev, [pageNumber]: fabricCanvasInstance }));
-        }
-    };
+    }, [initialScore]);
 
-    const handleCanvasMouseDown = useCallback((options, fabricCanvas, pageNum) => {
-        if (!fabricCanvas) return;
-        if (activeTool === 'textbox') {
-            if (options.target && !(options.target instanceof Canvas)) {
-                if (options.target instanceof IText) {
-                    fabricCanvas.setActiveObject(options.target);
-                    options.target.enterEditing();
-                    options.target.initDelayedCursor(true);
-                    fabricCanvas.renderAll();
+const onDocumentLoadSuccess = ({ numPages: nextNumPages }) => {
+    setNumPages(nextNumPages);
+    Object.values(fabricCanvases).forEach(canvas => {
+        if (canvas && typeof canvas.dispose === 'function') canvas.dispose();
+    });
+    setFabricCanvases({});
+    pageCanvasRefs.current = {};
+};
+
+useEffect(() => {
+    if (initialAnnotationData && Object.keys(fabricCanvases).length === numPages && numPages > 0) {
+        try {
+            const parsedData = JSON.parse(initialAnnotationData);
+            Object.entries(parsedData).forEach(([pageNum, canvasJSON]) => {
+                const canvas = fabricCanvases[pageNum];
+                if (canvas) {
+                    const callback = () => {
+                        canvas.calcOffset();
+                        canvas.renderAll();
+                    };
+                    canvas.loadFromJSON(canvasJSON, callback);
                 }
+            });
+        } catch (error) {
+            console.error("Failed to load annotation data:", error);
+        }
+    }
+}, [initialAnnotationData, fabricCanvases, numPages]); // Dependencies are correct
+
+const hexToRgba = useCallback((hex, alpha) => {
+    if (!hex || typeof hex !== 'string' || !hex.startsWith('#') || (hex.length !== 7 && hex.length !== 4)) {
+        return 'rgba(255, 255, 0, 0.3)';
+    }
+    let r, g, b;
+    if (hex.length === 4) {
+        r = parseInt(hex[1] + hex[1], 16); g = parseInt(hex[2] + hex[2], 16); b = parseInt(hex[3] + hex[3], 16);
+    } else {
+        r = parseInt(hex.slice(1, 3), 16); g = parseInt(hex.slice(3, 5), 16); b = parseInt(hex.slice(5, 7), 16);
+    }
+    if (isNaN(r) || isNaN(g) || isNaN(b)) return 'rgba(255, 255, 0, 0.3)';
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}, []);
+
+// Handle mouse down events for creating textboxes or erasing objects
+const handleCanvasMouseDown = useCallback((options, fabricCanvas) => {
+    if (!fabricCanvas) return;
+    if (activeTool === 'textbox') {
+        if (options.target && options.target instanceof fabric.IText) {
+            fabricCanvas.setActiveObject(options.target);
+            options.target.enterEditing();
             return;
         }
-            const pointer = fabricCanvas.getPointer(options.e);
-            const text = new IText('', {
-                left: pointer.x, top: pointer.y, fontFamily: 'arial', fill: color,
-                fontSize: 20, originX: 'left', originY: 'top', padding: 7,
-                cornerColor: 'blue', cornerStrokeColor: 'blue', transparentCorners: false, cornerSize: 10,
+        const pointer = fabricCanvas.getPointer(options.e);
+        const text = new fabric.IText('Your Text', {
+            left: pointer.x, top: pointer.y, fontFamily: 'arial', fill: color,
+            fontSize: 20,
         });
         fabricCanvas.add(text);
-            fabricCanvas.setActiveObject(text);
-            text.enterEditing();
-            text.initDelayedCursor(true);
-            fabricCanvas.renderAll();
-        } else if (activeTool === 'eraser') {
-            if (options.target && !(options.target instanceof Canvas)) {
-                fabricCanvas.remove(options.target);
-        fabricCanvas.renderAll();
+        fabricCanvas.setActiveObject(text);
+        text.enterEditing();
+    } else if (activeTool === 'eraser') {
+        if (options.target) {
+            fabricCanvas.remove(options.target);
+        }
+    }
+}, [activeTool, color]);
+
+// Effect to configure the active tool on the canvas
+useEffect(() => {
+    Object.values(fabricCanvases).forEach(canvas => {
+        if (canvas) {
+            canvas.isDrawingMode = ['pen', 'highlighter'].includes(activeTool);
+            canvas.selection = !canvas.isDrawingMode;
+            
+            if (activeTool === 'pen' || activeTool === 'highlighter') {
+                canvas.freeDrawingBrush = new fabric.PencilBrush(canvas);
+                canvas.freeDrawingBrush.width = activeTool === 'highlighter' ? parseInt(brushSize, 10) * 3 : parseInt(brushSize, 10);
+                canvas.freeDrawingBrush.color = activeTool === 'highlighter' ? hexToRgba(color, 0.3) : color;
+            }
+            
+            canvas.off('mouse:down');
+            if (['textbox', 'eraser'].includes(activeTool)) {
+                canvas.on('mouse:down', (options) => handleCanvasMouseDown(options, canvas));
             }
         }
-    }, [activeTool, color]);
-
-    useEffect(() => {
-        Object.entries(fabricCanvases).forEach(([pageNumStr, fCanvas]) => {
-            if (fCanvas instanceof Canvas) {
-            const pageNum = parseInt(pageNumStr, 10);
-
-                fCanvas.isDrawingMode = (activeTool === 'pen' || activeTool === 'highlighter');
-                fCanvas.selection = !fCanvas.isDrawingMode;
-
-                if (activeTool === 'pen') {
-                    fCanvas.freeDrawingBrush = new PencilBrush(fCanvas);
-                    fCanvas.freeDrawingBrush.color = color;
-                    fCanvas.freeDrawingBrush.width = parseInt(brushSize, 10);
-                    fCanvas.defaultCursor = 'crosshair'; // Cursor for pen
-                } else if (activeTool === 'highlighter') {
-                    fCanvas.freeDrawingBrush = new PencilBrush(fCanvas);
-                    fCanvas.freeDrawingBrush.color = hexToRgba(color, 0.3);
-                    fCanvas.freeDrawingBrush.width = parseInt(brushSize, 10) * 3;
-                    fCanvas.defaultCursor = 'crosshair'; // Cursor for highlighter
-                } else if (activeTool === 'textbox') {
-                    fCanvas.defaultCursor = 'text'; // Cursor for textbox
-                } else if (activeTool === 'eraser') {
-                    fCanvas.defaultCursor = 'cell'; // Cursor for eraser (select mode)
-                } else {
-                    fCanvas.defaultCursor = 'default'; // Default cursor
-                }
-
-                fCanvas.off('mouse:down');
-                if (activeTool === 'textbox' || activeTool === 'eraser') {
-                    fCanvas.on('mouse:down', (options) => handleCanvasMouseDown(options, fCanvas, pageNum));
-                }
-                fCanvas.renderAll();
-            }
-        });
-        return () => {
-            Object.values(fabricCanvases).forEach(fCanvas => {
-                if (fCanvas instanceof Canvas) fCanvas.off('mouse:down');
-            });
-        };
-    }, [activeTool, color, brushSize, fabricCanvases, handleCanvasMouseDown, hexToRgba]);
-
-    const handleEraserButtonClick = () => {
-        if (activeTool !== 'eraser') {
-            setActiveTool('eraser');
-            return;
-        }
-        let objectsWereRemoved = false;
-        Object.values(fabricCanvases).forEach(fCanvas => {
-            if (fCanvas instanceof Canvas) {
-                const activeObjectOrSelection = fCanvas.getActiveObject();
-                if (activeObjectOrSelection) {
-                    if (activeObjectOrSelection.type === 'activeSelection') {
-                        activeObjectOrSelection.forEachObject(obj => fCanvas.remove(obj));
-                        objectsWereRemoved = true;
-                    } else {
-                        fCanvas.remove(activeObjectOrSelection); // Also remove single selected on button click
-                        objectsWereRemoved = true;
-                    }
-                    if (objectsWereRemoved) {
-                        fCanvas.discardActiveObject();
-                        fCanvas.renderAll();
-                    }
-                }
-            }
-        });
-    };
-
-    const handleSave = async () => {
-        if (!numPages || !pdfUrl) {
-            alert("No PDF loaded or no pages to save.");
-            return;
-        }
-        if (!submissionId) {
-            alert("Submission ID is missing. Cannot save.");
-            return;
-        }
-        setInternalIsSaving(true);
-
-        // 1. Generate the marked PDF blob
-        const newPdfDoc = await PDFDocument.create();
-        const existingPdfBytes = await fetch(pdfUrl).then(res => res.arrayBuffer());
-        const originalPdfDoc = await PDFDocument.load(existingPdfBytes);
-
-        for (let i = 0; i < numPages; i++) {
-            const [originalPage] = await newPdfDoc.copyPages(originalPdfDoc, [i]);
-            const newPage = newPdfDoc.addPage(originalPage);
-            const fabricCanvas = fabricCanvases[i + 1];
-            if (fabricCanvas) {
-                const originalBg = fabricCanvas.backgroundColor;
-                fabricCanvas.backgroundColor = '';
-                fabricCanvas.renderAll();
-                fabricCanvas.discardActiveObject();
-                fabricCanvas.renderAll();
-                const annotationDataUrl = fabricCanvas.toDataURL({ format: 'png', multiplier: 2 });
-                const annotationImageBytes = await fetch(annotationDataUrl).then(res => res.arrayBuffer());
-                const annotationImage = await newPdfDoc.embedPng(annotationImageBytes);
-                fabricCanvas.backgroundColor = originalBg;
-                fabricCanvas.renderAll();
-                const { width, height } = newPage.getSize();
-                newPage.drawImage(annotationImage, { x: 0, y: 0, width: width, height: height });
-            }
-        }
-        const pdfBytes = await newPdfDoc.save();
-        const markedPdfBlob = new Blob([pdfBytes], { type: 'application/pdf' });
-
-        // 2. Prepare FormData
-        const formData = new FormData();
-        formData.append('submissionId', submissionId);
-        formData.append('score', score); // Score from state
-        formData.append('notes', notes); // Notes from state
-        formData.append('file', markedPdfBlob, `marked_${submissionId}.pdf`);
-
-        // 3. Make the API Call
-        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-        if (!token) {
-            alert("Authentication token not found. Please log in.");
-            setInternalIsSaving(false);
-            return;
-        }
-
-        try {
-            const endpoint = markType === 'exam'
-                ? 'https://backend-edu-site-5cnm.vercel.app/exams/mark'
-                : 'https://backend-edu-site-5cnm.vercel.app/assignments/mark';
-            const response = await fetch(endpoint, {
-                method: 'PUT',
-                headers: {
-                    'Authorization': `MonaEdu ${token}`,
-                },
-                body: formData,
-            });
-
-            const responseData = await response.json();
-            if (!response.ok) {
-                throw new Error(responseData.message || `Server error: ${response.status}`);
-            }
-            alert(responseData.message || 'Marked assignment saved successfully!');
-            if (onSaveSuccess) {
-                onSaveSuccess();
-            }
-        } catch (err) {
-            console.error('Error saving marked assignment:', err);
-            alert(`Error: ${err.message}`);
-        } finally {
-            setInternalIsSaving(false);
-        }
-    };
-    
-    const getToolButtonStyle = (toolName) => ({
-        ...styles.toolButton,
-        ...(activeTool === toolName ? styles.activeToolButton : {}),
     });
+}, [activeTool, color, brushSize, fabricCanvases, handleCanvasMouseDown, hexToRgba]);
+
+const initFabricCanvas = (pageNumber, canvasElement, width, height) => {
+    if (fabricCanvases[pageNumber]) {
+        fabricCanvases[pageNumber].setDimensions({ width, height });
+        fabricCanvases[pageNumber].renderAll();
+        return;
+    }
+    if (canvasElement) {
+        const fabricCanvasInstance = new fabric.Canvas(canvasElement, { width, height });
+        setFabricCanvases(prev => ({ ...prev, [pageNumber]: fabricCanvasInstance }));
+    }
+};
+
+
+const handleEraserButtonClick = () => {
+    if (activeTool !== 'eraser') {
+        setActiveTool('eraser');
+        return;
+    }
+
+    Object.values(fabricCanvases).forEach(canvas => {
+        if (canvas instanceof fabric.Canvas) {
+            const activeObject = canvas.getActiveObject();
+
+            if (activeObject) {
+                if (activeObject.type === 'activeSelection') {
+                    activeObject.forEachObject(obj => {
+                        canvas.remove(obj);
+                    });
+                } else { 
+                    canvas.remove(activeObject);
+                }
+                canvas.discardActiveObject();
+                canvas.renderAll();
+            }
+        }
+    });
+};
+
+
+const handleSave = async () => {
+    if (!submissionId) {
+        alert("Submission ID is missing. Cannot save.");
+        return;
+    }
+    setInternalIsSaving(true);
+
+    // 1. Export the state of all canvases to a single JSON object
+    const allCanvasData = {};
+    Object.entries(fabricCanvases).forEach(([pageNum, canvas]) => {
+        if (canvas) {
+            allCanvasData[pageNum] = canvas.toJSON();
+        }
+    });
+    const annotationDataString = JSON.stringify(allCanvasData);
+
+    // 2. Prepare the request body
+    const saveData = {
+        submissionId: submissionId,
+        score: score,
+        annotationData: annotationDataString,
+    };
+
+    // 3. Make the API Call
+    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+    if (!token) {
+        alert("Authentication token not found.");
+        setInternalIsSaving(false);
+        return;
+    }
+
+    try {
+        const endpoint = markType === 'exam' 
+            ? `${API_URL}/exams/mark` 
+            : `${API_URL}/assignments/mark`;
+            
+        const response = await fetch(endpoint, {
+            method: 'PUT',
+            headers: {
+                'Authorization': `MonaEdu ${token}`,
+                'Content-Type': 'application/json', // We send JSON now, not FormData
+            },
+            body: JSON.stringify(saveData),
+        });
+
+        const responseData = await response.json();
+        if (!response.ok) {
+            throw new Error(responseData.message || `Server error: ${response.status}`);
+        }
+        alert(responseData.message || 'Marks and annotations saved successfully!');
+        if (onSaveSuccess) {
+            onSaveSuccess();
+        }
+    } catch (err) {
+        console.error('Error saving annotations:', err);
+        alert(`Error: ${err.message}`);
+    } finally {
+        setInternalIsSaving(false);
+    }
+};
+
+const getToolButtonStyle = (toolName) => ({
+    ...styles.toolButton,
+    ...(activeTool === toolName ? styles.activeToolButton : {}),
+});
 
     return (
         <div style={styles.editorContainer}>
@@ -361,7 +340,7 @@ const PDFAnnotationEditor = ({
                         value={score}
                         onChange={(e) => setScore(e.target.value)}
                         style={{ ...styles.inputField, ...styles.scoreInput }}
-                    />
+                        />
                 </div>
                 
                 <button onClick={handleSave} disabled={internalIsSaving || !numPages} style={styles.toolButton}>
@@ -410,3 +389,5 @@ const PDFAnnotationEditor = ({
 };
 
 export default PDFAnnotationEditor;
+
+

@@ -207,7 +207,7 @@ const Profile = () => {
                                 <div className="submission-actions">
                                     <button 
                                         className="action-btn view"
-                                        onClick={() => window.open(submission.filePath, '_blank')}
+                                        onClick={() => window.open(submission.path, '_blank')}
                                     >
                                         View
                                     </button>

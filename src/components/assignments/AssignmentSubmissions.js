@@ -1,78 +1,67 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
+import Modal from 'react-modal';
 import { API_URL } from '../../config';
 import '../../styles/assignmentSubmissions.css';
 import PDFAnnotationEditor from '../PDFAnnotationEditor/PDFAnnotationEditor';
-import Modal from 'react-modal';
+import MarkedPDFViewer from '../PDFAnnotationEditor/MarkedPDFViewer';
 
 const AssignmentSubmissions = () => {
-const { grade, groupId, assignmentId } = useParams();
-const [assignment, setAssignment] = useState(null);
-const [submissions, setSubmissions] = useState([]);
-const [loading, setLoading] = useState(true);
-const [error, setError] = useState(null);
-const [pdfURL, setPdfURL] = useState(null);
-const [statusFilter, setStatusFilter] = useState('all');
-const [sortBy, setSortBy] = useState('name');
-const [sortOrder, setSortOrder] = useState('asc');
-const [assignmentName, setAssignmentName] = useState('');
+    const { groupId, assignmentId } = useParams();
+    const [submissions, setSubmissions] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const [assignmentName, setAssignmentName] = useState('');
+    const [statusFilter, setStatusFilter] = useState('all');
+    const [sortBy, setSortBy] = useState('name');
+    const [sortOrder, setSortOrder] = useState('asc');
 
-  // --- State for PDF Editor Modal ---
-  const [isEditorOpen, setIsEditorOpen] = useState(false);
-  const [selectedSubmissionForMarking, setSelectedSubmissionForMarking] = useState(null);
-  const [isSavingMarkedPdf, setIsSavingMarkedPdf] = useState(false); // For loading state during save
+    const [isEditorOpen, setIsEditorOpen] = useState(false);
+    const [selectedSubmissionForMarking, setSelectedSubmissionForMarking] = useState(null);
 
-useEffect(() => {
-    fetchAssignmentAndSubmissions();
-}, [assignmentId, groupId]);
+    const [isViewerOpen, setIsViewerOpen] = useState(false);
+    const [selectedSubmissionForViewing, setSelectedSubmissionForViewing] = useState(null);
 
-const fetchAssignmentAndSubmissions = async () => {
+
+const fetchAssignmentAndSubmissions = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-    
-    // Fetch submissions
-    const submissionsResponse = await fetch(
-        `${API_URL}/assignments/submissions?assignmentId=${assignmentId}&groupId=${groupId}`,{
-        headers: {
-            'Authorization': `MonaEdu ${token}`
+        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        const response = await fetch(
+            `${API_URL}/assignments/submissions?assignmentId=${assignmentId}&groupId=${groupId}`,
+            { headers: { 'Authorization': `MonaEdu ${token}` } }
+        );
+        const data = await response.json();
+        if (data.message === "Submission status for group fetched successfully.") {
+            setSubmissions(data.data);
+            setAssignmentName(data.assignmentName || '');
+        } else {
+            throw new Error(data.message || 'Failed to fetch submissions');
         }
-        });
-    const submissionsData = await submissionsResponse.json();
-    
-    if (submissionsData.message === "Submission status for group fetched successfully.") {
-        setSubmissions(submissionsData.data);
-        setAssignmentName(submissionsData.assignmentName || '');
-    } else {
-        throw new Error(submissionsData.message || 'Failed to fetch submissions');
-    }
     } catch (err) {
-    setError(err.message);
+        setError(err.message);
     } finally {
-    setLoading(false);
+        setLoading(false);
     }
-};
+}, [assignmentId, groupId]);
+
+useEffect(() => {
+    fetchAssignmentAndSubmissions();
+}, [fetchAssignmentAndSubmissions]);
+
 
 const handleViewSubmission = async (studentId) => {
     try {
         const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-        
-        const response = await fetch(
-            `${API_URL}/assignments/submissions?assignmentId=${assignmentId}&groupId=${groupId}&studentId=${studentId}`,
-            {
-                headers: {
-                    'Authorization': `MonaEdu ${token}`
-                }
-            }
-        );
-        
+        const response = await fetch(`${API_URL}/assignments/submissions?assignmentId=${assignmentId}&groupId=${groupId}&studentId=${studentId}`, { headers: { 'Authorization': `MonaEdu ${token}` } });
         const data = await response.json();
         
         if (data.message === "Submissions fetched successfully." && data.data.length > 0) {
             const submission = data.data[0];
             if (submission.path) {
-                window.open(submission.path, '_blank');
+                setSelectedSubmissionForViewing(submission); // Set data for the viewer
+                setIsViewerOpen(true); // Open the viewer modal
             } else {
                 alert('No PDF file found for this submission.');
             }
@@ -85,7 +74,12 @@ const handleViewSubmission = async (studentId) => {
     }
 };
 
-const getFilteredAndSortedSubmissions = () => {
+const handleCloseViewer = () => {
+    setIsViewerOpen(false);
+    setSelectedSubmissionForViewing(null);
+};
+
+    const getFilteredAndSortedSubmissions = () => {
     let filtered = [...submissions];
     
     // Apply status filter
@@ -110,7 +104,7 @@ const getFilteredAndSortedSubmissions = () => {
     return filtered;
 };
 
-const getSubmissionStats = () => {
+    const getSubmissionStats = () => {
     const total = submissions.length;
     const submitted = submissions.filter(sub => sub.status === 'submitted').length;
     const percentage = total > 0 ? Math.round((submitted / total) * 100) : 0;
@@ -119,32 +113,24 @@ const getSubmissionStats = () => {
 
   // --- Functions for PDF Editor Modal ---
 
-  const handleOpenMarkEditor = async (studentId) => {
+    const handleOpenMarkEditor = async (studentId) => {
     try {
         const token = localStorage.getItem('token') || sessionStorage.getItem('token');
         const response = await fetch(
             `${API_URL}/assignments/submissions?assignmentId=${assignmentId}&groupId=${groupId}&studentId=${studentId}`,
-            {
-                headers: {
-                    'Authorization': `MonaEdu ${token}`
-                }
-            }
+            { headers: { 'Authorization': `MonaEdu ${token}` } }
         );
         const data = await response.json();
-        console.log("Fetched submission data for marking: ", data);
 
         if (data.message === "Submissions fetched successfully." && data.data.length > 0) {
-            const submission = data.data[0];    // <<< ADD THIS LOG
+            const submission = data.data[0];
             if (submission.path) {
-                // console.log(submission);
                 setSelectedSubmissionForMarking(submission);
-                setTimeout(() => setIsEditorOpen(true), 0); // Open modal after state is set
+                setIsEditorOpen(true);
             } else {
-                // console.error("No valid PDF path found in submission object:", submission);
                 alert('No PDF file found for this submission.');
             }
         } else {
-            // console.error("No submission found or error in API response:", data);
             alert('No submission found for this student.');
         }
     } catch (error) {
@@ -153,9 +139,14 @@ const getSubmissionStats = () => {
     }
 };
 
-const handleCloseMarkEditor = () => {
+    const handleCloseMarkEditor = () => {
     setIsEditorOpen(false);
     setSelectedSubmissionForMarking(null);
+};
+
+    const handleSaveSuccess = () => {
+    handleCloseMarkEditor();
+    fetchAssignmentAndSubmissions(); 
 };
 
 
@@ -236,7 +227,7 @@ return (
                 </span>
                 </td>
                 <td>{student.submissionDetails?.SubmitDate ? new Date(student.submissionDetails.SubmitDate).toLocaleDateString() : '-'}</td>
-                <td>{student.submissionDetails?.grade || '-'}</td>
+                <td>{student.submissionDetails?.score || '-'}</td>
                 <td>
                 <div className="action-buttons">
                     <button 
@@ -268,19 +259,38 @@ return (
                     contentLabel="Mark Submission PDF"
                     className="pdf-editor-modal"
                     overlayClassName="pdf-editor-modal-overlay"
-                    shouldCloseOnOverlayClick={!isSavingMarkedPdf}
                 >
                     <div className="modal-header">
                         <h2>Marking: {selectedSubmissionForMarking.studentId.firstName} {selectedSubmissionForMarking.studentId.lastName}'s Submission</h2>
-                        <button onClick={handleCloseMarkEditor} disabled={isSavingMarkedPdf} className="close-modal-btn">×</button>
+                        <button onClick={handleCloseMarkEditor} className="close-modal-btn">×</button>
                     </div>
                     <div className="modal-body">
                         <PDFAnnotationEditor
                             pdfUrl={selectedSubmissionForMarking.path}
                             submissionId={selectedSubmissionForMarking._id}
-                            onSaveSuccess={handleCloseMarkEditor}
+                            initialAnnotationData={selectedSubmissionForMarking.annotationData}
+                            initialScore={selectedSubmissionForMarking.submissionDetails?.score}
+                            onSaveSuccess={handleSaveSuccess}
+                            markType="assignment"
                         />
                     </div>
+                </Modal>
+            )}
+
+            {selectedSubmissionForViewing && (
+                <Modal
+                    isOpen={isViewerOpen}
+                    onRequestClose={handleCloseViewer}
+                    contentLabel="View Marked Submission"
+                    className="pdf-viewer-modal" 
+                    overlayClassName="pdf-viewer-modal-overlay"
+                >
+                    <button onClick={handleCloseViewer} className="close-modal-btn">×</button>
+                    <MarkedPDFViewer
+                        pdfUrl={selectedSubmissionForViewing.path}
+                        annotationData={selectedSubmissionForViewing.annotationData}
+                    />
+                    {/* The close button is now part of the viewer component */}
                 </Modal>
             )}
     </div>

@@ -79,10 +79,6 @@ const Exams = () => {
     }
   };
 
-  const handleGroupChange = (e) => {
-    const selectedOptions = Array.from(e.target.selectedOptions, option => option.value);
-    setSelectedGroups(selectedOptions);
-  };
 
   const handleGroupClick = async (groupId) => {
     setSelectedGroupId(groupId);

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { API_URL } from '../../config';
 import '../../styles/assignmentSubmissions.css';
@@ -6,52 +6,44 @@ import Modal from 'react-modal';
 import PDFAnnotationEditor from '../PDFAnnotationEditor/PDFAnnotationEditor';
 
 const ExamSubmissions = () => {
-const { groupId, examId } = useParams();
-const [exam, setExam] = useState(null);
-const [submissions, setSubmissions] = useState([]);
-const [loading, setLoading] = useState(true);
-const [error, setError] = useState(null);
-const [statusFilter, setStatusFilter] = useState('all');
-const [sortBy, setSortBy] = useState('name');
-const [sortOrder, setSortOrder] = useState('asc');
+    const { groupId, examId } = useParams();
+    const [submissions, setSubmissions] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const [statusFilter, setStatusFilter] = useState('all');
+    const [sortBy, setSortBy] = useState('name');
+    const [sortOrder, setSortOrder] = useState('asc');
 
-    // --- State for PDF Editor Modal ---
     const [isEditorOpen, setIsEditorOpen] = useState(false);
     const [selectedSubmissionForMarking, setSelectedSubmissionForMarking] = useState(null);
-    const [isSavingMarkedPdf, setIsSavingMarkedPdf] = useState(false); // For loading state during save
 
 
-useEffect(() => {
-    fetchExamAndSubmissions();
-}, [examId, groupId]);
 
-const fetchExamAndSubmissions = async () => {
+const fetchExamAndSubmissions = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-    
-    // Fetch submissions
-    const submissionsResponse = await fetch(
-        `${API_URL}/exams/student/submissions?groupId=${groupId}&examId=${examId}`,
-        {
-        headers: {
-            'Authorization': `MonaEdu ${token}`
+        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        const response = await fetch(
+            `${API_URL}/exams/student/submissions?groupId=${groupId}&examId=${examId}`,
+            { headers: { 'Authorization': `MonaEdu ${token}` } }
+        );
+        const data = await response.json();
+        if (data.message === "Student submission statuses fetched successfully") {
+            setSubmissions(data.students);
+        } else {
+            throw new Error(data.message || 'Failed to fetch submissions');
         }
-        });
-    const submissionsData = await submissionsResponse.json();
-    
-    if (submissionsData.message === "Student submission statuses fetched successfully") {
-        setSubmissions(submissionsData.students);
-    } else {
-        throw new Error(submissionsData.message || 'Failed to fetch submissions');
-    }
     } catch (err) {
-    setError(err.message);
+        setError(err.message);
     } finally {
-    setLoading(false);
+        setLoading(false);
     }
-};
+}, [examId, groupId]);
+
+useEffect(() => {
+    fetchExamAndSubmissions();
+}, [fetchExamAndSubmissions]);
 
 const handleViewSubmission = async (studentId) => {
     try {
@@ -118,32 +110,24 @@ const getSubmissionStats = () => {
 
   // --- Functions for PDF Editor Modal ---
 
-  const handleOpenMarkEditor = async (studentId) => {
+const handleOpenMarkEditor = async (studentId) => {
     try {
         const token = localStorage.getItem('token') || sessionStorage.getItem('token');
         const response = await fetch(
             `${API_URL}/exams/submissions?examId=${examId}&groupId=${groupId}&studentId=${studentId}`,
-            {
-                headers: {
-                    'Authorization': `MonaEdu ${token}`
-                }
-            }
+            { headers: { 'Authorization': `MonaEdu ${token}` } }
         );
         const data = await response.json();
-        console.log("Fetched submission data for marking: ", data);
 
         if (data.message === "Submitted exams fetched successfully." && data.data.length > 0) {
-            const submission = data.data[0];    // <<< ADD THIS LOG
+            const submission = data.data[0];
             if (submission.filePath) {
-                // console.log(submission);
                 setSelectedSubmissionForMarking(submission);
-                setTimeout(() => setIsEditorOpen(true), 0); // Open modal after state is set
+                setIsEditorOpen(true);
             } else {
-                // console.error("No valid PDF path found in submission object:", submission);
                 alert('No PDF file found for this submission.');
             }
         } else {
-            // console.error("No submission found or error in API response:", data);
             alert('No submission found for this student.');
         }
     } catch (error) {
@@ -155,6 +139,11 @@ const getSubmissionStats = () => {
 const handleCloseMarkEditor = () => {
     setIsEditorOpen(false);
     setSelectedSubmissionForMarking(null);
+};
+
+const handleSaveSuccess = () => {
+    handleCloseMarkEditor();
+    fetchExamAndSubmissions(); // Refresh the list
 };
 
 if (loading) return <div className="loading">Loading submissions...</div>;
@@ -251,28 +240,29 @@ return (
     </div>
     {/* --- PDF Editor Modal --- */}
     {selectedSubmissionForMarking && (
-        <Modal
-            isOpen={isEditorOpen}
-            onRequestClose={handleCloseMarkEditor}
-            contentLabel="Mark Exam Submission PDF"
-            className="pdf-editor-modal"
-            overlayClassName="pdf-editor-modal-overlay"
-            shouldCloseOnOverlayClick={true}
-        >
-            <div className="modal-header">
-                <h2>Marking: {selectedSubmissionForMarking.studentId.firstName} {selectedSubmissionForMarking.studentId.lastName}'s Submission</h2>
-                <button onClick={handleCloseMarkEditor} className="close-modal-btn">×</button>
-            </div>
-            <div className="modal-body">
-                <PDFAnnotationEditor
-                    pdfUrl={selectedSubmissionForMarking.filePath}
-                    submissionId={selectedSubmissionForMarking._id}
-                    onSaveSuccess={handleCloseMarkEditor}
-                    markType="exam"
-                />
-            </div>
-        </Modal>
-    )}
+                <Modal
+                    isOpen={isEditorOpen}
+                    onRequestClose={handleCloseMarkEditor}
+                    contentLabel="Mark Exam Submission PDF"
+                    className="pdf-editor-modal"
+                    overlayClassName="pdf-editor-modal-overlay"
+                >
+                    <div className="modal-header">
+                        <h2>Marking: {selectedSubmissionForMarking.studentId.firstName} {selectedSubmissionForMarking.studentId.lastName}'s Submission</h2>
+                        <button onClick={handleCloseMarkEditor} className="close-modal-btn">×</button>
+                    </div>
+                    <div className="modal-body">
+                        <PDFAnnotationEditor
+                            pdfUrl={selectedSubmissionForMarking.filePath}
+                            submissionId={selectedSubmissionForMarking._id}
+                            initialAnnotationData={selectedSubmissionForMarking.annotationData}
+                            initialScore={selectedSubmissionForMarking.score}
+                            onSaveSuccess={handleSaveSuccess}
+                            markType="exam"
+                        />
+                    </div>
+                </Modal>
+            )}
     </div>
 );
 };
