@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "/EduSite/static/css/main.73afc62a.css",
-    "main.js": "/EduSite/static/js/main.49ee5d8a.js",
+    "main.js": "/EduSite/static/js/main.51ae6f4a.js",
     "static/js/453.dff87da4.chunk.js": "/EduSite/static/js/453.dff87da4.chunk.js",
     "static/media/dashboard.svg": "/EduSite/static/media/dashboard.06eec19f95e6ee4874aedb8b888f00ac.svg",
     "index.html": "/EduSite/index.html",
@@ -12,11 +12,11 @@
     "static/media/groups.svg": "/EduSite/static/media/groups.d605d8a43f60476f91617b970206952f.svg",
     "static/media/assignment.svg": "/EduSite/static/media/assignment.b22e777e1b3d978faa73fd563c5cee62.svg",
     "main.73afc62a.css.map": "/EduSite/static/css/main.73afc62a.css.map",
-    "main.49ee5d8a.js.map": "/EduSite/static/js/main.49ee5d8a.js.map",
+    "main.51ae6f4a.js.map": "/EduSite/static/js/main.51ae6f4a.js.map",
     "453.dff87da4.chunk.js.map": "/EduSite/static/js/453.dff87da4.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.73afc62a.css",
-    "static/js/main.49ee5d8a.js"
+    "static/js/main.51ae6f4a.js"
   ]
 }
