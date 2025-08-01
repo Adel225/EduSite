@@ -114,10 +114,12 @@ const handleOpenMarkEditor = async (studentId) => {
     try {
         const token = localStorage.getItem('token') || sessionStorage.getItem('token');
         const response = await fetch(
-            `${API_URL}/exams/submissions?examId=${examId}&groupId=${groupId}&studentId=${studentId}`,
-            { headers: { 'Authorization': `MonaEdu ${token}` } }
+            `${API_URL}/exams/submissions?examId=${examId}&studentId=${studentId}&groupId=${groupId}`,
+            { headers: { 'authorization': `MonaEdu ${token}` } }
         );
         const data = await response.json();
+        console.log("api call : " , `${API_URL}/exams/submissions?examId=${examId}&groupId=${groupId}&studentId=${studentId}`)
+        console.log(data);
 
         if (data.message === "Submitted exams fetched successfully." && data.data.length > 0) {
             const submission = data.data[0];
@@ -143,7 +145,7 @@ const handleCloseMarkEditor = () => {
 
 const handleSaveSuccess = () => {
     handleCloseMarkEditor();
-    fetchExamAndSubmissions(); // Refresh the list
+    fetchExamAndSubmissions();
 };
 
 if (loading) return <div className="loading">Loading submissions...</div>;

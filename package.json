@@ -9,16 +9,19 @@
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.2.0",
     "@testing-library/user-event": "^13.5.0",
+    "copy-webpack-plugin": "^13.0.0",
     "fabric": "^6.7.1",
     "pdf-lib": "^1.17.1",
     "react": "^19.0.0",
+    "react-app-rewired": "^2.2.1",
     "react-dom": "^19.0.0",
     "react-icons": "^5.5.0",
     "react-modal": "^3.16.3",
     "react-pdf": "^9.2.1",
     "react-router-dom": "^7.1.5",
     "react-scripts": "5.0.1",
-    "web-vitals": "^2.1.4"
+    "web-vitals": "^2.1.4",
+    "webpack-env": "^0.8.0"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -47,6 +50,7 @@
     ]
   },
   "devDependencies": {
+    "@types/webpack-env": "^1.18.8",
     "gh-pages": "^6.3.0"
   }
 }

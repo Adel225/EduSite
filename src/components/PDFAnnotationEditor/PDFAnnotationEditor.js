@@ -110,6 +110,7 @@ const PDFAnnotationEditor = ({
     const pageCanvasRefs = useRef({});
     const [score, setScore] = useState('');
     const [internalIsSaving, setInternalIsSaving] = useState(false);
+    const [pageDimensions, setPageDimensions] = useState({});
 
 
  // Set initial score when component loads
@@ -121,6 +122,7 @@ const PDFAnnotationEditor = ({
 
 const onDocumentLoadSuccess = ({ numPages: nextNumPages }) => {
     setNumPages(nextNumPages);
+    setPageDimensions({}); 
     Object.values(fabricCanvases).forEach(canvas => {
         if (canvas && typeof canvas.dispose === 'function') canvas.dispose();
     });
@@ -129,24 +131,48 @@ const onDocumentLoadSuccess = ({ numPages: nextNumPages }) => {
 };
 
 useEffect(() => {
-    if (initialAnnotationData && Object.keys(fabricCanvases).length === numPages && numPages > 0) {
-        try {
-            const parsedData = JSON.parse(initialAnnotationData);
-            Object.entries(parsedData).forEach(([pageNum, canvasJSON]) => {
-                const canvas = fabricCanvases[pageNum];
-                if (canvas) {
-                    const callback = () => {
-                        canvas.calcOffset();
-                        canvas.renderAll();
-                    };
-                    canvas.loadFromJSON(canvasJSON, callback);
-                }
-            });
-        } catch (error) {
-            console.error("Failed to load annotation data:", error);
+    // We proceed only when we have dimensions for ALL pages.
+    if (numPages && Object.keys(pageDimensions).length === numPages) {
+        
+        // Initialize all canvases that haven't been created yet.
+        const canvases = {};
+        for (let i = 1; i <= numPages; i++) {
+            const canvasEl = document.getElementById(`fabric-canvas-${i}`);
+            if (canvasEl && !fabricCanvases[i]) {
+                const { width, height } = pageDimensions[i];
+                canvases[i] = new fabric.Canvas(canvasEl, { width, height });
+            } else if (fabricCanvases[i]) {
+                canvases[i] = fabricCanvases[i]; // Keep existing instance
+            }
+        }
+        setFabricCanvases(canvases);
+
+        // Now that all canvases are guaranteed to exist, load the annotations.
+        if (initialAnnotationData) {
+            try {
+                const parsedData = JSON.parse(initialAnnotationData);
+                Object.entries(parsedData).forEach(([pageNum, canvasJSON]) => {
+                    const canvas = canvases[pageNum];
+                    if (canvas) {
+                        canvas.loadFromJSON(canvasJSON, () => {
+                            requestAnimationFrame(() => {
+                                canvas.renderAll();
+                                canvas.getObjects().forEach(obj => {
+                                    if (obj.opacity === 0 || obj.visible === false) {
+                                        obj.opacity = 1;
+                                        obj.visible = true;
+                                    }
+                                });
+                            });
+                        });
+                    }
+                });
+            } catch (error) {
+                console.error("Failed to load annotation data:", error);
+            }
         }
     }
-}, [initialAnnotationData, fabricCanvases, numPages]); // Dependencies are correct
+}, [pageDimensions, numPages, initialAnnotationData]);
 
 const hexToRgba = useCallback((hex, alpha) => {
     if (!hex || typeof hex !== 'string' || !hex.startsWith('#') || (hex.length !== 7 && hex.length !== 4)) {
@@ -186,7 +212,7 @@ const handleCanvasMouseDown = useCallback((options, fabricCanvas) => {
     }
 }, [activeTool, color]);
 
-// Effect to configure the active tool on the canvas
+
 useEffect(() => {
     Object.values(fabricCanvases).forEach(canvas => {
         if (canvas) {
@@ -268,6 +294,11 @@ const handleSave = async () => {
         score: score,
         annotationData: annotationDataString,
     };
+    console.log({
+        submissionId: submissionId,
+        score: score,
+        annotationData: annotationDataString,
+    })
 
     // 3. Make the API Call
     const token = localStorage.getItem('token') || sessionStorage.getItem('token');
@@ -278,15 +309,15 @@ const handleSave = async () => {
     }
 
     try {
-        const endpoint = markType === 'exam' 
-            ? `${API_URL}/exams/mark` 
+        const endpoint = markType === 'exam'
+            ? `${API_URL}/exams/mark`
             : `${API_URL}/assignments/mark`;
-            
+
         const response = await fetch(endpoint, {
             method: 'PUT',
             headers: {
                 'Authorization': `MonaEdu ${token}`,
-                'Content-Type': 'application/json', // We send JSON now, not FormData
+                'Content-Type': 'application/json',
             },
             body: JSON.stringify(saveData),
         });
@@ -295,9 +326,19 @@ const handleSave = async () => {
         if (!response.ok) {
             throw new Error(responseData.message || `Server error: ${response.status}`);
         }
-        alert(responseData.message || 'Marks and annotations saved successfully!');
-        if (onSaveSuccess) {
-            onSaveSuccess();
+
+        const successMessages = [
+            "Marked PDF uploaded successfully",
+            "Submission marked and replaced successfully"
+        ];
+
+        if (successMessages.includes(responseData.message)) {
+            alert('Marks and annotations saved successfully!');
+            if (onSaveSuccess) {
+                onSaveSuccess();
+            }
+        } else {
+            throw new Error(responseData.message || 'An unexpected response was received from the server.');
         }
     } catch (err) {
         console.error('Error saving annotations:', err);
@@ -312,80 +353,70 @@ const getToolButtonStyle = (toolName) => ({
     ...(activeTool === toolName ? styles.activeToolButton : {}),
 });
 
-    return (
-        <div style={styles.editorContainer}>
-            {internalIsSaving && (
-                <div style={styles.loadingOverlay}>Saving... Please wait.</div>
-            )}
-            <div style={styles.toolbar}>
-                <button style={getToolButtonStyle('pen')} onClick={() => setActiveTool('pen')}>Pen</button>
-                <button style={getToolButtonStyle('highlighter')} onClick={() => setActiveTool('highlighter')}>Highlight</button>
-                <button style={getToolButtonStyle('eraser')} onClick={handleEraserButtonClick}>Eraser</button>
-                <button style={getToolButtonStyle('textbox')} onClick={() => setActiveTool('textbox')}>Textbox</button>
-                
-                <div style={styles.inputGroup}>
-                    <input type="color" value={color} onChange={(e) => setColor(e.target.value)} style={{ ...styles.inputField, padding: '2px', height: '34px'}} />
-                </div>
-                <div style={styles.inputGroup}>
-                    <label htmlFor="brushSizeInput">Size:</label>
-                    <input type="range" id="brushSizeInput" min="1" max="50" value={brushSize} onChange={(e) => setBrushSize(e.target.value)} style={{ margin: '0 5px' }}/> {brushSize}
-                </div>
+return (
+    <div style={styles.editorContainer}>
+        {internalIsSaving && (
+            <div style={styles.loadingOverlay}>Saving... Please wait.</div>
+        )}
+        <div style={styles.toolbar}>
+            <button style={getToolButtonStyle('pen')} onClick={() => setActiveTool('pen')}>Pen</button>
+            <button style={getToolButtonStyle('highlighter')} onClick={() => setActiveTool('highlighter')}>Highlight</button>
+            <button style={getToolButtonStyle('eraser')} onClick={handleEraserButtonClick}>Eraser</button>
+            <button style={getToolButtonStyle('textbox')} onClick={() => setActiveTool('textbox')}>Textbox</button>
+            <div style={styles.inputGroup}>
+                <input type="color" value={color} onChange={(e) => setColor(e.target.value)} style={{ ...styles.inputField, padding: '2px', height: '34px'}} />
             </div>
-            <div style={{ ...styles.toolbar, borderTop: '1px solid #ddd', justifyContent: 'space-between' }}> {/* Second row for score/notes/save */}
-                <div style={styles.inputGroup}>
-                    <label htmlFor="scoreInput">Score:</label>
-                    <input
-                        type="number"
-                        id="scoreInput"
-                        value={score}
-                        onChange={(e) => setScore(e.target.value)}
-                        style={{ ...styles.inputField, ...styles.scoreInput }}
-                        />
-                </div>
-                
-                <button onClick={handleSave} disabled={internalIsSaving || !numPages} style={styles.toolButton}>
-                    {internalIsSaving ? 'Saving...' : 'Save Marked PDF'}
-                </button>
-            </div>
-
-            <div style={styles.pdfDisplayArea}>
-                <Document
-                    file={pdfUrl}
-                    onLoadSuccess={onDocumentLoadSuccess}
-                    onLoadError={(error) => console.error("Error loading PDF:", error.message)}
-                >
-                    {Array.from(new Array(numPages || 0), (el, index) => (
-                        <div key={`page_container_${index + 1}`} style={styles.pageContainer}>
-                            <Page
-                                key={`page_${index + 1}`}
-                                pageNumber={index + 1}
-                                renderAnnotationLayer={false}
-                                renderTextLayer={false}
-                                onRenderSuccess={(page) => {
-                                    const viewport = page.getViewport({ scale: 1 });
-                                    const fabricCanvasContainer = document.getElementById(`fabric-canvas-container-${index + 1}`);
-                                    if (fabricCanvasContainer) {
-                                        let canvasEl = pageCanvasRefs.current[index + 1];
-                                        if (!canvasEl) {
-                                            canvasEl = document.createElement('canvas');
-                                            canvasEl.id = `fabric-actual-canvas-${index + 1}`;
-                                            pageCanvasRefs.current[index + 1] = canvasEl;
-                                            fabricCanvasContainer.innerHTML = '';
-                                            fabricCanvasContainer.appendChild(canvasEl);
-                                        }
-                                        initFabricCanvas(index + 1, canvasEl, viewport.width, viewport.height);
-                                    }
-                                }}
-                            />
-                            <div id={`fabric-canvas-container-${index + 1}`} style={styles.fabricCanvasOverlay}>
-                                {/* Canvas element will be dynamically added here */}
-                            </div>
-                        </div>
-                    ))}
-                </Document>
+            <div style={styles.inputGroup}>
+                <label htmlFor="brushSizeInput">Size:</label>
+                <input type="range" id="brushSizeInput" min="1" max="50" value={brushSize} onChange={(e) => setBrushSize(e.target.value)} style={{ margin: '0 5px' }}/> {brushSize}
             </div>
         </div>
-    );
+        <div style={{ ...styles.toolbar, borderTop: '1px solid #ddd', justifyContent: 'space-between' }}>
+            <div style={styles.inputGroup}>
+                <label htmlFor="scoreInput">Score:</label>
+                <input type="number" id="scoreInput" value={score} onChange={(e) => setScore(e.target.value)} style={{ ...styles.inputField, ...styles.scoreInput }}/>
+            </div>
+            <button onClick={handleSave} disabled={internalIsSaving || !numPages} style={styles.toolButton}>
+                {internalIsSaving ? 'Saving...' : 'Save Changes'}
+            </button>
+        </div>
+        <div style={styles.pdfDisplayArea}>
+            <Document
+                file={pdfUrl}
+                onLoadSuccess={onDocumentLoadSuccess}
+                onLoadError={(error) => console.error("Error loading PDF:", error.message)}
+            >
+                {Array.from(new Array(numPages || 0), (el, index) => (
+                    <div key={`page_container_${index + 1}`} style={styles.pageContainer}>
+                        <Page
+                            key={`page_${index + 1}`}
+                            pageNumber={index + 1}
+                            renderAnnotationLayer={false}
+                            renderTextLayer={false}
+                            onRenderSuccess={(page) => {
+                                // --- KEY CHANGE: Update state with page dimensions ---
+                                setPageDimensions(prev => ({
+                                    ...prev,
+                                    [index + 1]: { width: page.width, height: page.height }
+                                }));
+                            }}
+                        />
+                        {/* --- KEY CHANGE: Render canvas directly in JSX --- */}
+                        <div style={styles.fabricCanvasOverlay}>
+                            {pageDimensions[index + 1] && (
+                                <canvas
+                                    id={`fabric-canvas-${index + 1}`}
+                                    width={pageDimensions[index + 1].width}
+                                    height={pageDimensions[index + 1].height}
+                                />
+                            )}
+                        </div>
+                    </div>
+                ))}
+            </Document>
+        </div>
+    </div>
+);
 };
 
 export default PDFAnnotationEditor;

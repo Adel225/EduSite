@@ -175,7 +175,7 @@ const Materials = () => {
           const getUrlResponse = await fetch(`${API_URL}/material/generate-upload-url`, {
             method: 'POST',
             headers: { 'Authorization': `MonaEdu ${token}`, 'Content-Type': 'application/json' },
-            body: JSON.stringify({ fileName: file.name, fileType: file.type }),
+            body: JSON.stringify({ fileName: file.name, fileType: file.type, materialName: file.name }),
           });
           if (!getUrlResponse.ok) throw new Error(`Could not get upload URL for ${file.name}.`);
           const { uploadUrl, s3Key } = await getUrlResponse.json();
@@ -282,7 +282,11 @@ const Materials = () => {
                   {groups.map((group) => (
                     <div key={group._id} className="group-checkbox-row">
                       <label>
-                        <input type="checkbox" checked={selectedGroups.includes(group._id)} onChange={() => setSelectedGroups(prev => prev.includes(group._id) ? prev.filter(id => id !== group._id) : [...prev, group._id])} />
+                        <input 
+                          type="checkbox" 
+                          checked={selectedGroups.includes(group._id)} 
+                          onChange={() => setSelectedGroups(prev => prev.includes(group._id) ? prev.filter(id => id !== group._id) : [...prev, group._id])} 
+                          />
                         {group.groupname}
                       </label>
                     </div>

@@ -121,6 +121,7 @@ const handleCloseViewer = () => {
             { headers: { 'Authorization': `MonaEdu ${token}` } }
         );
         const data = await response.json();
+        console.log(data);
 
         if (data.message === "Submissions fetched successfully." && data.data.length > 0) {
             const submission = data.data[0];
