@@ -24,9 +24,10 @@ const Exams = () => {
                 }
             });
             const data = await response.json();
+            console.log(data);
             
             if (data.message === "Exams fetched successfully") {
-                setExams(data.exams);
+                setExams(data.data);
             } else {
                 setError('Failed to fetch exams');
             }
