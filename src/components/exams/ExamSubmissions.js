@@ -4,6 +4,7 @@ import { API_URL } from '../../config';
 import '../../styles/assignmentSubmissions.css';
 import Modal from 'react-modal';
 import PDFAnnotationEditor from '../PDFAnnotationEditor/PDFAnnotationEditor';
+// import MarkedPDFViewer from '../PDFAnnotationEditor/MarkedPDFViewer';
 
 const ExamSubmissions = () => {
     const { groupId, examId } = useParams();
@@ -16,6 +17,9 @@ const ExamSubmissions = () => {
 
     const [isEditorOpen, setIsEditorOpen] = useState(false);
     const [selectedSubmissionForMarking, setSelectedSubmissionForMarking] = useState(null);
+
+    // const [isViewerOpen, setIsViewerOpen] = useState(false);
+    // const [selectedSubmissionForViewing, setSelectedSubmissionForViewing] = useState(null);
 
 
 
@@ -45,36 +49,38 @@ useEffect(() => {
     fetchExamAndSubmissions();
 }, [fetchExamAndSubmissions]);
 
-const handleViewSubmission = async (studentId) => {
-    try {
-        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-        const response = await fetch(
-            `${API_URL}/exams/submissions?examId=${examId}&groupId=${groupId}&studentId=${studentId}`,
-            {
-                headers: {
-                    'Authorization': `MonaEdu ${token}`
-                }
-            }
-        );
+// const handleViewSubmission = async (studentId) => {
+//     try {
+//         const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+//         const response = await fetch(`${API_URL}/exams/submissions?examId=${examId}&groupId=${groupId}&studentId=${studentId}`, {
+//                 headers: { 'Authorization': `MonaEdu ${token}` }
+//             }
+//         );
         
-        const data = await response.json();
+//         const data = await response.json();
         
-        if (data.message === "Submitted exams fetched successfully." && data.data.length > 0) {
-            const submission = data.data[0];
-            console.log(submission.filePath);
-            if (submission.filePath) {
-                window.open(submission.filePath, '_blank');
-            } else {
-                alert('No PDF file found for this submission.');
-            }
-        } else {
-            alert('No submission found for this student.');
-        }
-    } catch (error) {
-        console.error('Error fetching submission:', error);
-        alert('Error fetching submission. Please try again.');
-    }
-};
+//         if (data.message === "Submitted exams fetched successfully." && data.data.length > 0) {
+//             const submission = data.data[0];
+//             if (submission.filePath) {
+//                 setSelectedSubmissionForViewing(submission);
+//                 setIsViewerOpen(true);
+//             } 
+//             else {
+//                 alert('No PDF file found for this submission.');
+//             }
+//         } else {
+//             alert('No submission found for this student.');
+//         }
+//     } catch (error) {
+//         console.error('Error fetching submission:', error);
+//         alert('Error fetching submission. Please try again.');
+//     }
+// };
+
+// const handleCloseViewer = () => {
+//     setIsViewerOpen(false);
+//     setSelectedSubmissionForViewing(null);
+// };
 
 const getFilteredAndSortedSubmissions = () => {
     let filtered = [...submissions];
@@ -121,9 +127,9 @@ const handleOpenMarkEditor = async (studentId) => {
         console.log("api call : " , `${API_URL}/exams/submissions?examId=${examId}&groupId=${groupId}&studentId=${studentId}`)
         console.log(data);
 
-        if (data.message === "Submitted exams fetched successfully." && data.data.length > 0) {
+        if (data.message === "Student submission statuses fetched successfully." && data.data.length > 0) {
             const submission = data.data[0];
-            if (submission.filePath) {
+            if (submission.submissions[0].filePath) {
                 setSelectedSubmissionForMarking(submission);
                 setIsEditorOpen(true);
             } else {
@@ -202,6 +208,8 @@ return (
             <th>Student Name</th>
             <th>Status</th>
             <th>Submission Date</th>
+            <th>Student Notes</th>
+            <th>Feedback</th>
             <th>Grade</th>
             <th>Actions</th>
             </tr>
@@ -216,22 +224,24 @@ return (
                 </span>
                 </td>
                 <td>{student.submittedAt ? new Date(student.submittedAt).toLocaleDateString() : '-'}</td>
+                <td>{student.notes || '-'}</td>
+                <td>{student.teacherFeedback || '-'}</td>
                 <td>{student.score || '-'}</td>
                 <td>
                 <div className="action-buttons">
-                    <button 
+                    {/* <button 
                     className="view-btn"
                     onClick={() => handleViewSubmission(student._id)}
                     disabled={student.status !== 'submitted'}
                     >
                     View
-                    </button>
+                    </button> */}
                     <button 
                     className="mark-btn"
                     onClick={() => handleOpenMarkEditor(student._id)}
                     disabled={student.status !== 'submitted'}
                     >
-                    Mark
+                    Mark / View
                     </button>
                 </div>
                 </td>
@@ -265,6 +275,20 @@ return (
                     </div>
                 </Modal>
             )}
+            {/* {selectedSubmissionForViewing && (
+                <Modal
+                    isOpen={isViewerOpen}
+                    onRequestClose={handleCloseViewer}
+                    contentLabel="View Marked Submission"
+                    className="pdf-viewer-modal" // Use a class for full-screen styling
+                    overlayClassName="pdf-viewer-modal-overlay"
+                >
+                    <MarkedPDFViewer
+                        pdfUrl={selectedSubmissionForViewing.filePath}
+                        annotationData={selectedSubmissionForViewing.annotationData}
+                    />
+                </Modal>
+            )} */}
     </div>
 );
 };

@@ -2,11 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { HashRouter as Router, Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
 
 // Layout Component
-import ResponsiveLayout from './components/layout/ResponsiveLayout'; // ++ IMPORTED RESPONSIVE LAYOUT
+import ResponsiveLayout from './components/layout/ResponsiveLayout'; 
+import Welcome from './components/Welcome.js';
 
 // Sidebar Components
 import Sidebar from './components/Sidebar'; // Teacher's Sidebar
-import StudentSidebar from './components/student/StudentSidebar'; // Student's Sidebar
+import StudentSidebar from './components/student/StudentSidebar'; 
 
 // Page/Feature Components (no changes to these imports)
 import Exams from './components/exams/exams';
@@ -85,15 +86,16 @@ useEffect(() => {
         if (response.ok) {
           const profileData = await response.json();
           if (profileData.data) {
-            const isTeacher = profileData.data.Main === true;
+            const isTeacher = profileData.data.role === "main_teacher";
+            const isAssistant = profileData.data.role === "assistant";
             const isStudent = !!profileData.data.userName;
 
             if (isTeacher) {
-              if (['/login', '/admin/login', '/signup', '/'].includes(currentPath)) {
+              if (['/login', '/admin/login', '/signup'].includes(currentPath)) {
                 navigate('/dashboard/', { replace: true });
               }
             } else if (isStudent) {
-              if (['/login', '/admin/login', '/signup', '/'].includes(currentPath)) {
+              if (['/login', '/admin/login', '/signup'].includes(currentPath)) {
                 navigate('/student/', { replace: true });
               }
             } else { 
@@ -114,7 +116,7 @@ useEffect(() => {
           localStorage.removeItem('token');
           sessionStorage.removeItem('token');
           if (!['/login', '/admin/login', '/signup'].includes(currentPath)) {
-             navigate('/login', { replace: true, state: { error: "Session expired or invalid. Please login again." } });
+              navigate('/login', { replace: true, state: { error: "Session expired or invalid. Please login again." } });
           }
         }
       } catch (error) {
@@ -160,6 +162,7 @@ const PrivateRoute = ({ children }) => {
 
 return (
     <Routes>
+    <Route path="/" element={<Welcome />} />
     <Route path="/admin/login" element={<AdminLogin />} />
     <Route path="/login" element={<Login />} />
     <Route path="/signup" element={<SignUp />} />
@@ -213,7 +216,7 @@ return (
         </PrivateRoute>
         } 
     />
-    <Route path="*" element={<Navigate to="/login" replace />} />
+    <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
 );
 };

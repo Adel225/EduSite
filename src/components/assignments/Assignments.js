@@ -4,18 +4,18 @@ import Modal from 'react-modal';
 import { API_URL } from '../../config';
 import '../../styles/assignments.css';
 
-// Helper function to format dates for the datetime-local input
 const toDatetimeLocal = (dateString) => {
   if (!dateString) return '';
   const date = new Date(dateString);
   if (isNaN(date.getTime())) return '';
-  // Adjust for timezone offset to display correctly in the user's local time
   const timezoneOffset = date.getTimezoneOffset() * 60000;
   const localDate = new Date(date.getTime() - timezoneOffset);
   return localDate.toISOString().slice(0, 16);
 };
 
 const Assignments = () => {
+  const navigate = useNavigate();
+  // State for the main page view
   const [selectedGrade, setSelectedGrade] = useState('');
   const [selectedGroups, setSelectedGroups] = useState([]);
   const [groups, setGroups] = useState([]);
@@ -27,36 +27,26 @@ const Assignments = () => {
   const [submitStatus, setSubmitStatus] = useState('');
   const [selectedGroupId, setSelectedGroupId] = useState(null);
 
-  // States for modal and form data
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isEditMode, setIsEditMode] = useState(false);
+  // --- MODIFIED: State for the STATIC "Create" form ---
+  const [createFormData, setCreateFormData] = useState({ name: '', file: null, startDate: '', endDate: '' });
+
+  // --- MODIFIED: State for the EDIT MODAL ---
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [currentItem, setCurrentItem] = useState(null);
-  const [formData, setFormData] = useState({
-    name: '',
-    file: null,
-    startDate: '',
-    endDate: '',
-    allowSubmissionsAfterDueDate: false,
-    grade: '',
-  });
+  const [editFormData, setEditFormData] = useState({ name: '', file: null, startDate: '', endDate: '', allowSubmissionsAfterDueDate: false });
 
   const grades = [12, 11, 10, 9];
-  const navigate = useNavigate();
 
   const fetchGroups = async (grade) => {
     setLoadingGroups(true);
     setError(null);
     try {
       const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-      const response = await fetch(`${API_URL}/group/grades?grade=${grade}`, {
-        headers: { 'Authorization': `MonaEdu ${token}` }
-      });
+      const response = await fetch(`${API_URL}/group/grades?grade=${grade}`, { headers: { 'Authorization': `MonaEdu ${token}` } });
       const data = await response.json();
       if (data.Message === "Groups fetched successfully") {
         setGroups(data.groups);
-        if (data.groups.length > 0) {
-          setGradeId(data.groups[0].gradeid);
-        }
+        if (data.groups.length > 0) setGradeId(data.groups[0].gradeid);
       } else {
         setError('Failed to fetch groups');
       }
@@ -71,13 +61,7 @@ const Assignments = () => {
     const grade = e.target.value;
     setSelectedGrade(grade);
     setSelectedGroups([]);
-    setAssignments([]); // Clear assignments when grade changes
-    setSelectedGroupId(null); // Clear selected group
-    if (grade) {
-      fetchGroups(grade);
-    } else {
-      setGroups([]);
-    }
+    if (grade) fetchGroups(grade); else setGroups([]);
   };
 
   const handleGroupClick = async (groupId) => {
@@ -86,116 +70,110 @@ const Assignments = () => {
     setError(null);
     try {
       const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-      const response = await fetch(`${API_URL}/assignments/group/all?groupId=${groupId}`, {
-        method: 'GET',
-        headers: { 'Authorization': `MonaEdu ${token}` }
-      });
+      const response = await fetch(`${API_URL}/assignments/group/all?groupId=${groupId}`, { headers: { 'Authorization': `MonaEdu ${token}` } });
       const data = await response.json();
       if (data.message === "Assignments fetched successfully") {
-        setAssignments(data.data);
+        setAssignments(data.data || []);
       } else {
-        setError('Failed to fetch assignments');
         setAssignments([]);
       }
     } catch (err) {
       setError('Error loading assignments');
-      setAssignments([]);
     } finally {
       setLoadingAssignments(false);
     }
   };
 
-  const handleAssignmentClick = (assignmentId) => {
-    if (!selectedGroupId) {
-      setError('No group selected');
+  const handleAssignmentClick = (assignment) => {
+    if (!selectedGroupId) return;
+    navigate(`/dashboard/assignments/grade/${selectedGrade}/group/${selectedGroupId}/assignment/${assignment._id}`);
+  };
+
+  const handleOpenEditModal = (assignment) => {
+    setCurrentItem(assignment);
+    setEditFormData({
+      name: assignment.name,
+      startDate: toDatetimeLocal(assignment.startDate),
+      endDate: toDatetimeLocal(assignment.endDate),
+      allowSubmissionsAfterDueDate: assignment.allowSubmissionsAfterDueDate || false,
+      file: null,
+    });
+    setIsEditModalOpen(true);
+  };
+
+  const handleCloseEditModal = () => setIsEditModalOpen(false);
+
+  const handleCreateSubmit = async (e) => {
+    e.preventDefault();
+    if (!selectedGrade || selectedGroups.length === 0) {
+      setError('Please select both grade and at least one group');
       return;
     }
-    navigate(`/dashboard/assignments/grade/${selectedGrade}/group/${selectedGroupId}/assignment/${assignmentId}`);
-  };
-
-  const handleOpenModal = (assignment = null) => {
+    setSubmitStatus('Uploading assignment...');
     setError(null);
-    setSubmitStatus('');
-    if (assignment) {
-      setIsEditMode(true);
-      setCurrentItem(assignment);
-      setFormData({
-        name: assignment.name,
-        startDate: toDatetimeLocal(assignment.startDate),
-        endDate: toDatetimeLocal(assignment.endDate),
-        allowSubmissionsAfterDueDate: assignment.allowSubmissionsAfterDueDate || false,
-        file: null,
-      });
-    } else {
-      setIsEditMode(false);
-      setCurrentItem(null);
-      setFormData({
-        name: '',
-        file: null,
-        startDate: '',
-        endDate: '',
-        allowSubmissionsAfterDueDate: false,
-        grade: selectedGrade || '',
-      });
-      setSelectedGroups([]);
-      if (selectedGrade) {
-        fetchGroups(selectedGrade);
-      } else {
-        setGroups([]);
-      }
-    }
-    setIsModalOpen(true);
-  };
-
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-    setIsEditMode(false);
-    setCurrentItem(null);
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setSubmitStatus(isEditMode ? 'Updating...' : 'Uploading...');
-    setError(null);
-
-    const formDataToSend = new FormData();
-    formDataToSend.append('name', formData.name);
-    formDataToSend.append('startDate', formData.startDate);
-    formDataToSend.append('endDate', formData.endDate);
-    formDataToSend.append('allowSubmissionsAfterDueDate', formData.allowSubmissionsAfterDueDate ? 'true' : 'false');
-
-    if (formData.file) {
-      formDataToSend.append('file', formData.file);
-    }
-    
-    const url = isEditMode ? `${API_URL}/assignments/edit` : `${API_URL}/assignments/create`;
-    const method = isEditMode ? 'PUT' : 'POST';
-
-    if (isEditMode) {
-      formDataToSend.append('assignmentId', currentItem._id);
-    } else {
-      formDataToSend.append('gradeId', gradeId);
-      selectedGroups.forEach(groupId => formDataToSend.append('groupIds', groupId));
-    }
-
     try {
       const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-      const response = await fetch(url, {
-        method: method,
+      const formDataToSend = new FormData();
+      formDataToSend.append('name', createFormData.name);
+      formDataToSend.append('file', createFormData.file);
+      formDataToSend.append('startDate', createFormData.startDate);
+      formDataToSend.append('endDate', createFormData.endDate);
+      selectedGroups.forEach(groupId => formDataToSend.append('groupIds', groupId));
+      formDataToSend.append('gradeId', gradeId);
+      
+      const response = await fetch(`${API_URL}/assignments/create`, {
+        method: 'POST',
         headers: { 'Authorization': `MonaEdu ${token}` },
         body: formDataToSend
       });
       const result = await response.json();
+      if (!response.ok) throw new Error(result.message || 'Failed to upload assignment');
 
-      if (!response.ok) throw new Error(result.message || 'Submission failed');
-      
-      setSubmitStatus(isEditMode ? 'Assignment updated successfully!' : 'Assignment created successfully!');
-      if (selectedGroupId) handleGroupClick(selectedGroupId);
-      setTimeout(handleCloseModal, 1500);
-
+      if (result.message === "Assignment created successfully") {
+        setSubmitStatus(`Assignment "${result.assignment.name}" created successfully`);
+        setCreateFormData({ name: '', file: null, startDate: '', endDate: '' });
+        setSelectedGroups([]);
+        document.getElementById('assignment-file-input').value = null;
+        if(selectedGroupId) handleGroupClick(selectedGroupId);
+      } else {
+        throw new Error('Unexpected response format');
+      }
     } catch (err) {
-      setError(err.message || 'An error occurred.');
+      setError(err.message || 'Error uploading assignment.');
       setSubmitStatus('');
+    }
+  };
+
+  const handleEditSubmit = async (e) => {
+    e.preventDefault();
+    setSubmitStatus('Updating assignment...');
+    setError(null);
+    try {
+        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        const formDataToSend = new FormData();
+        formDataToSend.append('assignmentId', currentItem._id);
+        formDataToSend.append('name', editFormData.name);
+        formDataToSend.append('startDate', editFormData.startDate);
+        formDataToSend.append('endDate', editFormData.endDate);
+        formDataToSend.append('allowSubmissionsAfterDueDate', editFormData.allowSubmissionsAfterDueDate);
+        if (editFormData.file) {
+            formDataToSend.append('file', editFormData.file);
+        }
+        
+        const response = await fetch(`${API_URL}/assignments/edit`, {
+            method: 'PUT',
+            headers: { 'Authorization': `MonaEdu ${token}` },
+            body: formDataToSend,
+        });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.message || 'Failed to update assignment');
+
+        setSubmitStatus('Assignment updated successfully!');
+        if(selectedGroupId) handleGroupClick(selectedGroupId);
+        setTimeout(handleCloseEditModal, 1500);
+    } catch (err) {
+        setError(err.message || 'Error updating assignment.');
+        setSubmitStatus('');
     }
   };
 
@@ -214,101 +192,71 @@ const Assignments = () => {
       if (!response.ok) throw new Error(result.message || 'Failed to delete assignment');
       
       alert('Assignment deleted successfully!');
-      if (selectedGroupId) handleGroupClick(selectedGroupId);
+      if (selectedGroupId) handleGroupClick(selectedGroupId); // Refresh the list
 
     } catch (err) {
-      setError(err.message || 'An error occurred while deleting.');
+      alert(err.message || 'An error occurred while deleting.');
     }
   };
 
-  const formatDate = (dateString) => {
-    try {
-      const date = new Date(dateString);
-      if (isNaN(date.getTime())) return 'Invalid Date';
-      return date.toLocaleString();
-    } catch (error) {
-      return 'Invalid Date';
-    }
-  };
+  const formatDate = (dateString) => new Date(dateString).toLocaleString();
 
   return (
     <>
       <div className="assignments-page">
+
         <div className="assignments-left">
           <h2>Select Grade</h2>
           <div className="grades-list">
-            {grades.map((grade) => (
-              <div
-                key={grade}
-                className={`grade-card ${selectedGrade === grade ? 'selected' : ''}`}
-                onClick={() => handleGradeChange({ target: { value: grade } })}
-              >
-                <h3>Grade {grade}</h3>
-              </div>
-            ))}
+            {grades.map((grade) => (<div key={grade} className={`grade-card ${selectedGrade === String(grade) ? 'selected' : ''}`} onClick={() => handleGradeChange({ target: { value: grade } })}><h3>Grade {grade}</h3></div>))}
           </div>
-
           {selectedGrade && (
             <div className="groups-section">
               <h3>Groups in Grade {selectedGrade}</h3>
-              {loadingGroups ? (
-                <div className="loading">Loading groups...</div>
-              ) : error ? (
-                <div className="error">{error}</div>
-              ) : (
+              {loadingGroups ? <div className="loading">Loading...</div> : (
                 <div className="groups-list">
-                  {groups.map((group) => (
-                    <div 
-                      key={group._id} 
-                      className={`group-item ${selectedGroupId === group._id ? 'selected' : ''}`}
-                      onClick={() => handleGroupClick(group._id)}
-                    >
-                      {group.groupname}
-                    </div>
-                  ))}
+                  {groups.map((group) => (<div key={group._id} className={`group-item ${selectedGroupId === group._id ? 'selected' : ''}`} onClick={() => handleGroupClick(group._id)}>{group.groupname}</div>))}
                 </div>
               )}
             </div>
           )}
-
           {selectedGroupId && (
             <div className="assignments-section">
               <h3>Assignments</h3>
-              {loadingAssignments ? (
-                <div className="loading">Loading assignments...</div>
-              ) : (
+              {loadingAssignments ? <div className="loading">Loading...</div> : (
                 <ul className="assignments-list">
                   {assignments.length > 0 ? assignments.map((assignment) => (
                     <li key={assignment._id} className="assignment-card">
-                      <div className="assignment-info" onClick={() => handleAssignmentClick(assignment._id)}>
+                      <div className="assignment-info" onClick={() => handleAssignmentClick(assignment)}>
                         <span className="assignment-name">{assignment.name}</span>
-                        <span className="assignment-dates">
-                          Start: {formatDate(assignment.startDate)} <br />
-                          End: {formatDate(assignment.endDate)}
-                        </span>
+                        <span className="assignment-dates">Start: {formatDate(assignment.startDate)}<br/>End: {formatDate(assignment.endDate)}</span>
                       </div>
                       <div className="assignment-actions">
-                          <button className="edit-btn" onClick={() => handleOpenModal(assignment)}>Edit</button>
-                          <button
+
+                        <button
                             className="view-btn"
                             onClick={e => {
                               e.stopPropagation();
-                              if (assignment.path) window.open(assignment.path, '_blank');
-                              else window.alert('No file available for this assignment.');
+                              if (assignment.path) {
+                                window.open(assignment.path, '_blank');
+                              } else {
+                                window.alert('No file available for this assignment.');
+                              }
                             }}
                           >
                             View
                           </button>
-                          <button
-                              className="delete-btn"
-                              onClick={async (e) => {
-                                  e.stopPropagation();
-                                  if (window.confirm('Are you sure you want to delete this assignment?')) {
-                                      handleDelete(assignment._id);
-                                  }
-                              }}
+                        <button className="edit-btn" onClick={(e) => { e.stopPropagation(); handleOpenEditModal(assignment); }}>Edit</button>
+                        <button
+                            className="delete-btn"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                if (window.confirm('Are you sure you want to delete this assignment?')) {
+                                    handleDelete(assignment._id);
+                                }
+                            }}
                           >
-                              Delete
+                            Delete
                           </button>
                       </div>
                     </li>
@@ -320,58 +268,14 @@ const Assignments = () => {
         </div>
 
         <div className="assignments-right">
-          <h2>Actions</h2>
-          <p>Select a grade and group to manage assignments, or upload a new one.</p>
-          <button className="upload-new-btn" onClick={() => handleOpenModal()}>
-              + Upload New Assignment
-          </button>
-        </div>
-      </div>
-
-      <Modal
-        isOpen={isModalOpen}
-        onRequestClose={handleCloseModal}
-        contentLabel={isEditMode ? "Edit Assignment" : "Upload New Assignment"}
-        className="form-modal"
-        overlayClassName="form-modal-overlay"
-      >
-        <h2>{isEditMode ? "Edit Assignment" : "Upload New Assignment"}</h2>
-        <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label>Assignment Name:</label>
-            <input type="text" value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} placeholder="Enter Assignment Name" required />
-          </div>
-          
-          {!isEditMode && (
-            <>
-              <div className="form-group">
-                <label>Grade:</label>
-                <select 
-                  value={formData.grade} 
-                  onChange={(e) => {
-                    const newGrade = e.target.value;
-                    setFormData(prev => ({ ...prev, grade: newGrade }));
-                    setSelectedGroups([]);
-                    if (newGrade) {
-                      fetchGroups(newGrade);
-                    } else {
-                      setGroups([]);
-                    }
-                  }} 
-                  required
-                >
-                  <option value="">Select Grade</option>
-                  {grades.map((grade) => <option key={grade} value={grade}>{grade}</option>)}
-                </select>
-              </div>
-              <div className="form-group">
-                <label>Groups:</label>
-                {loadingGroups ? (<div>Loading...</div>) : (
-                  <div className="groups-list checkbox-style">
-                    <div className="select-all group-checkbox-row">
-                      <label><input type="checkbox" onChange={(e) => setSelectedGroups(e.target.checked ? groups.map(g => g._id) : [])} checked={selectedGroups.length === groups.length && groups.length > 0} /> Select All Groups</label>
-                    </div>
-                    {groups.map((group) => (
+          <h2>Upload new Assignment</h2>
+          <form onSubmit={handleCreateSubmit}>
+            <div className="form-group"><label>Grade:</label><select value={selectedGrade} onChange={handleGradeChange} required><option value="">Select Grade</option>{grades.map(grade => (<option key={grade} value={grade}>Grade {grade}</option>))}</select></div>
+            <div className="form-group">
+              <label>Groups:</label>
+              <div className="groups-list checkbox-style">
+                <div className="select-all-row"><label><input type="checkbox" checked={selectedGroups.length === groups.length && groups.length > 0} onChange={() => setSelectedGroups(selectedGroups.length === groups.length ? [] : groups.map(g => g._id))} /> Select All Groups</label></div>
+                {groups.map((group) => (
                       <div key={group._id} className="group-checkbox-row">
                         <label>
                           <input
@@ -383,45 +287,36 @@ const Assignments = () => {
                         </label>
                       </div>
                     ))}
-                  </div>
-                )}
               </div>
-            </>
-          )}
+            </div>
+            <div className="form-group"><label>Assignment Name:</label><input type="text" value={createFormData.name} onChange={(e) => setCreateFormData({...createFormData, name: e.target.value})} required /></div>
+            <div className="form-group"><label>Assignment File:</label><input type="file" id="assignment-file-input" accept=".pdf" onChange={(e) => setCreateFormData({...createFormData, file: e.target.files[0]})} required /></div>
+            <div className="form-group"><label>Start Date:</label><input type="datetime-local" value={createFormData.startDate} onChange={(e) => setCreateFormData({...createFormData, startDate: e.target.value})} required /></div>
+            <div className="form-group"><label>End Date:</label><input type="datetime-local" value={createFormData.endDate} onChange={(e) => setCreateFormData({...createFormData, endDate: e.target.value})} required /></div>
+            {error && <div className="error-message">{error}</div>}
+            {submitStatus && <div className="submit-status">{submitStatus}</div>}
+            <button type="submit" disabled={submitStatus.includes('...')}>Submit</button>
+          </form>
+        </div>
+      </div>
 
-          <div className="form-group">
-            <label>Assignment File {isEditMode && "(leave blank to keep existing)"}:</label>
-            <input type="file" accept=".pdf" onChange={(e) => setFormData({...formData, file: e.target.files[0]})} required={!isEditMode} />
-          </div>
-
-          <div className="form-group">
-            <label>Start Date and Time:</label>
-            <input type="datetime-local" value={formData.startDate} onChange={(e) => setFormData({...formData, startDate: e.target.value})} required />
-          </div>
-          <div className="form-group">
-            <label>End Date and Time:</label>
-            <input type="datetime-local" value={formData.endDate} onChange={(e) => setFormData({...formData, endDate: e.target.value})} required />
-          </div>
-
-          <div className="form-group checkbox-group">
-            <input 
-              type="checkbox" 
-              id="allowLateSubmissions"
-              checked={formData.allowSubmissionsAfterDueDate}
-              onChange={(e) => setFormData({...formData, allowSubmissionsAfterDueDate: e.target.checked})} 
-            />
-            <label htmlFor="allowLateSubmissions">Allow submissions after due date</label>
-          </div>
-
-          {error && <div className="error-message">{error}</div>}
-          {submitStatus && <div className="submit-status">{submitStatus}</div>}
-          
-          <div className="form-actions">
-            <button type="button" className="cancel-btn" onClick={handleCloseModal}>Cancel</button>
-            <button type="submit" disabled={submitStatus.includes('...')}>
-              {submitStatus.includes('...') ? submitStatus : (isEditMode ? 'Save Changes' : 'Submit')}
-            </button>
-          </div>
+      <Modal isOpen={isEditModalOpen} onRequestClose={handleCloseEditModal} contentLabel="Edit Assignment" className="form-modal" overlayClassName="form-modal-overlay">
+        <h2>Edit Assignment</h2>
+        <form onSubmit={handleEditSubmit}>
+            <div className="form-group"><label>Assignment Name:</label><input type="text" value={editFormData.name} onChange={(e) => setEditFormData({...editFormData, name: e.target.value})} required /></div>
+            <div className="form-group"><label>Assignment File (Leave blank to keep existing):</label><input type="file" onChange={(e) => setEditFormData({...editFormData, file: e.target.files[0]})} /></div>
+            <div className="form-group"><label>Start Date:</label><input type="datetime-local" value={editFormData.startDate} onChange={(e) => setEditFormData({...editFormData, startDate: e.target.value})} required /></div>
+            <div className="form-group"><label>End Date:</label><input type="datetime-local" value={editFormData.endDate} onChange={(e) => setEditFormData({...editFormData, endDate: e.target.value})} required /></div>
+            <div className="form-group checkbox-group">
+                <input type="checkbox" id="allowLateSubmissions" checked={editFormData.allowSubmissionsAfterDueDate} onChange={(e) => setEditFormData({...editFormData, allowSubmissionsAfterDueDate: e.target.checked})} />
+                <label htmlFor="allowLateSubmissions">Allow submissions after due date</label>
+            </div>
+            {error && <div className="error-message">{error}</div>}
+            {submitStatus && <div className="submit-status">{submitStatus}</div>}
+            <div className="form-actions">
+                <button type="button" className="cancel-btn" onClick={handleCloseEditModal}>Cancel</button>
+                <button type="submit" disabled={submitStatus.includes('...')}>Save Changes</button>
+            </div>
         </form>
       </Modal>
     </>

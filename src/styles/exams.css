@@ -1,411 +1,71 @@
-/* exams.css */
+/* --- Unified Styles for Assignments & Exams --- */
 
-.exams-page {
-    display: flex; /* Keep for potential admin view with multiple columns */
-    /* gap: 2rem; /* Only applies between multiple children */
-    /* padding: 20px; /* Let's manage padding more directly on .main-content (from ResponsiveLayout.css)
-                        and on specific content blocks like .exams-list if needed for internal spacing.
-                        If .exams-page has padding, its flex children are laid out *within* that padding. */
-    min-height: calc(100vh - 70px); /* Adjust 70px to your actual sticky header height */
-    width: 100%; /* Crucial: Make .exams-page take full width of its parent (.main-content) */
-    box-sizing: border-box;
-    /* background-color: pink !important; /* For debugging: to see .exams-page area */
-}
-
-.exams-left {
-    flex: 1;
-    background: white;
-    padding: 2rem;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    margin-right: 1rem; /* Example gap if .exams-page gap is removed */
-}
-
-.exams-right {
-    flex: 1;
-    background: white;
-    padding: 2rem;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    margin-left: 2rem; /* Example gap if .exams-page gap is removed */
-}
-
-/* Student specific styles (e.g., for Materials page) */
-/* This is the primary content block for students */
-.exams-list {
-    flex-grow: 1;  /* Make it take all available horizontal space in .exams-page */
-    flex-basis: 0; /* Ensures flex-grow works effectively */
-    /* If .exams-page had padding, and .exams-list was the only child,
-       it would fill that padded area. */
-    background: white;
-    padding: 2rem; /* Internal padding for the content *within* .exams-list */
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    box-sizing: border-box;
-    /* background-color: lightyellow !important; /* For debugging: to see .exams-list area */
-}
-
-/* Ensure no max-width is constraining .exams-list or its children unnecessarily on desktop */
-/* You might have a more general content wrapper style that could be imposing a max-width */
-/* For example, if you had a .container class somewhere: */
-/* .container { max-width: 1200px; margin: 0 auto; } */
-/* Make sure .exams-page or .exams-list are not inadvertently getting such a style. */
-
-
-.exam-cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 1.5rem;
-    margin-top: 1.5rem;
-}
-
-.exam-card {
-    background: #f8f9fa;
-    border-radius: 8px;
+.assignments-page, .exams-page {
+    display: flex;
+    gap: 2rem;
     padding: 1.5rem;
-    transition: all 0.3s ease;
-    border: 1px solid #e9ecef;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+  
+  .assignments-left, .exams-left {
+    flex: 3;
     display: flex;
     flex-direction: column;
-    margin-bottom: 1rem;
-    gap: 1rem; /* Replaces margin-bottom on children for spacing */
-}
-
-.exam-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    border-color: #5A67BA;
-}
-
-.exam-info {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem; /* Consistent spacing */
-    flex-grow: 1; /* Allow info to take space before button */
-}
-
-.exam-name {
-    font-weight: 500;
-    color: #2c3e50;
-    font-size: 1.1em;
-    margin: 0;
-}
-
-.exam-dates {
-    color: #666;
-    font-size: 0.9em;
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem; /* Consistent spacing */
-}
-
-.exam-dates p {
-    margin: 0;
-}
-
-.download-btn {
-    background: #5A67BA;
-    color: white;
-    border: none;
-    padding: 0.75rem 1rem;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 0.9rem;
-    transition: background-color 0.2s;
-    width: 100%;
-    margin-top: auto; /* Pushes button to the bottom if card content varies */
-}
-
-.download-btn:hover {
-    background: #4c569b;
-}
-
-/* Form styles - general good practice to include box-sizing */
-.form-group {
-    margin-bottom: 1.5rem;
-}
-
-.form-group label {
-    display: block;
-    margin-bottom: 0.5rem;
-    color: #2c3e50;
-    font-weight: 500;
-}
-
-.form-group input,
-.form-group select,
-.form-group textarea {
-    width: 100%;
-    padding: 0.75rem;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 1rem;
-    background: white;
-    box-sizing: border-box; /* Ensures padding doesn't add to width */
-}
-
-.form-group textarea {
-    min-height: 100px;
-    resize: vertical;
-}
-
-.form-group input[type="file"] {
-    padding: 0.5rem; /* Default padding might be too much for file input */
-    background: #f8f9fa;
-}
-
-/* Status messages */
-.submit-status, .error-message, .loading, .error {
-    padding: 0.75rem 1rem; /* Standardized padding */
-    border-radius: 4px;
-    margin-bottom: 1rem;
-}
-.submit-status { background: #d4edda; color: #155724; }
-.error-message { background: #f8d7da; color: #721c24; } /* Adjusted color for better contrast */
-.loading { text-align: center; color: #666; }
-.error { background: #f8d7da; color: #721c24; } /* Adjusted color */
-
-
-/* Admin specific components */
-.grades-list {
-    display: grid;
-    gap: 1rem;
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    margin-bottom: 2rem;
-}
-/* ... (other admin styles remain the same) ... */
-.grade-card {
-    background: #f8f9fa;
-    padding: 1rem;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.2s;
-    text-align: center;
-}
-
-.grade-card:hover {
-    background: #e9ecef;
-}
-
-.grade-card.selected {
-    background: #5A67BA;
-    color: white;
-}
-
-.grade-card h3 {
-    margin: 0;
-    font-size: 1.2rem;
-}
-
-.groups-section {
-    margin-top: 2rem;
-}
-
-.groups-section h3 {
-    margin-bottom: 1rem;
-    color: #2c3e50;
-}
-
-.groups-list {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-}
-
-.group-item {
-    padding: 0.75rem;
-    background: #f8f9fa;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: all 0.2s;
-    padding-left: 1.5rem !important;
-    box-sizing: border-box;
-}
-
-.group-item:hover {
-    background: #e9ecef;
-}
-
-.group-item.selected {
-    background: #5A67BA;
-    color: white;
-}
-
-
-/* Responsive adjustments */
-@media (max-width: 768px) {
-    .exams-page {
-        flex-direction: column;
-        padding: 15px; /* Add back padding for mobile if you removed it from base .exams-page */
-    }
-    
-    .exam-cards {
-        grid-template-columns: 1fr; /* Single column for cards on mobile */
-    }
-    
-    .grades-list {
-        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-    }
-
-    .exams-left, .exams-right, .exams-list {
-        padding: 1rem; /* Reduce internal padding for these blocks on mobile */
-        margin-right: 0; /* Remove horizontal margins for stacked items */
-        margin-left: 0;
-    }
-}
-
-.delete-btn {
-    display: inline-flex; 
-    align-items: center;
-    justify-content: center;
-    padding: 6px 12px;
-    font-size: 14px;
-    font-weight: bold;
-    line-height: 1;
-    text-align: center;
-    text-decoration: none;
-    white-space: nowrap;
-    vertical-align: middle;
-    cursor: pointer;
-    user-select: none;
-    border: 1px solid transparent;
-    border-radius: 4px;
-    transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
-    color: #fff;
-    background-color: #dc3545;
-    border-color: #dc3545;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.075);
-}
-
-.upload-exam {
-    flex: 1;
-    max-width: 400px;
-    min-width: 300px;
-    background: white;
+    gap: 1.5rem;
+  }
+  
+  .assignments-right, .exams-right {
+    flex: 2;
+    background-color: #f8f9fa;
     padding: 2rem;
     border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    margin-left: 2rem;
-    box-sizing: border-box;
     align-self: flex-start;
-}
-
-@media (max-width: 900px) {
-    .upload-exam {
-        max-width: 100%;
-        min-width: 0;
-        margin-left: 0;
-        margin-top: 2rem;
-        width: 100%;
-        align-self: stretch;
-    }
-}
-
-/* Add this to BOTH assignments.css AND exams.css */
-
-/* Header above the list */
-.assignments-header, .exams-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: 1rem;
-    padding-bottom: 0.5rem;
-    border-bottom: 1px solid #eee;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   }
   
-  .assignments-header h3, .exams-header h3 {
-    margin: 0;
-  }
-  
-  .upload-new-btn {
-    background-color: #28a745;
-    color: white;
-    border: none;
-    padding: 0.5rem 1rem;
-    border-radius: 5px;
-    cursor: pointer;
-    font-weight: 500;
-    transition: background-color 0.2s ease;
-  }
-  
-  .upload-new-btn:hover {
-    background-color: #218838;
-  }
-  
-  /* Actions buttons on the card */
-  .assignment-actions, .exam-actions {
-    display: flex;
-    gap: 0.5rem;
-  }
-  
-  .edit-btn {
-    background-color: #ffc107;
-    color: #212529;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-weight: 500;
-  }
-  
-  /* Modal styles */
-  .form-modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(0, 0, 0, 0.6);
-    z-index: 1000;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-  
-  .form-modal {
-    background: white;
-    padding: 2rem;
-    border-radius: 8px;
-    width: 90%;
-    max-width: 600px;
-    outline: none;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-  }
-  
-  .form-modal h2 {
+  .assignments-right h2, .exams-right h2 {
+    color: #343a40;
     margin-top: 0;
+    text-align: left;
     margin-bottom: 2rem;
-    color: #333;
   }
   
-  .checkbox-group {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-  }
-  .checkbox-group input[type="checkbox"] {
-    width: auto;
-    margin: 0;
-  }
+  /* --- Content & Card Styles --- */
   
-  .form-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 1rem;
-    margin-top: 2rem;
-    border-top: 1px solid #eee;
-    padding-top: 1rem;
-  }
+  .grades-list { display: flex; flex-wrap: wrap; gap: 1rem; }
+  .grade-card { padding: 1rem 1.5rem; border: 1px solid #ccc; border-radius: 8px; cursor: pointer; background-color: #fff; transition: all 0.2s ease; }
+  .grade-card:hover { border-color: #5A67BA; color: #5A67BA; }
+  .grade-card.selected { background-color: #5A67BA; color: white; border-color: #5A67BA; }
   
-  .form-actions button {
-    padding: 0.75rem 1.5rem;
-    border-radius: 5px;
-    border: none;
-    cursor: pointer;
-    font-weight: 500;
-  }
+  .groups-section h3, .assignments-section h3, .exams-section h3 { margin-top: 0; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid #eee; }
+  .groups-list { display: flex; flex-direction: column; gap: 0.5rem; }
+  .group-item { padding: 1.75rem 1rem; padding-left: 1.5rem !important;  border: 1px solid #ddd; border-radius: 6px; cursor: pointer; background-color: #fff; }
+  .group-item.selected { background-color: #e9ecef; border-left: 4px solid #5A67BA; font-weight: 500; }
   
-  .form-actions .cancel-btn {
-    background-color: #6c757d;
-    color: white;
-  }
+  .assignments-list, .exams-list { list-style: none; padding: 0; }
+  .assignment-card, .exam-card { background-color: #ffffff; border: 1px solid #e0e0e0; border-radius: 8px; padding: 1.5rem; margin-bottom: 1rem; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); display: flex; justify-content: space-between; align-items: center; transition: all 0.2s ease-in-out; }
+  .assignment-card:hover, .exam-card:hover { transform: translateY(-3px); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); border-color: #5A67BA; }
+  .assignment-info, .exam-info { flex-grow: 1; cursor: pointer; }
+  .assignment-actions, .exam-actions { display: flex; gap: 0.5rem; flex-shrink: 0; }
+  .edit-btn, .view-btn, .delete-btn { padding: 8px 16px; border-radius: 5px; border: none; cursor: pointer; font-weight: 500; }
+  .edit-btn { background-color: #ffc107; color: #212529; }
+  .view-btn { background-color: #3498db; color: white; }
+  .delete-btn { background-color: #e74c3c; color: white; }
+  
+  /* --- Form Styles (for right column) --- */
+  .form-group { margin-bottom: 1.5rem; text-align: left; }
+  .form-group label { display: block; margin-bottom: 0.5rem; }
+  .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 0.75rem; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+  .groups-list.checkbox-style { max-height: 150px; overflow-y: auto; border: 1px solid #ccc; padding: 0.5rem; border-radius: 4px; }
+  .group-checkbox-row { text-align: left; }
+  
+  /* --- Modal Styles --- */
+  .form-modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.6); z-index: 1000; display: flex; justify-content: center; align-items: center; }
+  .form-modal { background: white; padding: 2rem; border-radius: 8px; width: 90%; max-width: 600px; outline: none; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+  .form-modal h2 { margin-top: 0; margin-bottom: 2rem; color: #333; }
+  .checkbox-group { display: flex; align-items: center; gap: 0.5rem; }
+  .checkbox-group input[type="checkbox"] { width: auto; margin: 0; }
+  .form-actions { display: flex; justify-content: flex-end; gap: 1rem; margin-top: 2rem; border-top: 1px solid #eee; padding-top: 1rem; }
+  .form-actions button { padding: 0.75rem 1.5rem; border-radius: 5px; border: none; cursor: pointer; font-weight: 500; }
+  .form-actions .cancel-btn { background-color: #6c757d; color: white; }

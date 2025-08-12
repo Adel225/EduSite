@@ -1,6 +1,6 @@
-/* src/styles/assignments.css */
+/* --- Unified Styles for Assignments & Exams --- */
 
-.assignments-page {
+.assignments-page, .exams-page {
   display: flex;
   gap: 2rem;
   padding: 1.5rem;
@@ -8,230 +8,64 @@
   margin: 0 auto;
 }
 
-.assignments-left {
-  flex: 3; /* Takes up more space */
+.assignments-left, .exams-left {
+  flex: 3;
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
 }
 
-.assignments-right {
-  flex: 2; /* Takes up less space */
+.assignments-right, .exams-right {
+  flex: 2;
   background-color: #f8f9fa;
   padding: 2rem;
   border-radius: 8px;
-  text-align: center;
-  align-self: flex-start; /* Important: prevents stretching */
+  align-self: flex-start;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
-.assignments-right h2 {
+.assignments-right h2, .exams-right h2 {
   color: #343a40;
   margin-top: 0;
-}
-
-.assignments-right p {
-  color: #6c757d;
+  text-align: left;
   margin-bottom: 2rem;
 }
 
-.upload-new-btn {
-  background-color: #28a745;
-  color: white;
-  border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 5px;
-  cursor: pointer;
-  font-weight: 500;
-  font-size: 1rem;
-  transition: background-color 0.2s ease;
-}
+/* --- Content & Card Styles --- */
 
-.upload-new-btn:hover {
-  background-color: #218838;
-}
+.grades-list { display: flex; flex-wrap: wrap; gap: 1rem; }
+.grade-card { padding: 1rem 1.5rem; border: 1px solid #ccc; border-radius: 8px; cursor: pointer; background-color: #fff; transition: all 0.2s ease; }
+.grade-card:hover { border-color: #5A67BA; color: #5A67BA; }
+.grade-card.selected { background-color: #5A67BA; color: white; border-color: #5A67BA; }
 
+.groups-section h3, .assignments-section h3, .exams-section h3 { margin-top: 0; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid #eee; }
+.groups-list { display: flex; flex-direction: column; gap: 0.5rem; }
+.group-item { padding: 0.75rem 1rem; padding-left: 1.5rem !important;  border: 1px solid #ddd; border-radius: 6px; cursor: pointer; background-color: #fff; }
+.group-item.selected { background-color: #e9ecef; border-left: 4px solid #5A67BA; font-weight: 500; }
 
-/* --- Other Styles (Cards, Groups, etc.) --- */
-
-.grades-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
-}
-
-.grade-card {
-  padding: 1rem 1.5rem;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  cursor: pointer;
-  background-color: #fff;
-  transition: all 0.2s ease;
-}
-
-.grade-card:hover {
-  border-color: #5A67BA;
-  color: #5A67BA;
-}
-
-.grade-card.selected {
-  background-color: #5A67BA;
-  color: rgb(255, 255, 255);
-  border-color: #5A67BA;
-}
-
-.groups-section h3,
-.assignments-section h3 {
-  margin-top: 0;
-  margin-bottom: 1rem;
-  padding-bottom: 0.5rem;
-  border-bottom: 1px solid #eee;
-}
-
-.groups-list {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.group-item {
-  padding: 0.75rem 1rem;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  cursor: pointer;
-  background-color: #fff;
-}
-
-.group-item.selected {
-  background-color: #e9ecef;
-  border-left: 4px solid #5A67BA;
-  font-weight: 500;
-  color: #212529;
-}
-
-.assignments-list {
-  list-style: none;
-  padding: 0;
-}
-
-.assignment-card {
-  background-color: #ffffff;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  padding: 1.5rem;
-  margin-bottom: 1rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  transition: all 0.2s ease-in-out;
-}
-
-.assignment-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  border-color: #5A67BA;
-}
-
-.assignment-info {
-  flex-grow: 1;
-  cursor: pointer;
-}
-
-.assignment-actions {
-  display: flex;
-  gap: 0.5rem;
-  flex-shrink: 0;
-}
-
-.edit-btn, .view-btn, .delete-btn {
-  padding: 8px 16px;
-  border-radius: 5px;
-  border: none;
-  cursor: pointer;
-  font-weight: 500;
-}
-
+.assignments-list, .exams-list { list-style: none; padding: 0; }
+.assignment-card, .exam-card { background-color: #ffffff; border: 1px solid #e0e0e0; border-radius: 8px; padding: 1.5rem; margin-bottom: 1rem; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); display: flex; justify-content: space-between; align-items: center; transition: all 0.2s ease-in-out; }
+.assignment-card:hover, .exam-card:hover { transform: translateY(-3px); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); border-color: #5A67BA; }
+.assignment-info, .exam-info { flex-grow: 1; cursor: pointer; }
+.assignment-actions, .exam-actions { display: flex; gap: 0.5rem; flex-shrink: 0; }
+.edit-btn, .view-btn, .delete-btn { padding: 8px 16px; border-radius: 5px; border: none; cursor: pointer; font-weight: 500; }
 .edit-btn { background-color: #ffc107; color: #212529; }
 .view-btn { background-color: #3498db; color: white; }
 .delete-btn { background-color: #e74c3c; color: white; }
 
+/* --- Form Styles (for right column) --- */
+.form-group { margin-bottom: 1.5rem; text-align: left; }
+.form-group label { display: block; margin-bottom: 0.5rem; }
+.form-group input, .form-group select, .form-group textarea { width: 100%; padding: 0.75rem; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+.groups-list.checkbox-style { max-height: 150px; overflow-y: auto; border: 1px solid #ccc; padding: 0.5rem; border-radius: 4px; }
+.group-checkbox-row { text-align: left; }
 
 /* --- Modal Styles --- */
-
-.form-modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.6);
-  z-index: 1000;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.form-modal {
-  background: white;
-  padding: 2rem;
-  border-radius: 8px;
-  width: 90%;
-  max-width: 600px;
-  outline: none;
-  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-}
-
-.form-modal h2 {
-  margin-top: 0;
-  margin-bottom: 2rem;
-  color: #333;
-}
-
-.form-group {
-    margin-bottom: 1.5rem;
-}
-.form-group label {
-    display: block;
-    margin-bottom: 0.5rem;
-}
-
-.groups-list.checkbox-style {
-  max-height: 150px;
-  overflow-y: auto;
-  border: 1px solid #ccc;
-  padding: 0.5rem;
-  border-radius: 4px;
-}
-
-.checkbox-group {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-.checkbox-group input[type="checkbox"] {
-  width: auto;
-  margin: 0;
-}
-
-.form-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 1rem;
-  margin-top: 2rem;
-  border-top: 1px solid #eee;
-  padding-top: 1rem;
-}
-
-.form-actions button {
-  padding: 0.75rem 1.5rem;
-  border-radius: 5px;
-  border: none;
-  cursor: pointer;
-  font-weight: 500;
-}
-
-.form-actions .cancel-btn {
-  background-color: #6c757d;
-  color: white;
-}
+.form-modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.6); z-index: 1000; display: flex; justify-content: center; align-items: center; }
+.form-modal { background: white; padding: 2rem; border-radius: 8px; width: 90%; max-width: 600px; outline: none; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+.form-modal h2 { margin-top: 0; margin-bottom: 2rem; color: #333; }
+.checkbox-group { display: flex; align-items: center; gap: 0.5rem; }
+.checkbox-group input[type="checkbox"] { width: auto; margin: 0; }
+.form-actions { display: flex; justify-content: flex-end; gap: 1rem; margin-top: 2rem; border-top: 1px solid #eee; padding-top: 1rem; }
+.form-actions button { padding: 0.75rem 1.5rem; border-radius: 5px; border: none; cursor: pointer; font-weight: 500; }
+.form-actions .cancel-btn { background-color: #6c757d; color: white; }

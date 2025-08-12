@@ -25,7 +25,7 @@ const Exams = () => {
   const [loadingExams, setLoadingExams] = useState(false);
   const [error, setError] = useState(null);
   const [submitStatus, setSubmitStatus] = useState('');
-  const [selectedGroupId, setSelectedGroupId] = useState(null);
+  const [selectedGroupId, setSelectedGroupId] = useState(null); 
 
   // State for the STATIC "Create" form
   const [createFormData, setCreateFormData] = useState({ name: '', file: null, startDate: '', endDate: '' });
@@ -382,6 +382,7 @@ const Exams = () => {
         </div>
 
       </div>  
+      
       <Modal isOpen={isEditModalOpen} onRequestClose={handleCloseEditModal} contentLabel="Edit Exam" className="form-modal" overlayClassName="form-modal-overlay">
         <h2>Edit Exam</h2>
         <form onSubmit={handleEditSubmit}>

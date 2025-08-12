@@ -99,6 +99,7 @@ const PDFAnnotationEditor = ({
     submissionId,
     initialAnnotationData, 
     initialScore, 
+    initialFeedback,
     onSaveSuccess,
     markType
 }) => {
@@ -109,16 +110,22 @@ const PDFAnnotationEditor = ({
     const [brushSize, setBrushSize] = useState(5);
     const pageCanvasRefs = useRef({});
     const [score, setScore] = useState('');
+    const [feedback, setFeedback] = useState(''); 
     const [internalIsSaving, setInternalIsSaving] = useState(false);
     const [pageDimensions, setPageDimensions] = useState({});
 
 
- // Set initial score when component loads
+
     useEffect(() => {
         if (initialScore !== undefined && initialScore !== null) {
             setScore(String(initialScore));
         }
     }, [initialScore]);
+    useEffect(() => {
+        if (initialFeedback) {
+            setFeedback(initialFeedback);
+        }
+    }, [initialFeedback]);
 
 const onDocumentLoadSuccess = ({ numPages: nextNumPages }) => {
     setNumPages(nextNumPages);
@@ -198,7 +205,7 @@ const handleCanvasMouseDown = useCallback((options, fabricCanvas) => {
             return;
         }
         const pointer = fabricCanvas.getPointer(options.e);
-        const text = new fabric.IText('Your Text', {
+        const text = new fabric.IText('', {
             left: pointer.x, top: pointer.y, fontFamily: 'arial', fill: color,
             fontSize: 20,
         });
@@ -232,18 +239,6 @@ useEffect(() => {
         }
     });
 }, [activeTool, color, brushSize, fabricCanvases, handleCanvasMouseDown, hexToRgba]);
-
-const initFabricCanvas = (pageNumber, canvasElement, width, height) => {
-    if (fabricCanvases[pageNumber]) {
-        fabricCanvases[pageNumber].setDimensions({ width, height });
-        fabricCanvases[pageNumber].renderAll();
-        return;
-    }
-    if (canvasElement) {
-        const fabricCanvasInstance = new fabric.Canvas(canvasElement, { width, height });
-        setFabricCanvases(prev => ({ ...prev, [pageNumber]: fabricCanvasInstance }));
-    }
-};
 
 
 const handleEraserButtonClick = () => {
@@ -293,11 +288,13 @@ const handleSave = async () => {
         submissionId: submissionId,
         score: score,
         annotationData: annotationDataString,
+        feedback : feedback,
     };
     console.log({
         submissionId: submissionId,
         score: score,
         annotationData: annotationDataString,
+        feedback : feedback,
     })
 
     // 3. Make the API Call
@@ -376,6 +373,17 @@ return (
                 <label htmlFor="scoreInput">Score:</label>
                 <input type="number" id="scoreInput" value={score} onChange={(e) => setScore(e.target.value)} style={{ ...styles.inputField, ...styles.scoreInput }}/>
             </div>
+            <div style={{...styles.inputGroup, flexGrow: 1, margin: '0 1rem' }}>
+                    <label htmlFor="feedbackInput">Feedback:</label>
+                    <textarea
+                        id="feedbackInput"
+                        value={feedback}
+                        onChange={(e) => setFeedback(e.target.value)}
+                        placeholder="Provide overall feedback..."
+                        style={{ ...styles.inputField, width: '100%', resize: 'none' }}
+                        rows="1"
+                    />
+                </div>
             <button onClick={handleSave} disabled={internalIsSaving || !numPages} style={styles.toolButton}>
                 {internalIsSaving ? 'Saving...' : 'Save Changes'}
             </button>

@@ -27,7 +27,7 @@ const Login = () => {
         setError(''); 
 
         try {
-            const response = await fetch(`${API_URL}/student/login`, { // Assuming student login endpoint
+            const response = await fetch(`${API_URL}/student/login`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -46,10 +46,7 @@ const Login = () => {
                 } else {
                     sessionStorage.setItem('token', data.token);
                 }
-                // After successful login, navigate to a neutral path or the expected dashboard.
-                // The AuthInitializerAndMainApp will then pick up the new token and redirect.
-                // Navigating to '/' is a safe bet to trigger the AuthInitializer.
-                navigate('/student', { replace: true }); 
+                navigate('/student/sessions', { replace: true }); 
             } else {
                 setError(data.Message || 'Login failed');
             }

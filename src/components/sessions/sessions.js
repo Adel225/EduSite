@@ -80,16 +80,20 @@
         
         if (data.message === "Sections fetched successfully") {
             setSessions(data.data || []); // Corrected to use data.data from API response
-        } else {
+        } 
+        else if (data.message === "No sections found for this student.") {
+            setError('No sessions found!');
+        }
+        else {
             setError('Failed to fetch sessions');
             setSessions([]);
         }
         } catch (err) {
-        console.error('Error fetching exams:', err);
-        setError('Error loading sessions');
-        setSessions([]);
+            console.error('Error fetching exams:', err);
+            setError('Error loading sessions');
+            setSessions([]);
         } finally {
-        setLoadingSessions(false);
+            setLoadingSessions(false);
         }
     };
 

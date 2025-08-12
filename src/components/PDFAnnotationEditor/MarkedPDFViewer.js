@@ -32,8 +32,8 @@ const MarkedPDFViewer = ({ pdfUrl, annotationData, onClose }) => {
                 const canvas = canvases[pageNum];
                 if (canvas) {
                     const callback = () => {
-                        canvas.calcOffset(); // Recalculates object positions
-                        canvas.renderAll();  // Forces a visual redraw of the canvas
+                        canvas.calcOffset(); 
+                        canvas.renderAll();  
                     };
                     canvas.loadFromJSON(canvasJSON, callback);
                 }

@@ -1,5 +1,6 @@
 import React, { useState , useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import './auth.css';
 import { API_URL } from '../../config';
 
@@ -7,6 +8,7 @@ const AdminLogin = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [rememberMe, setRememberMe] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState('');
     const navigate = useNavigate();
 
@@ -37,7 +39,7 @@ const AdminLogin = () => {
                 else {
                     sessionStorage.setItem('token', data.token);
                 }
-                navigate('/dashboard/');
+                navigate('/dashboard/sessions');
             } else {
                 // Display error message from API
                 setError(data.Message || 'Login failed');
@@ -66,13 +68,21 @@ const AdminLogin = () => {
                     </div>
                     <div className="form-group">
                         <label>Password:</label>
-                        <input
-                            type="password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            required
-                            className="form-input"
-                        />
+                        <div className="password-input-container">
+                            <input
+                                type={showPassword ? "text" : "password"}
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                required
+                                className="form-input"
+                            />
+                            <span 
+                                className="password-toggle-icon"
+                                onClick={() => setShowPassword(!showPassword)}
+                            >
+                                {showPassword ? <FaEyeSlash /> : <FaEye />}
+                            </span>
+                        </div>
                     </div>
                     <div className="form-group remember-me">
                         <label className="checkbox-label">
@@ -86,6 +96,14 @@ const AdminLogin = () => {
                     </div>
                     <button type="submit" className="auth-button">Login</button>
                 </form>
+                <div className="auth-footer">
+                    <div className="signup-link">
+                        Don't have an account? <Link to="/signup">Sign Up</Link>
+                    </div>
+                    <div className="teacher-login">
+                        <Link to="/login" className="teacher-login-link">Login as Student</Link>
+                    </div>
+                </div>
             </div>
         </div>
     );
