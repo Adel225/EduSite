@@ -30,6 +30,8 @@ import StudentMaterials from './components/student/pages/Materials';
 import Profile from './components/student/pages/Profile';
 import StudentSessions from './components/student/pages/Sessions'; 
 
+import Redirecting from './utils/Redirecting.js';
+
 // Auth Components
 import Login from './components/auth/login';
 import SignUp from './components/auth/SignUp';
@@ -95,7 +97,7 @@ useEffect(() => {
                 navigate('/dashboard/', { replace: true });
               }
             } else if (isStudent) {
-              if (['/login', '/admin/login', '/signup'].includes(currentPath)) {
+              if (['/login', '/admin/login', '/signup', '/redirecting'].includes(currentPath)) {
                 navigate('/student/', { replace: true });
               }
             } else { 
@@ -138,8 +140,7 @@ useEffect(() => {
     return () => {
       isMounted = false;
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [navigate]); 
+  }, [navigate, location.pathname]); 
 
 if (isLoading) {
     return <GlobalLoadingIndicator />;
@@ -163,6 +164,7 @@ const PrivateRoute = ({ children }) => {
 return (
     <Routes>
     <Route path="/" element={<Welcome />} />
+    <Route path="/redirecting" element={<Redirecting />} />
     <Route path="/admin/login" element={<AdminLogin />} />
     <Route path="/login" element={<Login />} />
     <Route path="/signup" element={<SignUp />} />
@@ -205,7 +207,7 @@ return (
         <PrivateRoute>
             <ResponsiveLayout SidebarComponent={StudentSidebar}>
                         <Routes>
-                            <Route index element={<StudentDashboard />} />
+                            <Route index element={<StudentSessions />} />
                             <Route path="assignments" element={<StudentAssignments />} />
                             <Route path="sessions" element={<StudentSessions />} />
                             <Route path="exams" element={<StudentExams />} />

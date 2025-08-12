@@ -1,6 +1,6 @@
 // src/components/Welcome.js
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import '../styles/welcome.css';
 import { API_URL } from '../config';
 
@@ -11,6 +11,8 @@ const ChartIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" heigh
 
 
 const Welcome = () => {
+    const navigate = useNavigate();
+
     const [feedback, setFeedback] = useState({
         name: '',
         email: '',
@@ -49,6 +51,18 @@ const Welcome = () => {
         }
     };
 
+    const handleLoginClick = () => {
+        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        if (token) {
+            // If a token exists, go to the loading page.
+            // The AuthInitializer will then take over and redirect from there.
+            navigate('/redirecting');
+        } else {
+            // If no token, go to the actual login page.
+            navigate('/login');
+        }
+    };
+
     return (
         <div className="welcome-page">
             <header className="welcome-header">
@@ -56,7 +70,7 @@ const Welcome = () => {
                     <nav className="welcome-nav">
                         <div className="nav-brand">Mona AboElazm</div>
                         <div className="nav-links">
-                            <Link to="/login" className="nav-button login">Login</Link>
+                        <button onClick={handleLoginClick} className="nav-button login">Login</button>
                             <Link to="/signup" className="nav-button signup">Sign Up</Link>
                         </div>
                     </nav>
@@ -137,7 +151,7 @@ const Welcome = () => {
             </main>
 
             <footer className="welcome-footer">
-                <p>&copy; 2024 Mona AboElazm. All Rights Reserved.</p>
+                <p>&copy; 2025 Mona AboElazm. All Rights Reserved.</p>
             </footer>
         </div>
     );

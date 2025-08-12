@@ -14,10 +14,10 @@ const Login = () => {
     const navigate = useNavigate();
     const location = useLocation();
 
+
     useEffect(() => {
         if (location.state?.error) {
             setError(location.state.error);
-            // Clear error from location state to prevent it from reappearing on refresh/back
             navigate(location.pathname, { replace: true, state: {} });
         }
     }, [location.state, location.pathname, navigate]);
@@ -55,6 +55,7 @@ const Login = () => {
             console.error('Login error:', err);
         }
     };
+
 
     return (
         <div className="auth-container">
