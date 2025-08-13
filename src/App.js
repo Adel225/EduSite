@@ -4,6 +4,11 @@ import { HashRouter as Router, Routes, Route, Navigate, useLocation, useNavigate
 // Layout Component
 import ResponsiveLayout from './components/layout/ResponsiveLayout'; 
 import Welcome from './components/Welcome.js';
+import Courses from './components/pages/Courses';
+import Testimonials from './components/pages/Testimonials';
+import About from './components/pages/About';
+import FAQs from './components/pages/FAQs';
+import Contact from './components/pages/Contact';
 
 // Sidebar Components
 import Sidebar from './components/Sidebar'; // Teacher's Sidebar
@@ -163,7 +168,13 @@ const PrivateRoute = ({ children }) => {
 
 return (
     <Routes>
-    <Route path="/" element={<Welcome />} />
+        <Route path="/" element={<Welcome />} />
+        <Route path="/courses" element={<Courses />} />
+        <Route path="/testimonials" element={<Testimonials />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/faqs" element={<FAQs />} />
+        <Route path="/contact" element={<Contact />} />
+
     <Route path="/redirecting" element={<Redirecting />} />
     <Route path="/admin/login" element={<AdminLogin />} />
     <Route path="/login" element={<Login />} />
