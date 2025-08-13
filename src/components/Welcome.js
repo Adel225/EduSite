@@ -3,6 +3,7 @@ import React , { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import '../styles/welcome.css';
 import {API_URL} from "../config";
+import useIntersectionObserver from '../utils/useIntersectionObserver';
 
 const CheckmarkIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>;
 const BookIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>;
@@ -23,6 +24,40 @@ const Welcome = () => {
     const navigate = useNavigate();
     const [isNavOpen, setIsNavOpen] = useState(false);
     const [activeFaq, setActiveFaq] = useState(null);
+
+    const aboutRef = useIntersectionObserver({ threshold: 0.3 });
+    const experienceRef = useIntersectionObserver({ threshold: 0.3 });
+    const testimonialsRef = useIntersectionObserver({ threshold: 0.3 });
+    const whyChooseUsRef = useIntersectionObserver({ threshold: 0.3 });
+    const faqsRef = useIntersectionObserver({ threshold: 0.3 });
+    const contactRef = useIntersectionObserver({ threshold: 0.3 });
+
+    const testimonialsData = [
+        {
+            id: 1,
+            studentName: 'Adel sameh',
+            rating: 5, 
+            message: '"Placeholder: Amazing teacher! My grades went up significantly. Highly recommend!"'
+        },
+        {
+            id: 2,
+            studentName: 'Ahmed Salah',
+            rating: 4,
+            message: '"Placeholder: The concepts are explained so clearly. I finally understand topics I struggled with for years."'
+        },
+        {
+            id: 3,
+            studentName: '3amo maged',
+            rating: 3,
+            message: '"Placeholder: The best tutor I\'ve ever had. The sessions are engaging and fun."'
+        },
+        {
+            id: 4,
+            studentName: 'It is me',
+            rating: 1,
+            message: '"Placeholder: A wonderful and supportive learning environment. Thank you!"'
+        }
+    ];
 
     const handleLoginClick = () => {
         const token = localStorage.getItem('token') || sessionStorage.getItem('token');
@@ -135,13 +170,14 @@ const Welcome = () => {
                 </section>
 
 
-                <section id="about" className="welcome-section">
+                <section id="about" className="welcome-section animated-section" ref={aboutRef}>
                     <div className="container about-container">
                         <div className="about-text">
                             {/* The h2 now correctly uses the generic .section-title class */}
                             <h2 className="section-title">About The Teacher</h2>
                             <p>Placeholder for your biography...</p>
                             <Link to="/about" className="content-button">Read More</Link>
+                            
                         </div>
                         <div className="about-image">
                             <div className="content-image-wrapper soft-rectangle">
@@ -151,9 +187,9 @@ const Welcome = () => {
                     </div>
                 </section>
 
-                <section id="experience" className="welcome-section" style={{backgroundColor: '#f8f9fa'}}>
-                     <div className="container">
-                        <h2 className="section-title">An Exciting Educational Experience</h2>
+                <section id="experience" className="welcome-section animated-section" ref={experienceRef} style={{backgroundColor: '#f8f9fa'}}>
+                    <div className="container">
+                        <h2 className="section-title">Educational Experience</h2>
                         
                         {/* --- First Item (Image on Left, Text on Right) --- */}
                         <div className="content-layout" style={{marginBottom: '4rem'}}>
@@ -167,7 +203,7 @@ const Welcome = () => {
                         </div>
 
                         <div className="content-layout reverse">
-                             <div className="content-image">
+                            <div className="content-image">
                                 <img src="https://res.cloudinary.com/dwcy6vc23/image/upload/v1692917668/a4jpegwtdrrny5fbmrll.png" width="500" height="500" alt="Supporting Team" />
                             </div>
                             <div className="content-text">
@@ -179,30 +215,42 @@ const Welcome = () => {
                     </div>
                 </section>
 
-                <section id="testimonials" className="welcome-section testimonials-section">
+                <section id="testimonials" className="welcome-section testimonials-section" ref={testimonialsRef}>
                     <div className="container">
                         <h2 className="section-title">What My Students Say</h2>
-                        <div className="testimonial-grid">
-                            <div className="testimonial-card">
-                                <p>"Placeholder: Amazing teacher! My grades went up significantly. Highly recommend!"</p>
-                                <div className="testimonial-stars">★★★★★</div>
-                                <strong>- Student A</strong>
-                            </div>
-                            <div className="testimonial-card">
-                                <p>"Placeholder: The concepts are explained so clearly. I finally understand topics I struggled with for years."</p>
-                                <div className="testimonial-stars">★★★★★</div>
-                                <strong>- Student B</strong>
-                            </div>
-                             <div className="testimonial-card">
-                                <p>"Placeholder: The best tutor I've ever had. The sessions are engaging and fun."</p>
-                                <div className="testimonial-stars">★★★★★</div>
-                                <strong>- Student C</strong>
-                            </div>
+                    </div>
+                    <div className="testimonial-marquee">
+                        <div className="testimonial-track">
+                            {testimonialsData.map((testimonial) => (
+                                <div className="testimonial-card" key={testimonial.id}>
+                                    <p>{testimonial.message}</p>
+                                    <div className="testimonial-stars">
+                                        {'★'.repeat(testimonial.rating)}
+                                        {'☆'.repeat(5 - testimonial.rating)}
+                                    </div>
+                                    <strong>- {testimonial.studentName}</strong>
+                                </div>
+                            ))}
+                            
+                            {/* Map over the data AGAIN to create the seamless duplicate set */}
+                            {testimonialsData.map((testimonial) => (
+                                <div className="testimonial-card" key={`duplicate-${testimonial.id}`} aria-hidden="true">
+                                    <p>{testimonial.message}</p>
+                                    <div className="testimonial-stars">
+                                        {'★'.repeat(testimonial.rating)}
+                                        {'☆'.repeat(5 - testimonial.rating)}
+                                    </div>
+                                    <strong>- {testimonial.studentName}</strong>
+                                </div>
+                            ))}
                         </div>
+                    </div>
+                    <div className="view-all-container">
+                        <Link to="/testimonials" className="content-button">View All Testimonials</Link>
                     </div>
                 </section>
                 
-                <section id="why-choose-us" className="welcome-section" style={{backgroundColor: '#f8f9fa'}}>
+                <section id="why-choose-us" className="welcome-section animated-section" ref={whyChooseUsRef} style={{backgroundColor: '#f8f9fa'}}>
                     <div className="container">
                         <h2 className="section-title">Why Choose Us</h2>
                         <div className="features-grid">
@@ -213,11 +261,10 @@ const Welcome = () => {
                     </div>
                 </section>
 
-                <section id="faqs" className="welcome-section">
+                <section id="faqs" className="welcome-section animated-section" ref={faqsRef}>
                     <div className="container faqs-container">
                         <h2 className="section-title">Frequently Asked Questions</h2>
                         
-                        {/* --- HIGHLIGHT: The new interactive FAQ list --- */}
                         <div className={`faq-item ${activeFaq === 1 ? 'active' : ''}`}>
                             <div className="faq-question" onClick={() => toggleFaq(1)}>
                                 <span>Q: Placeholder question one?</span>
@@ -239,9 +286,12 @@ const Welcome = () => {
                         </div>
 
                     </div>
+                    <div className="view-all-container">
+                        <Link to="/faqs" className="content-button">View All FAQs</Link>
+                    </div>
                 </section>
 
-                <section id="contact" className="welcome-section contact-section">
+                <section id="contact" className="welcome-section contact-section animated-section" ref={contactRef}>
                     <div className="container">
                         <h2 className="section-title">Get In Touch</h2>
                         <p className="section-subtitle">Have a Feedback or a suggestion? I'd love to hear from you.</p>
@@ -277,7 +327,7 @@ const Welcome = () => {
                 <section className="demo-cta">
                     <div className="container">
                         <h2>REGISTER FOR THE FREE DEMO CLASS</h2>
-                        <Link to="/contact" className="cta-button">Watch Now</Link>
+                        <Link to="/demo" className="cta-button">Watch Now</Link>
                     </div>
                 </section>
 
