@@ -21,6 +21,7 @@ const WhatsAppIcon = () => <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0p
 
 const Welcome = () => {
     const navigate = useNavigate();
+    const [isNavOpen, setIsNavOpen] = useState(false);
     const [activeFaq, setActiveFaq] = useState(null);
 
     const handleLoginClick = () => {
@@ -35,6 +36,8 @@ const Welcome = () => {
     const toggleFaq = (index) => {
         setActiveFaq(activeFaq === index ? null : index);
     };
+
+    const closeNav = () => setIsNavOpen(false);
 
     const [feedback, setFeedback] = useState({
         name: '',
@@ -88,21 +91,39 @@ const Welcome = () => {
                 </div>
             </div>
 
-            <header className="welcome-header">
-                    <nav className="welcome-nav">
-                        <Link to="/" className="nav-brand">Mona AboElazm</Link>
-                        <div className="nav-links">
-                            <Link to="/">Home</Link>
-                            <Link to="/courses">Courses</Link>
-                            <Link to="/testimonials">Student Testimonials</Link>
-                            <Link to="/about">About Us</Link>
-                            <Link to="/faqs">FAQs</Link>
-                            <Link to="/contact">Contact Us</Link>
-                            <button onClick={handleLoginClick} className="nav-button login">Login</button>
-                            <Link to="/signup" className="nav-button signup">Sign Up</Link>
-                        </div>
-                    </nav>
-            </header>
+        <header className="welcome-header">
+            <nav className="welcome-nav">
+            <Link to="/" className="nav-brand">Mona AboElazm</Link>
+            <div className="nav-links desktop-only">
+                <Link to="/">Home</Link>
+                <Link to="/courses">Courses</Link>
+                <Link to="/testimonials">Student Testimonials</Link>
+                <Link to="/about">About Us</Link>
+                <Link to="/faqs">FAQs</Link>
+                <Link to="/contact">Contact Us</Link>
+                <button onClick={handleLoginClick} className="nav-button login">Login</button>
+                <Link to="/signup" className="nav-button signup">Sign Up</Link>
+                </div>
+                <div className="hamburger mobile-only" onClick={() => setIsNavOpen(true)}>
+                    ☰
+            </div>
+            </nav>
+        </header>
+
+        {/* Sidebar Menu */}
+        <div className={`mobile-sidebar ${isNavOpen ? 'open' : ''}`} onClick={closeNav}>
+            <div className="sidebar-content" onClick={(e) => e.stopPropagation()}>
+                <div className="close-btn" onClick={closeNav}>×</div>
+                <Link to="/" onClick={closeNav}>Home</Link>
+                <Link to="/courses" onClick={closeNav}>Courses</Link>
+                <Link to="/testimonials" onClick={closeNav}>Student Testimonials</Link>
+                <Link to="/about" onClick={closeNav}>About Us</Link>
+                <Link to="/faqs" onClick={closeNav}>FAQs</Link>
+                <Link to="/contact" onClick={closeNav}>Contact Us</Link>
+                <button onClick={() => { handleLoginClick(); closeNav(); }} className="nav-button login">Login</button>
+                <Link to="/signup" onClick={closeNav} className="nav-button signup">Sign Up</Link>
+            </div>
+        </div>
 
             <main>
                 <section className="hero-section">
@@ -137,7 +158,7 @@ const Welcome = () => {
                         {/* --- First Item (Image on Left, Text on Right) --- */}
                         <div className="content-layout" style={{marginBottom: '4rem'}}>
                             <div className="content-image">
-                                <img src="https://res.cloudinary.com/dwcy6vc23/image/upload/v1692917668/a4jpegwtdrrny5fbmrll.png" alt="A Unique Approach" />
+                                <img src="https://res.cloudinary.com/dwcy6vc23/image/upload/v1692917668/a4jpegwtdrrny5fbmrll.png" width="500" height="500" alt="A Unique Approach" />
                             </div>
                             <div className="content-text">
                                 <h3>A Unique Approach</h3>
@@ -147,7 +168,7 @@ const Welcome = () => {
 
                         <div className="content-layout reverse">
                              <div className="content-image">
-                                <img src="https://res.cloudinary.com/dwcy6vc23/image/upload/v1692917668/a4jpegwtdrrny5fbmrll.png" alt="Supporting Team" />
+                                <img src="https://res.cloudinary.com/dwcy6vc23/image/upload/v1692917668/a4jpegwtdrrny5fbmrll.png" width="500" height="500" alt="Supporting Team" />
                             </div>
                             <div className="content-text">
                                 <h3>Our Supporting Team</h3>
@@ -271,7 +292,7 @@ const Welcome = () => {
                         <div className="footer-col"><h4>Contact Us</h4> <a href="https://wa.me/971508162674" target="_blank" rel="noopener noreferrer"><img src="https://img.icons8.com/?size=100&id=Funux8t3F8Ig&format=png&color=FFFFFF" width="20" height="20" /> +971 50 816 2674</a> </div>
                     </div>
                     <div className="footer-bottom">
-                        <p>&copy; 2024 Mona AboElazm. All Rights Reserved.</p>
+                        <p>&copy; 2025 Mona AboElazm. All Rights Reserved.</p>
                     </div>
                 </div>
             </footer>
