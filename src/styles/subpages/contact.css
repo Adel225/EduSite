@@ -1,0 +1,89 @@
+/* src/styles/contact.css */
+
+:root {
+    --primary-color: #5A67BA; 
+    --secondary-color: #FF8C00; 
+    --dark-text: #2c3e50;
+    --body-text: #5a6a7d;
+    --bg-light: #f8f9fa;
+    --border-light: #e0e0e0;
+}
+
+.contact-page-container {
+    /* Remove padding from the main container to allow the hero to be full-width */
+    padding: 0; 
+}
+
+.space {
+    margin-bottom: 2rem;
+    font-size: 1.1rem;
+}
+
+/* --- NEW: Hero Section for the Contact Page --- */
+.contact-hero-section {
+    padding: 1rem 1.5rem;
+    text-align: center;
+    color: #fff;
+    background-size: cover;
+    background-position: center;
+    background-color: var(--dark-text); /* Fallback color */
+}
+
+.contact-hero-section h1 {
+    font-size: 3rem;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    /* color: var(--primary-color); */
+}
+@media (max-width: 768px) {
+    .contact-hero-section h1 {
+        font-size: 2.1rem;
+    }
+}
+
+.contact-hero-section p {
+    font-size: 1.3rem;
+    opacity: 0.9;
+    color: var(--secondary-color);
+}
+
+/* --- Main Content Area --- */
+.contact-main-content {
+    padding: 5rem 1.5rem;
+}
+
+.contact-content-grid {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr; /* Form column is wider */
+    gap: 4rem;
+    max-width: 1100px;
+    margin: 0 auto;
+    align-items: flex-start;
+}
+
+/* --- Form Styles --- */
+.contact-form-container h2 {
+    font-size: 2rem;
+    color: var(--dark-text);
+    margin-top: 0;
+    margin-bottom: 2rem;
+}
+/* This reuses your existing .feedback-form styles but ensures they work in this context */
+.feedback-form .form-grid, .feedback-form textarea {
+    grid-template-columns: 1fr; /* Stack all fields in a single column */
+}
+
+/* --- Contact Details Sidebar --- */
+.contact-details h3 {
+    font-size: 1.5rem;
+    color: var(--dark-text);
+    margin-top: 0;
+    margin-bottom: 3.5rem;
+}
+.contact-info-item { /* ... (This style from your previous CSS can remain) ... */ }
+
+/* --- Responsive Adjustments --- */
+@media (max-width: 992px) {
+    .contact-content-grid {
+        grid-template-columns: 1fr; /* Stack columns on tablets and mobile */
+    }
+}

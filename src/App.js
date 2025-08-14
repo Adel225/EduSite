@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { HashRouter as Router, Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
+import ScrollToTop from './utils/ScrollToTop.js';
 
 // Layout Component
 import ResponsiveLayout from './components/layout/ResponsiveLayout'; 
@@ -170,6 +171,7 @@ const PrivateRoute = ({ children }) => {
 
 return (
     <Routes>
+        
         <Route path="/" element={<Welcome />} />
 
         <Route path="/courses" element={<Layout><Courses /></Layout>} />
@@ -241,7 +243,8 @@ return (
 const App = () => {
 return (
     <Router>
-    <AuthInitializerAndMainApp />
+      <ScrollToTop />
+      <AuthInitializerAndMainApp />
     </Router>
 );
 };

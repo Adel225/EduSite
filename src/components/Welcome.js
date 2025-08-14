@@ -18,7 +18,7 @@ const Welcome = () => {
     const [activeFaq, setActiveFaq] = useState(null);
 
     const aboutRef = useIntersectionObserver({ threshold: 0.3 });
-    const experienceRef = useIntersectionObserver({ threshold: 0.3 });
+    const experienceRef = useIntersectionObserver({ threshold: 0.2 });
     const testimonialsRef = useIntersectionObserver({ threshold: 0.3 });
     const whyChooseUsRef = useIntersectionObserver({ threshold: 0.3 });
     const faqsRef = useIntersectionObserver({ threshold: 0.3 });
@@ -182,8 +182,20 @@ const Welcome = () => {
                 <section id="testimonials" className="welcome-section testimonials-section" ref={testimonialsRef}>
                     <div className="container">
                         <h2 className="section-title">What My Students Say</h2>
+                        <div className="testimonial-grid mobile-only">
+                            {testimonialsData.slice(0, 3).map((testimonial) => (
+                                <div className="testimonial-card" key={testimonial.id}>
+                                    <p>{testimonial.message}</p>
+                                    <div className="testimonial-stars">
+                                        {'★'.repeat(testimonial.rating)}
+                                        {'☆'.repeat(5 - testimonial.rating)}
+                                    </div>
+                                    <strong>- {testimonial.studentName}</strong>
+                                </div>
+                            ))}
+                        </div>
                     </div>
-                    <div className="testimonial-marquee">
+                    <div className="testimonial-marquee desktop-only">
                         <div className="testimonial-track">
                             {testimonialsData.map((testimonial) => (
                                 <div className="testimonial-card" key={testimonial.id}>
