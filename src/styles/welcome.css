@@ -74,22 +74,53 @@
 
 /* --- Hero Section --- */
 .hero-section {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
+    position: relative; /* Acts as the positioning container for the content */
     min-height: 90vh;
-    background-size: cover;
-    background-position: center center;
     background-color: var(--dark-text);
     color: #fff;
-    padding: 4rem 1.5rem;
-    transition: background-image 1s ease-in-out;
+    overflow: hidden; /* This is the "window" that hides the off-screen slide */
 }
+
+/* The track that holds the slides */
+.hero-slider-track {
+    display: flex;
+    width: 200%; 
+    height: 90vh; 
+    transition: transform 1.2s cubic-bezier(0.77, 0, 0.175, 1); 
+}
+
+/* Each individual slide */
+.hero-slide {
+    width: 50%; /* Each slide takes up half of the track's width */
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+}
+
+/* The text content that sits on top */
 .hero-content {
-    background-color: rgba(0, 0, 0, 0.5); /* Adds a dark overlay for text readability */
-    padding: 3rem;
-    border-radius: 12px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    padding-top: 25vh; 
+    align-items: center;
+    text-align: center;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 2; 
+    box-sizing: border-box;
+    padding-left: 1.5rem;  
+    padding-right: 1.5rem;  
+}
+
+.hero-subtitle {
+    opacity: 0;
+    animation: fadeIn 0.8s ease-out forwards;
+    animation-delay: 0.2s; /* A small delay for effect */
 }
 .hero-title { font-size: 3.5rem; margin-bottom: 1rem; line-height: 1.2; text-shadow: 0 2px 4px rgba(0,0,0,0.4); }
 .hero-subtitle { font-size: 1.25rem; opacity: 0.9; margin-bottom: 2.5rem; }
@@ -399,6 +430,9 @@
         }
         .section-title { font-size: 1.5rem; }
         .content-text h3 { font-size: 1.3rem; }
+        #about .about-text .section-title {
+            font-size: 1.5rem;
+        }  
     }
     
     /* Hamburger */

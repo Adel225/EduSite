@@ -121,7 +121,13 @@ const Welcome = () => {
             <WelcomeHeader />
 
             <main>
-            <section className="hero-section" style={{ backgroundImage: `url('${heroSlides[currentSlide].imageUrl}')` }}>
+            <section className="hero-section">
+                    <div className="hero-slider-track" style={{ transform: `translateX(-${currentSlide * 50}%)` }}>
+
+                        <div className="hero-slide" style={{ backgroundImage: `url('${heroSlides[0].imageUrl}')` }}></div>
+                        <div className="hero-slide" style={{ backgroundImage: `url('${heroSlides[1].imageUrl}')` }}></div>
+
+                    </div>
                 <div className="hero-content">
                     <h1 className="hero-title">Mathematics, Mastered with Mrs. Mona Abouelazm</h1>
                     <p className="hero-subtitle">{heroSlides[currentSlide].subtitle}</p>
