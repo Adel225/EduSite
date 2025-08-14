@@ -10,6 +10,7 @@ import About from './components/pages/About';
 import FAQs from './components/pages/FAQs';
 import Contact from './components/pages/Contact';
 import Demo from './components/pages/Demo';
+import Layout from './components/Layout'; 
 
 // Sidebar Components
 import Sidebar from './components/Sidebar'; // Teacher's Sidebar
@@ -170,11 +171,12 @@ const PrivateRoute = ({ children }) => {
 return (
     <Routes>
         <Route path="/" element={<Welcome />} />
-        <Route path="/courses" element={<Courses />} />
-        <Route path="/testimonials" element={<Testimonials />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/faqs" element={<FAQs />} />
-        <Route path="/contact" element={<Contact />} />
+
+        <Route path="/courses" element={<Layout><Courses /></Layout>} />
+        <Route path="/testimonials" element={<Layout><Testimonials /></Layout>} />
+        <Route path="/about" element={<Layout><About /></Layout>} />
+        <Route path="/faqs" element={<Layout><FAQs /></Layout>} />
+        <Route path="/contact" element={<Layout><Contact /></Layout>} />
         <Route path="/demo" element={<Demo />} />
 
     <Route path="/redirecting" element={<Redirecting />} />
