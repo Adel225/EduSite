@@ -11,6 +11,7 @@ const Login = () => {
     const [rememberMe, setRememberMe] = useState(false);
     const [error, setError] = useState('');
     const [showPassword, setShowPassword] = useState(false);
+    const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
     const location = useLocation();
 
@@ -25,6 +26,7 @@ const Login = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError(''); 
+        setLoading(true);
 
         try {
             const response = await fetch(`${API_URL}/student/login`, {
@@ -53,6 +55,8 @@ const Login = () => {
         } catch (err) {
             setError('An error occurred during login. Please check your connection.');
             console.error('Login error:', err);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -101,7 +105,9 @@ const Login = () => {
                             <span>Remember Me</span>
                         </label>
                     </div>
-                    <button type="submit" className="auth-button">Login</button>
+                    <button type="submit" className="auth-button" disabled={loading}>
+                        {loading ? <div className="loading-spinner-small"></div> : 'Login'}
+                    </button>
                 </form>
                 <div className="auth-footer">
                     <div className="signup-link">

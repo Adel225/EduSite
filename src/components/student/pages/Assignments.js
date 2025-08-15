@@ -191,32 +191,35 @@ const Assignments = () => {
 
     return (
         <div className="exams-page">
-            <div className="exams-list">
+            <div className="assignments-left">
                 <h2>Available Assigments</h2>
                 {assignments.length === 0 ? (
                     <div className="no-exams">No Assigments yet</div>
                 ) : (
-                    <div className="exam-cards">
+                    <div className="student-exams-list">
                         {assignments.map((assignment) => (
-                            <div key={assignment._id} className="exam-card">
+                            <div key={assignment._id} className="student-exam-card">
                                 <h3>{assignment.name}</h3>
-                                <div className="exam-dates">
+                                <div className="student-exam-dates">
                                     <p>Start: {formatDate(assignment.startDate)}</p>
                                     <p>End: {formatDate(assignment.endDate)}</p>
                                 </div>
-                                <button 
-                                    className="download-btn"
-                                    onClick={() => downloadAssignment(assignment._id)}
-                                >
-                                    Download Assignment
-                                </button>
+                                <div className='exam-actions'>
+                                    <button 
+                                        className="download-btn"
+                                        onClick={() => downloadAssignment(assignment._id)}
+                                    >
+                                        Download
+                                    </button>
+                                </div>
+                                
                             </div>
                         ))}
                     </div>
                 )}
             </div>
 
-            <div className="upload-exam">
+            <div className="assignments-right">
                 <h2>Submit Assignment</h2>
                 {error && <div className="error">{error}</div>}
                 {submitStatus && <div className="submit-status">{submitStatus}</div>}

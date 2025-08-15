@@ -1,0 +1,132 @@
+/* src/styles/assistants.css */
+
+.assistants-page {
+    padding: 1.5rem;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.assistants-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border-light);
+}
+
+.assistants-header h2 {
+    margin: 0;
+    color: var(--dark-text);
+}
+
+.add-assistant-btn {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 0.6rem 1.2rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 0.9rem;
+    transition: background-color 0.2s ease;
+}
+.add-assistant-btn:hover {
+    background-color: #4b57a5 ;
+}
+
+.assistants-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.assistant-card {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.07);
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.assistant-info {
+    flex-grow: 1;
+}
+
+.assistant-name {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--dark-text);
+    margin-bottom: 0.25rem;
+}
+
+.assistant-email {
+    font-size: 0.9rem;
+    color: var(--light-text);
+    margin-bottom: 1.5rem;
+    word-break: break-all;
+}
+
+.assistant-actions {
+    display: flex;
+    gap: 0.75rem;
+    border-top: 1px solid var(--border-light);
+    padding-top: 1rem;
+    margin-top: 1rem;
+}
+
+.assistant-actions button {
+    flex-grow: 1;
+    padding: 0.6rem;
+    border-radius: 5px;
+    border: 1px solid;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.edit-permissions-btn {
+    background-color:  #ffc107;
+    border-color: #ffc107;
+    color: #ffffff;
+    font-size: 1rem;
+}
+.edit-permissions-btn:hover {
+    background-color: #ecb306;
+}
+
+.delete-assistant-btn {
+    background-color: transparent;
+    border-color: #e74c3c;
+    color: #e74c3c;
+}
+.delete-assistant-btn:hover {
+    background-color: #e74c3c;
+    color: #fff;
+}
+
+/* --- Permissions Modal Styles --- */
+.permissions-modal .permission-category {
+    border: 1px solid var(--border-light);
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    overflow: hidden;
+}
+.permission-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    cursor: pointer;
+    background-color: var(--bg-light);
+}
+.permission-header h4 { margin: 0; }
+.permission-summary { font-size: 0.85rem; color: var(--light-text); }
+.permission-content { max-height: 0; overflow: hidden; transition: max-height 0.4s ease-out; }
+.permission-content.open { max-height: 500px; /* Adjust as needed */ }
+.permission-body { padding: 1.5rem; border-top: 1px solid var(--border-light); }
+.grade-pills { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1.5rem; }
+.grade-pill { padding: 0.4rem 0.8rem; border: 1px solid var(--border-light); border-radius: 16px; cursor: pointer; }
+.grade-pill.active { background-color: var(--primary-color); color: white; border-color: var(--primary-color); }
+.groups-checkbox-list { display: flex; flex-direction: column; gap: 0.5rem; max-height: 200px; overflow-y: auto; }

@@ -24,7 +24,7 @@
         endDate: ''
     });
 
-    const grades = [12, 11, 10, 9];
+    const grades = [6,7,8,9,10,11,12];
 
     const fetchGroups = async (grade) => {
         setLoadingGroups(true);
@@ -240,9 +240,9 @@
                             className="session-card"
                             onClick={() => handleSessionClick(session)}
                         >
-                            <div className="exam-info">
+                            <div className="session-info">
                                 <span className="exam-name">{session.name}</span>
-                                <span className="exam-dates">{session.description}</span>
+                                <span className="session-description">{session.description}</span>
                             </div>
                             <button
                                 className="delete-btn"

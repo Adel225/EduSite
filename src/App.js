@@ -25,6 +25,7 @@ import Groups from './components/groups/Groups';
 import GroupDetails from './components/groups/GroupDetails';
 import AssignmentSubmissions from './components/assignments/AssignmentSubmissions';
 import ExamSubmissions from './components/exams/ExamSubmissions';
+import Assistants from './components/assistants/Assistants';
 
 import Sessions from './components/sessions/sessions';
 import SessionDetails from './components/sessions/sessionDetails';
@@ -101,8 +102,8 @@ useEffect(() => {
             const isStudent = !!profileData.data.userName;
 
             if (isTeacher) {
-              if (['/login', '/admin/login', '/signup'].includes(currentPath)) {
-                navigate('/dashboard/', { replace: true });
+              if (['/login', '/admin/login', '/signup', '/redirecting'].includes(currentPath)) {
+                navigate('/dashboard/sessions', { replace: true });
               }
             } else if (isStudent) {
               if (['/login', '/admin/login', '/signup', '/redirecting'].includes(currentPath)) {
@@ -208,6 +209,7 @@ return (
                             <Route path="sessions/:sessionId" element={<SessionDetails />} />
                             <Route path="materials" element={<Materials />} />
                             <Route path="groups" element={<Groups />} />
+                            <Route path="assistants" element={<Assistants />} />
                             <Route path="groups/:grade/:group" element={<GroupDetails />} />
                         </Routes>
                     {/* </div> */}

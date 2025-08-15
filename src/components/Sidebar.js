@@ -6,6 +6,7 @@ import AssignmentIcon from '../icons/assignment.svg';
 import MaterialsIcon from '../icons/materials.svg';
 import GroupsIcon from '../icons/groups.svg';
 import SessionIcon from '../icons/session.svg'
+import AssistantIcon from '../icons/user.svg';
 import '../styles/Sidebar.css'; // Ensure this CSS is adapted
 import { NavLink } from 'react-router-dom';
 
@@ -25,6 +26,7 @@ const Sidebar = ({ isOpen, onNavLinkClick, isMobile }) => {
         <NavLink className={({ isActive }) => (isActive ? 'active-link' : 'li')} to="/dashboard/assignments" onClick={onNavLinkClick}><img src={AssignmentIcon} alt="Assignments" /> Assignments</NavLink><br/><br/>
         <NavLink className={({ isActive }) => (isActive ? 'active-link' : 'li')} to="/dashboard/materials" onClick={onNavLinkClick}><img src={MaterialsIcon} alt="Materials" /> Materials</NavLink><br/><br/>
         <NavLink className={({ isActive }) => (isActive ? 'active-link' : 'li')} to="/dashboard/groups" onClick={onNavLinkClick}><img src={GroupsIcon} alt="Groups" /> Groups</NavLink><br/><br/>
+        <NavLink className={({ isActive }) => (isActive ? 'active-link' : 'li')} to="/dashboard/assistants" onClick={onNavLinkClick}><img src={AssistantIcon} alt="Assistants" /> Assistants</NavLink><br/><br/>
       </div>
     </div>
   );

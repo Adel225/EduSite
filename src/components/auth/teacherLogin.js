@@ -9,12 +9,14 @@ const AdminLogin = () => {
     const [password, setPassword] = useState('');
     const [rememberMe, setRememberMe] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
+    const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
+        setLoading(true);
 
         try {
             const response = await fetch(`${API_URL}/student/teacher/login`, {
@@ -29,7 +31,7 @@ const AdminLogin = () => {
             });
 
             const data = await response.json();
-            console.log('Login response:', data); // Debug log
+            // console.log('Login response:', data); // Debug log
             
             if (data.token) {
                 // Save token to localStorage
@@ -47,6 +49,8 @@ const AdminLogin = () => {
         } catch (err) {
             setError('An error occurred during login');
             console.error('Login error:', err);
+        }finally {
+            setLoading(false);
         }
     };
 
@@ -94,7 +98,9 @@ const AdminLogin = () => {
                             <span>Remember Me</span>
                         </label>
                     </div>
-                    <button type="submit" className="auth-button">Login</button>
+                    <button type="submit" className="auth-button" disabled={loading}>
+                        {loading ? <div className="loading-spinner-small"></div> : 'Login'}
+                    </button>
                 </form>
                 <div className="auth-footer">
                     <div className="signup-link">

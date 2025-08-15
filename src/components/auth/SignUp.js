@@ -18,6 +18,7 @@ const SignUp = () => {
         grade: 9
     });
     const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
     const [showPasswords, setShowPasswords] = useState({
         password: false,
         confirmPassword: false
@@ -58,6 +59,8 @@ const SignUp = () => {
             setError('Please enter valid email addresses');
             return;
         }
+        
+        setLoading(true);
 
         try {
             const submittedData = {
@@ -97,6 +100,8 @@ const SignUp = () => {
         } catch (err) {
             setError(err.message || 'An error occurred during registration.');
             console.error('Registration error:', err);
+        } finally {
+            setLoading(false); 
         }
     };
 
@@ -209,6 +214,9 @@ const SignUp = () => {
                             required
                             className="form-input"
                         >
+                            <option value={9}>Grade 6</option>
+                            <option value={9}>Grade 7</option>
+                            <option value={9}>Grade 8</option>
                             <option value={9}>Grade 9</option>
                             <option value={10}>Grade 10</option>
                             <option value={11}>Grade 11</option>
@@ -255,7 +263,9 @@ const SignUp = () => {
                             </span>
                         </div>
                     </div>
-                    <button type="submit" className="auth-button">Sign Up</button>
+                    <button type="submit" className="auth-button" disabled={loading}>
+                        {loading ? <div className="loading-spinner-small"></div> : 'Sign Up'}
+                    </button>
                 </form>
                 <div className="auth-footer">
                     Already have an account? <Link to="/login">Login</Link>

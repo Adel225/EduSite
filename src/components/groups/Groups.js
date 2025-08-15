@@ -5,7 +5,7 @@ import Modal from 'react-modal'; // Import Modal
 import { API_URL } from '../../config';
 
 
-const Grades = [9, 10, 11, 12];
+const Grades = [6,7,8,9,10,11,12];
 
 const Groups = () => {
   const [allGroups, setAllGroups] = useState({});

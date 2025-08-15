@@ -119,9 +119,9 @@ const Materials = () => {
                     {materials.length === 0 && !loading ? ( 
                         <div className="no-exams">{error ? error : 'No Materials yet'}</div> 
                     ) : (
-                        <div className="exam-cards"> {/* material-cards */}
+                        <div className="material-grid"> {/* material-cards */}
                             {materials.map((material) => (
-                                <div key={material._id} className="exam-card"> 
+                                <div key={material._id} className="student-exam-card"> 
                                     <h3>{material.name}</h3> 
                                     <div className="exam-dates"> 
                                         <p>{material.description}</p>

@@ -35,7 +35,7 @@ const Assignments = () => {
   const [currentItem, setCurrentItem] = useState(null);
   const [editFormData, setEditFormData] = useState({ name: '', file: null, startDate: '', endDate: '', allowSubmissionsAfterDueDate: false });
 
-  const grades = [12, 11, 10, 9];
+  const grades = [6,7,8,9,10,11,12];
 
   const fetchGroups = async (grade) => {
     setLoadingGroups(true);

@@ -183,32 +183,34 @@ const Exams = () => {
 
     return (
         <div className="exams-page">
-            <div className="exams-list">
+            <div className="exams-left">
                 <h2>Available Exams</h2>
                 {exams.length === 0 ? (
                     <div className="no-exams">No Exams yet</div>
                 ) : (
-                    <div className="exam-cards">
+                    <div className="student-exams-list">
                         {exams.map((exam) => (
-                            <div key={exam._id} className="exam-card">
-                                <h3>{exam.Name}</h3>
-                                <div className="exam-dates">
+                            <div key={exam._id} className="student-exam-card">
+                            <h3>{exam.Name}</h3>
+                            <div className="student-exam-dates">
                                     <p>Start: {formatDate(exam.startdate)}</p>
                                     <p>End: {formatDate(exam.enddate)}</p>
                                 </div>
+                            <div className="exam-actions">
                                 <button 
                                     className="download-btn"
                                     onClick={() => downloadExam(exam._id)}
                                 >
-                                    Download Exam
+                                    Download
                                 </button>
                             </div>
+                        </div>
                         ))}
                     </div>
                 )}
             </div>
 
-            <div className="upload-exam">
+            <div className="exams-right">
                 <h2>Submit Exam</h2>
                 {submitStatus && <div className="submit-status">{submitStatus}</div>}
                 <form onSubmit={handleSubmit}>

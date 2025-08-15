@@ -26,6 +26,7 @@ const Materials = () => {
     description: '',
     files: null,
     links: [''],
+    publishDate: '' ,
   });
 
   // State for the "View Material" modal
@@ -34,7 +35,7 @@ const Materials = () => {
   const [selectedMaterialForViewing, setSelectedMaterialForViewing] = useState(null);
   const [pdfUrlToView, setPdfUrlToView] = useState('');
 
-  const grades = [12, 11, 10, 9];
+  const grades = [6,7,8,9,10,11,12];
 
   const fetchGroups = async (grade) => {
     setLoadingGroups(true);
@@ -87,7 +88,7 @@ const Materials = () => {
       const token = localStorage.getItem('token') || sessionStorage.getItem('token');
       const response = await fetch(`${API_URL}/material/group/${groupId}`, { headers: { 'Authorization': `MonaEdu ${token}` } });
       const data = await response.json();
-      if (data.message === "Materials fetched successfully for the group") {
+      if (data.message === "Materials fetched successfully for the group.") {
         setMaterials(data.data || []);
       } else {
         setMaterials([]);
@@ -191,10 +192,11 @@ const Materials = () => {
       const materialPayload = {
         name: formData.name,
         description: formData.description,
-        gradeId: gradeId, // Use the gradeId from the page's state
-        groupIds: selectedGroups, // Use the selectedGroups from the page's state
+        gradeId: gradeId, 
+        groupIds: selectedGroups, 
         linksArray: formData.links.filter(link => link.trim() !== ''),
         files: uploadedFilesData,
+        publishDate: formData.publishDate,
       };
       
       const createResponse = await fetch(`${API_URL}/material/create`, {
@@ -296,12 +298,21 @@ const Materials = () => {
             </div>
             <div className="form-group"><label>Material Name:</label><input type="text" value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} required /></div>
             <div className="form-group"><label>Description:</label><textarea value={formData.description} onChange={(e) => setFormData({...formData, description: e.target.value})} required /></div>
+            <div className="form-group">
+            <label>Publish Date and Time:</label>
+            <input 
+              type="datetime-local" 
+              value={formData.publishDate}
+              onChange={(e) => setFormData({...formData, publishDate: e.target.value})}
+              required
+            />
+          </div>
             <div className="form-group"><label>Material Files (can select multiple):</label><input type="file" id="material-files-input" multiple onChange={(e) => setFormData({...formData, files: e.target.files})} /></div>
             <div className="form-group">
               <label>YouTube Links:</label>
               {formData.links.map((link, index) => (
                 <div key={index} className="link-input-group">
-                  <input type="url" placeholder="https://www.youtube.com/watch?v=..." value={link} onChange={(e) => handleLinkChange(index, e)} />
+                  <input type="url" placeholder="https://example.com/..." value={link} onChange={(e) => handleLinkChange(index, e)} />
                   {formData.links.length > 1 && (<button type="button" className="remove-link-btn" onClick={() => removeLinkInput(index)}>×</button>)}
                 </div>
               ))}
