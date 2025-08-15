@@ -14,7 +14,7 @@ const WelcomeFooter = () => {
                         <div className="footer-col"><h4>Contact Us</h4> <a href="https://wa.me/971508162674" target="_blank" rel="noopener noreferrer"><img src="https://img.icons8.com/?size=100&id=Funux8t3F8Ig&format=png&color=FFFFFF" width="20" height="20" /> +971 50 816 2674</a> </div>
                     </div>
                     <div className="footer-bottom">
-                        <p>&copy; 2025 Mona AboElazm. All Rights Reserved.</p>
+                        <p>&copy; 2025 Mona Abouelazm. All Rights Reserved.</p>
                     </div>
                 </div>
             </footer>

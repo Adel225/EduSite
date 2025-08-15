@@ -6,6 +6,7 @@ import {API_URL} from "../config";
 import useIntersectionObserver from '../utils/useIntersectionObserver';
 import WelcomeHeader from './WelcomeHeader';
 import WelcomeFooter from './WelcomeFooter';
+import FAQs from './pages/FAQs'
 
 const CheckmarkIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>;
 const BookIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>;
@@ -33,6 +34,33 @@ const Welcome = () => {
             imageUrl: 'https://res.cloudinary.com/dwcy6vc23/image/upload/v1755143777/EduSite/toolxox.com-mEkl9_v9dg7e.jpg',
             subtitle: 'Comprehensive curriculum mastery for Cambridge, Edexcel, and Oxford IGCSE Mathematics'
         }
+    ];
+    const faqsData = [
+        {
+            id: 1,
+            question: 'Q: How will your lessons help me improve my maths grades?',
+            answer: 'My lessons are designed to break down complex IGCSE maths concepts into simple, easy-to-follow steps. You’ll receive targeted practice, clear explanations, and strategies for tackling tricky exam questions so you can boost both your confidence and your marks.'
+        },
+        {
+            id: 2,
+            question: 'Q: What makes your teaching style different?',
+            answer: 'I focus on building a solid foundation first — strengthening core skills before moving to advanced problem-solving. Lessons are interactive, personalised, and adapted to your pace, ensuring no topic is left unclear.'
+        },
+        {
+            id: 3,
+            question: 'Q: Have your students achieved top results before?',
+            answer: 'Yes — many of my students have moved from struggling with maths to achieving A* grades. Their progress comes from consistent practice, focused feedback, and learning how to approach exam questions effectively.'
+        },
+        {
+            id: 4,
+            question: 'Q: What exactly will I get when I join your course?',
+            answer: 'You’ll get structured lesson plans, concise revision notes, topic-by-topic worksheets, exam-style questions, and live support. Every resource is aligned with the Cambridge and Edexcel IGCSE syllabus to keep you exam-ready.'
+        },
+        {
+            id: 5,
+            question: 'Q: How can I be sure I’ll see results?',
+            answer: 'If you attend lessons regularly, complete the homework, and apply the techniques we cover, you’ll see steady improvement — and if you put in consistent effort, top grades are within reach.'
+        },
     ];
 
     const [currentSlide, setCurrentSlide] = useState(0);
@@ -129,8 +157,12 @@ const Welcome = () => {
 
                     </div>
                 <div className="hero-content">
-                    <h1 className="hero-title">Mathematics, Mastered with Mrs. Mona Abouelazm</h1>
-                    <p className="hero-subtitle">{heroSlides[currentSlide].subtitle}</p>
+                    <h1 className="hero-title">Mathematics, Mastered with <br/> Mrs. Mona Abouelazm</h1>
+                    <div className="hero-subtitle-container">
+                        <p className="hero-subtitle" key={currentSlide}>
+                            {heroSlides[currentSlide].subtitle}
+                        </p>
+                    </div>
                     <Link to="/signup" className="hero-button">Get Started</Link>
                 </div>
             </section>
@@ -140,7 +172,7 @@ const Welcome = () => {
                     <div className="container about-container">
                         <div className="about-text">
                             <h2 className="section-title">About Mrs. Mona Abouelazm</h2>
-                            <p>Over 20 years of experience teaching Mathematics, with expertise in the Cambridge, Edexcel, and Oxford curricula across international schools.</p>
+                            <p className="bold-p">Over 20 years of experience teaching Mathematics, with expertise in the Cambridge, Edexcel, and Oxford curricula across international schools.</p>
                             <p>My extensive experience ensures a holistic approach that builds critical thinking and problem-solving skills, making mathematics accessible and engaging for every student.</p>
                             <p>Discover how my approach to mathematics goes beyond formulas, equipping your child with the critical thinking skills to succeed.</p>
                             <Link to="/about" className="content-button">Read More</Link>
@@ -165,8 +197,7 @@ const Welcome = () => {
                             </div>
                             <div className="content-text">
                                 <h3>A Fresh Perspective</h3>
-                                <p className="content-subtext">Our approach isn’t just about memorizing formulas — it’s about understanding concepts deeply and seeing problems in new ways</p>
-                                <p className="content-subtext">By breaking complex ideas into clear, manageable steps, we help students build strong foundations, boost confidence, and develop lifelong problem-solving skills.</p>
+                                <p className="content-subtext">Our approach isn’t just about memorizing formulas — it’s about understanding concepts deeply and seeing problems in new ways by breaking complex ideas into clear, manageable steps, we help students build strong foundations, boost confidence, and develop lifelong problem-solving skills.</p>
                                 <p className="content-subtext">With this fresh perspective, challenges become opportunities, and learning math transforms from a chore into an exciting journey toward success in exams, college, and everyday life.</p>
                             </div>
                         </div>
@@ -265,7 +296,7 @@ const Welcome = () => {
                     </div>
                 </section>
 
-                <section id="faqs" className="welcome-section animated-section" ref={faqsRef}>
+                {/* <section id="faqs" className="welcome-section animated-section" ref={faqsRef}>
                     <div className="container faqs-container">
                         <h2 className="section-title">Frequently Asked Questions</h2>
                         
@@ -293,7 +324,25 @@ const Welcome = () => {
                     <div className="view-all-container">
                         <Link to="/faqs" className="content-button">View All FAQs</Link>
                     </div>
-                </section>
+                </section> */}
+                <div className="faqs-page-container">
+                    <div className="faqs-main-content">
+                        <h2 className="section-title">Frequently Asked Questions</h2>
+                        <div className="container faqs-container">
+                            {faqsData.map((faq) => (
+                                <div className={`faq-item ${activeFaq === faq.id ? 'active' : ''}`} key={faq.id}>
+                                    <div className="faq-question" onClick={() => toggleFaq(faq.id)}>
+                                        <span>{faq.question}</span>
+                                        <span className="faq-icon">{activeFaq === faq.id ? '×' : '+'}</span>
+                                    </div>
+                                    <div className="faq-answer">
+                                        <p>{faq.answer}</p>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
 
                 <section id="contact" className="welcome-section contact-section animated-section" ref={contactRef}>
                     <div className="container">
@@ -328,12 +377,12 @@ const Welcome = () => {
                     </div>
                 </section>
                 
-                <section className="demo-cta">
+                {/* <section className="demo-cta">
                     <div className="container">
                         <h2>REGISTER FOR THE FREE DEMO CLASS</h2>
                         <Link to="/demo" className="cta-button">Watch Now</Link>
                     </div>
-                </section>
+                </section> */}
 
             </main>
             

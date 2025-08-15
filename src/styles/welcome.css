@@ -2,11 +2,16 @@
 
 :root {
     --primary-color: #5A67BA; 
-    --secondary-color: #FF8C00; 
+    --secondary-color: #F6B352; 
     --dark-text: #2c3e50;
     --body-text: #5a6a7d;
     --bg-light: #f8f9fa;
     --border-light: #e0e0e0;
+}
+
+.bold-p {
+    font-weight: 700;
+    font-size: 1.2rem !important;
 }
 
 .welcome-page {
@@ -28,7 +33,7 @@
 
 /* --- Top Contact Bar --- */
 .top-bar {
-    background-color: #fff;
+    background-color: var(--secondary-color);
     padding: 0.5rem 0;
     border-bottom: 1px solid var(--border-light);
     font-size: 0.9rem;
@@ -46,7 +51,8 @@
     gap: 1.5rem; 
 }
 .social-links a, .contact-info a {
-    color: var(--body-text);
+    color: white;
+    font-weight: 600;
     text-decoration: none;
     display: flex;
     align-items: center;
@@ -62,8 +68,8 @@
 .welcome-header .container { width: 100%; max-width: 100%; padding: 0 5rem; }
 .welcome-nav { display: flex; justify-content: space-between; align-items: center;  padding-right: 5rem; padding-left: 5rem; }
 .nav-brand { font-size: 1.8rem; font-weight: 700; color: var(--primary-color); text-decoration: none; }
-.nav-links { display: flex; align-items: center; gap: 1rem; }
-.nav-links a { color: var(--dark-text); text-decoration: none; font-weight: 500; padding: 0.5rem 1rem; transition: color 0.2s; }
+.nav-links { display: flex; align-items: center; gap: 1rem; ;}
+.nav-links a { color: var(--dark-text); text-decoration: none; font-weight: 600; padding: 0.5rem 1rem; transition: color 0.2s; }
 .nav-links a:hover, .nav-links a.active { color: var(--primary-color); }
 .nav-button { padding: 0.6rem 1.2rem; border-radius: 6px; text-decoration: none; font-weight: 500; transition: all 0.2s ease; margin-left: 0.5rem; min-width: 50px; min-height: auto; text-align: center;  }
 .nav-button.login { background: transparent; color: var(--primary-color); border: 1px solid var(--primary-color); }
@@ -75,7 +81,7 @@
 /* --- Hero Section --- */
 .hero-section {
     position: relative; /* Acts as the positioning container for the content */
-    min-height: 90vh;
+    min-height: 70vh;
     background-color: var(--dark-text);
     color: #fff;
     overflow: hidden; /* This is the "window" that hides the off-screen slide */
@@ -85,7 +91,7 @@
 .hero-slider-track {
     display: flex;
     width: 200%; 
-    height: 90vh; 
+    height: 70vh; 
     transition: transform 1.2s cubic-bezier(0.77, 0, 0.175, 1); 
 }
 
@@ -117,15 +123,53 @@
     padding-right: 1.5rem;  
 }
 
-.hero-subtitle {
-    opacity: 0;
-    animation: fadeIn 0.8s ease-out forwards;
-    animation-delay: 0.2s; /* A small delay for effect */
+.hero-subtitle-container {
+    height: 3.5em; /* Give it a fixed height to prevent "jumping" when text changes */
+    position: relative;
+    margin-bottom: 2.5rem;
 }
 .hero-title { font-size: 3.5rem; margin-bottom: 1rem; line-height: 1.2; text-shadow: 0 2px 4px rgba(0,0,0,0.4); }
-.hero-subtitle { font-size: 1.25rem; opacity: 0.9; margin-bottom: 2.5rem; }
+.hero-subtitle {
+    font-size: 1.25rem;
+    opacity: 0.9;
+    /* position: absolute; */
+    width: 100%;
+    margin: 0;
+    animation: slideUpAndFadeIn 0.8s ease-out 0.2s forwards;
+}
 .hero-button { background: var(--secondary-color); color: #fff; padding: 0.8rem 2.5rem; border-radius: 6px; text-decoration: none; font-weight: 600; font-size: 1.1rem; transition: all 0.2s ease; }
 .hero-button:hover { background: #e67e22; transform: translateY(-2px); }
+
+/* 3. Hero Section Entrance Animation */
+.hero-title, .hero-button {
+    opacity: 0;
+    animation: fadeIn 0.8s ease-out forwards;
+}
+.hero-title {
+    animation-delay: 0.2s;
+}
+.hero-subtitle {
+    animation-delay: 0.6s;
+}
+.hero-button {
+    animation-delay: 1.0s;
+}
+
+@keyframes fadeIn {
+    to {
+        opacity: 1;
+    }
+}
+@keyframes slideUpAndFadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(100%); /* Start completely below the container */
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0); /* End inside the container */
+    }
+  }
 
 /* --- About & Content Sections --- */
 .about-container {
@@ -154,7 +198,7 @@
 /* --- NEW: Trigger the animation on hover --- */
     .section-title {
         font-size: 2.5rem; 
-        color: var(--dark-text);
+        color: #1E2A47;
         text-align: center ;
         position: relative;
         display: block; 
@@ -192,7 +236,7 @@
 .content-layout { display: flex; align-items: center; gap: 4rem; }
 .content-text { flex: 1; }
 .content-image { flex: 1; }
-.content-image img { max-width: 100%; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+.content-image img { max-width: 100%; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); border: 1px solid var(--primary-color); }
 .content-layout.reverse {
     flex-direction: row-reverse;
 }
@@ -580,26 +624,7 @@
     margin-top: 3rem; /* Adds space above the button */
 }
 
-/* 3. Hero Section Entrance Animation */
-.hero-content > * {
-    opacity: 0;
-    animation: fadeIn 0.8s ease-out forwards;
-}
-.hero-title {
-    animation-delay: 0.2s;
-}
-.hero-subtitle {
-    animation-delay: 0.6s;
-}
-.hero-button {
-    animation-delay: 1.0s;
-}
 
-@keyframes fadeIn {
-    to {
-        opacity: 1;
-    }
-}
 
 /* --- 1. Testimonial Marquee Animation --- */
 
