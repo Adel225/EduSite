@@ -1,29 +1,24 @@
-// Materials.js
+// src/components/student/pages/Materials.js
 import React, { useState, useEffect } from 'react';
-import '../../../styles/exams.css'; // Assuming you might reuse or have specific styles for materials
-import { API_URL } from "../../../config.js";
-
-// NEW IMPORTS
-import PDFViewer from '../../PDFAnnotationEditor/PDFViewer.js'; 
 import Modal from 'react-modal';
-// import '../../../styles/materialViewer.css'
+import { API_URL } from "../../../config.js";
+import PDFViewer from '../../PDFAnnotationEditor/PDFViewer.js'; 
+import '../../../styles/exams.css'; // For main page card layout
+import '../../../styles/materialViewer.css'; // For the modal
 
-// If not set globally, set the app element for react-modal
-// Modal.setAppElement('#root'); // Or your app's root element ID
+Modal.setAppElement('#root');
 
 const Materials = () => {
     const [materials, setMaterials] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    // NEW STATE FOR MODAL AND PDF URL TO VIEW
+    // State for the modal
     const [isPdfModalOpen, setIsPdfModalOpen] = useState(false);
+    const [modalLoading, setModalLoading] = useState(false);
+    const [selectedMaterial, setSelectedMaterial] = useState(null);
     const [pdfUrlToView, setPdfUrlToView] = useState('');
-    const [currentMaterialTitle, setCurrentMaterialTitle] = useState('');
-    const [currentFiles, setCurrentFiles] = useState([]); 
-    const [Links, setLinks] = useState([]); 
-    const [selectedFileIndex, setSelectedFileIndex] = useState(0); 
-    const [currentMaterialDescription, setCurrentMaterialDescription] = useState(''); 
+    const [mobileModalView, setMobileModalView] = useState('info'); 
 
     useEffect(() => {
         fetchMaterials();
@@ -31,83 +26,58 @@ const Materials = () => {
 
     const fetchMaterials = async () => {
         try {
-            setLoading(true); // Ensure loading is true at the start
-            setError(null);   // Clear previous errors
+            setLoading(true);
+            setError(null);
             const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-            const response = await fetch(`${API_URL}/material`, {
-                headers: {
-                    'Authorization': `MonaEdu ${token}`
-                }
-            });
+            const response = await fetch(`${API_URL}/material`, { headers: { 'Authorization': `MonaEdu ${token}` } });
             const data = await response.json();
-
             if (data.message === "Materials retrieved successfully") {
                 setMaterials(data.materials);
-            } else if (data.message === "Student has no group assigned") {
-                setError('You are not in group yet');
-                setMaterials([]); // Clear materials if error
             } else {
                 setError(data.message || 'Failed to fetch materials');
-                setMaterials([]); // Clear materials if error
+                setMaterials([]);
             }
         } catch (err) {
-            console.error('Error fetching materials:', err); // Log the actual error
             setError('Error loading materials. Please try again.');
-            setMaterials([]); // Clear materials on catch
+            setMaterials([]);
         } finally {
             setLoading(false);
         }
     };
 
-    const openMaterialInViewer = async (materialId, materialName) => {
+    const openMaterialInViewer = async (materialId) => {
+        setIsPdfModalOpen(true);
+        setModalLoading(true);
+        setMobileModalView('info'); // Default to info view
         try {
             const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-            const response = await fetch(`${API_URL}/material/${materialId}`, {
-                method: 'GET',
-                headers: {
-                    'Authorization': `MonaEdu ${token}`
-                }
-            });
-
-            
-            if (!response.ok) {
-                const errData = await response.json().catch(() => ({}));
-                throw new Error(errData.message || `Failed to fetch material details (status: ${response.status})`);
-            }
+            const response = await fetch(`${API_URL}/material/${materialId}`, { headers: { 'Authorization': `MonaEdu ${token}` } });
+            if (!response.ok) throw new Error(`Failed to fetch material details`);
             
             const data = await response.json();
-            console.log(data.Links);
+            setSelectedMaterial(data);
 
             if (data.files && Array.isArray(data.files) && data.files.length > 0) {
-                setCurrentFiles(data.files);
                 setPdfUrlToView(data.files[0].url);
-                setSelectedFileIndex(0);
-                setCurrentMaterialTitle(materialName || 'View Material');
-                setCurrentMaterialDescription(data.description || ''); 
-                setIsPdfModalOpen(true);
-                setLinks(data.Links);
             } else {
-                throw new Error('No file available for this material.');
+                setPdfUrlToView(''); // No PDF to view initially
             }
         } catch (error) {
-            console.error('Error opening material in viewer:', error);
-            alert('An error occurred while preparing the material for viewing: ' + error.message);
+            alert('An error occurred: ' + error.message);
+            setIsPdfModalOpen(false); // Close modal on error
+        } finally {
+            setModalLoading(false);
         }
     };
 
     const handleClosePdfModal = () => {
         setIsPdfModalOpen(false);
         setPdfUrlToView('');
-        setCurrentMaterialTitle('');
-        setCurrentFiles([]);
-        setLinks([]);
-        setSelectedFileIndex(0);
-        setCurrentMaterialDescription(''); 
+        setSelectedMaterial(null);
     };
 
     if (loading) return <div className="loading">Loading materials...</div>;
-    if (error && materials.length === 0) return <div className="error">{error}</div>;
-
+    if (error) return <div className="error">{error}</div>;
 
     return (
         <>
@@ -139,77 +109,67 @@ const Materials = () => {
                 </div>
             </div>
 
-            {isPdfModalOpen && (
-                <Modal
-                    isOpen={isPdfModalOpen}
-                    onRequestClose={handleClosePdfModal}
-                    contentLabel="View Material PDF"
-                    style={{ 
-                        overlay: { backgroundColor: 'rgba(0, 0, 0, 0.75)', zIndex: 1000 },
-                        content: {
-                            top: '50%', left: '50%', right: 'auto', bottom: 'auto',
-                            marginRight: '-50%', transform: 'translate(-50%, -50%)',
-                            width: '90vw', maxWidth: '1000px', height: '90vh',
-                            padding: '0', border: 'none', display: 'flex', flexDirection: 'column'
-                        }
-                    }}
-                >
-                    <div style={{ padding: '15px 20px', borderBottom: '1px solid #eee', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <h2 style={{ margin: 0, fontSize: '1.2em' }}>{currentMaterialTitle}</h2>
-                        <button onClick={handleClosePdfModal} style={{ background: 'none', border: 'none', fontSize: '1.5em', cursor: 'pointer' }}>×</button>
-                    </div>
-                    {currentMaterialDescription && (
-                        <div style={{ padding: '10px 20px', color: '#34495e', fontSize: '1rem', borderBottom: '1px solid #eee' }}>
-                            {currentMaterialDescription}
-                        </div>
-                    )}
+            <Modal
+                isOpen={isPdfModalOpen}
+                onRequestClose={handleClosePdfModal}
+                contentLabel="View Material"
+                className="material-modal"
+                overlayClassName="material-modal-overlay"
+            >
+                {modalLoading ? <div className="loading">Loading...</div> : (
+                    selectedMaterial && (
+                        <>
+                            <div className="material-modal-header">
+                                <h2>{selectedMaterial.name}</h2>
+                                <button onClick={handleClosePdfModal} className="close-modal-btn">×</button>
+                            </div>
+                            
+                            <div className="material-modal-body">
+                                <div className={`content-sidebar ${mobileModalView === 'info' ? 'active' : ''}`}>
+                                    <p className="material-description">{selectedMaterial.description}</p>
+                                    
+                                    <div className="resource-section">
+                                        <h3>Files</h3>
+                                        {selectedMaterial.files && selectedMaterial.files.length > 0 ? (
+                                            <ul className="resource-list">
+                                                {selectedMaterial.files.map((file, idx) => (
+                                                    <li key={idx} className="resource-item">
+                                                        <button className={pdfUrlToView === file.url ? 'active' : ''} onClick={() => setPdfUrlToView(file.url)}>
+                                                            {file.originalName || `File ${idx + 1}`}
+                                                        </button>
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        ) : <p className="no-resources-message">No files provided.</p>}
+                                    </div>
 
-                    {currentFiles.length > 1 && (
-                        <div style={{ padding: '10px 20px', borderBottom: '1px solid #eee', display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-                            {currentFiles.map((file, idx) => (
-                                <button
-                                    key={idx}
-                                    style={{
-                                        background: idx === selectedFileIndex ? '#3498db' : '#f4f4f4',
-                                        color: idx === selectedFileIndex ? 'white' : '#333',
-                                        border: '1px solid #ccc',
-                                        borderRadius: '4px',
-                                        padding: '6px 12px',
-                                        cursor: 'pointer',
-                                        fontWeight: 500
-                                    }}
-                                    onClick={() => {
-                                        setPdfUrlToView(file.url);
-                                        setSelectedFileIndex(idx);
-                                    }}
-                                >
-                                    {file.originalName || `File ${idx + 1}`}
-                                </button>
-                            ))}
-                        </div>
-                    )}
+                                    <div className="resource-section">
+                                        <h3>Links</h3>
+                                        {selectedMaterial.Links && selectedMaterial.Links.length > 0 ? (
+                                            <ul className="resource-list">
+                                                {selectedMaterial.Links.map((link, idx) => (
+                                                    <li key={idx} className="resource-item link-item">
+                                                        <a href={link} target="_blank" rel="noopener noreferrer">{link}</a>
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        ) : <p className="no-resources-message">No links provided.</p>}
+                                    </div>
+                                </div>
+                                
+                                <div className={`pdf-viewer-main ${mobileModalView === 'pdf' ? 'active' : ''}`}>
+                                    {pdfUrlToView ? <PDFViewer pdfUrl={pdfUrlToView} /> : <div className="loading">No PDF to display.</div>}
+                                </div>
+                            </div>
 
-                    <div className="resource-section">
-                        <h3>Links</h3>
-                        {Links && Links.length > 0 ? (
-                            <ul className="resource-list" >
-                                {Links.map((link, idx) => (
-                                    <li key={idx} className="resource-item link-item">
-                                        <a href={link} target="_blank" rel="noopener noreferrer">{link}</a>
-                                    </li>
-                                ))}
-                            </ul>
-                        ) : (
-                            <p className="no-resources-message">No links provided.</p>
-                        )}
-                    </div>
-
-                    <div style={{ flexGrow: 1, overflow: 'hidden' }}>
-                        <PDFViewer pdfUrl={pdfUrlToView} />
-                    </div>
-                </Modal>
-            )}
-        
+                            <div className="mobile-view-switcher">
+                                <button className={mobileModalView === 'info' ? 'active' : ''} onClick={() => setMobileModalView('info')}>Info</button>
+                                <button className={mobileModalView === 'pdf' ? 'active' : ''} onClick={() => setMobileModalView('pdf')}>PDF Viewer</button>
+                            </div>
+                        </>
+                    )
+                )}
+            </Modal>
         </>
     );
 };
