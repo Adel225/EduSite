@@ -236,7 +236,7 @@ const Exams = () => {
         <div className="exams-left">
           <h2>Select Grade</h2>
           <div className="grades-list">
-            {grades.map((grade) => (
+            {grades.map((grade) => ( 
               <div
                 key={grade}
                 className={`grade-card ${selectedGrade === grade ? 'selected' : ''}`}

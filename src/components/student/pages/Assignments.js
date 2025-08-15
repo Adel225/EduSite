@@ -11,10 +11,20 @@ const Assignments = () => {
     const [notes, setNotes] = useState('');
     const [file, setFile] = useState(null);
     const [submitStatus, setSubmitStatus] = useState('');
+    const [loadingDownloads, setLoadingDownloads] = useState({});
 
     useEffect(() => {
         fetchAssignments();
     }, []);
+
+    const isDeadlinePassed = (endDateString) => {
+        if (!endDateString) {
+            return false;
+        }
+        const deadline = new Date(endDateString);
+        const now = new Date();
+        return now > deadline;
+    };
 
     const fetchAssignments = async () => {
         try {
@@ -105,9 +115,10 @@ const Assignments = () => {
     };
 
     const downloadAssignment = async (assignmentId) => {
+        setLoadingDownloads(prev => ({ ...prev, [assignmentId]: true }));
         try {
             const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-            console.log('Download assignment: assignmentId =', assignmentId);
+            console.log('Download assignment: assignmentId = ', assignmentId);
             const response = await fetch(`https://backend-edu-site-5cnm.vercel.app/assignments/download?assignmentId=${assignmentId}`, {
                 method: 'GET',
                 headers: {
@@ -160,7 +171,41 @@ const Assignments = () => {
             window.URL.revokeObjectURL(url);
         } catch (error) {
             console.error('Error downloading assignment:', error);
-            setError('Failed to download assignment');
+            alert(error.message);
+        } finally {
+            setLoadingDownloads(prev => ({ ...prev, [assignmentId]: false }));
+        }
+    };
+
+    const downloadAnswerKey = async (assignmentId) => {
+        const loadingKey = `${assignmentId}-answer`;
+        setLoadingDownloads(prev => ({ ...prev, [loadingKey]: true }));
+        try {
+            const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+            const response = await fetch(`${API_URL}/assignments/download-answer?assignmentId=${assignmentId}`, {
+                method: 'GET',
+                headers: { 'Authorization': `MonaEdu ${token}` }
+            });
+
+            if (!response.ok) {
+                const data = await response.json().catch(() => ({}));
+                throw new Error(data.message || 'Failed to download answer key.');
+            }
+
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `answer-key-${assignmentId}.pdf`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+        } catch (error) {
+            console.error('Error downloading answer key:', error);
+            alert(error.message);
+        } finally {
+            setLoadingDownloads(prev => ({ ...prev, [loadingKey]: false }));
         }
     };
 
@@ -205,11 +250,17 @@ const Assignments = () => {
                                     <p>End: {formatDate(assignment.endDate)}</p>
                                 </div>
                                 <div className='exam-actions'>
+                                    {isDeadlinePassed(assignment.endDate) && (
+                                        <button className="action-btn view-answer-btn" onClick={() => downloadAnswerKey(assignment._id)} disabled={loadingDownloads[`${assignment._id}-answer`]}>
+                                            {loadingDownloads[`${assignment._id}-answer`] ? <div className="loading-spinner-small"></div> : 'View Answers'}
+                                        </button>
+                                    )}
                                     <button 
                                         className="download-btn"
                                         onClick={() => downloadAssignment(assignment._id)}
+                                        disabled={loadingDownloads[assignment._id]}
                                     >
-                                        Download
+                                        {loadingDownloads[assignment._id] ? <div className="loading-spinner-small"></div> : 'Download'}
                                     </button>
                                 </div>
                                 

@@ -137,3 +137,35 @@
   .form-actions { display: flex; justify-content: flex-end; gap: 1rem; margin-top: 2rem; border-top: 1px solid #eee; padding-top: 1rem; }
   .form-actions button { padding: 0.75rem 1.5rem; border-radius: 5px; border: none; cursor: pointer; font-weight: 500; }
   .form-actions .cancel-btn { background-color: #6c757d; color: white; }
+
+
+
+  /* ---------------- answers file styling  ---------------- */
+  .action-btn.view-answer-btn {
+    background-color: #28a745; 
+    color: white;
+    font: bolder;
+    padding: 0.6rem 1.2rem;
+    cursor: pointer; 
+    border-radius: 5px;
+}
+
+.action-btn.view-answer-btn:hover {
+    background-color: #218838; 
+}
+
+.loading-spinner-small {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: #fff;
+  animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+  to {
+      transform: rotate(360deg);
+  }
+}

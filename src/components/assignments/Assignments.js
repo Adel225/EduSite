@@ -28,12 +28,12 @@ const Assignments = () => {
   const [selectedGroupId, setSelectedGroupId] = useState(null);
 
   // --- MODIFIED: State for the STATIC "Create" form ---
-  const [createFormData, setCreateFormData] = useState({ name: '', file: null, startDate: '', endDate: '' });
+  const [createFormData, setCreateFormData] = useState({ name: '', file: null, answerFile: null, startDate: '', endDate: '' });
 
   // --- MODIFIED: State for the EDIT MODAL ---
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [currentItem, setCurrentItem] = useState(null);
-  const [editFormData, setEditFormData] = useState({ name: '', file: null, startDate: '', endDate: '', allowSubmissionsAfterDueDate: false });
+  const [editFormData, setEditFormData] = useState({ name: '', file: null, answerFile: null, startDate: '', endDate: '', allowSubmissionsAfterDueDate: false });
 
   const grades = [6,7,8,9,10,11,12];
 
@@ -116,6 +116,7 @@ const Assignments = () => {
       const formDataToSend = new FormData();
       formDataToSend.append('name', createFormData.name);
       formDataToSend.append('file', createFormData.file);
+      formDataToSend.append('answerFile', createFormData.answerFile);
       formDataToSend.append('startDate', createFormData.startDate);
       formDataToSend.append('endDate', createFormData.endDate);
       selectedGroups.forEach(groupId => formDataToSend.append('groupIds', groupId));
@@ -159,6 +160,9 @@ const Assignments = () => {
         if (editFormData.file) {
             formDataToSend.append('file', editFormData.file);
         }
+        if (editFormData.answerFile) {
+          formDataToSend.append('answerFile', editFormData.answerFile);
+      }
         
         const response = await fetch(`${API_URL}/assignments/edit`, {
             method: 'PUT',
@@ -208,7 +212,7 @@ const Assignments = () => {
         <div className="assignments-left">
           <h2>Select Grade</h2>
           <div className="grades-list">
-            {grades.map((grade) => (<div key={grade} className={`grade-card ${selectedGrade === String(grade) ? 'selected' : ''}`} onClick={() => handleGradeChange({ target: { value: grade } })}><h3>Grade {grade}</h3></div>))}
+            {grades.map((grade) => (<div key={grade} className={`grade-card ${selectedGrade === grade ? 'selected' : ''}`} onClick={() => handleGradeChange({ target: { value: grade } })}><h3>Grade {grade}</h3></div>))}
           </div>
           {selectedGrade && (
             <div className="groups-section">
@@ -233,6 +237,8 @@ const Assignments = () => {
                       </div>
                       <div className="assignment-actions">
 
+                        
+                        <button className="edit-btn" onClick={(e) => { e.stopPropagation(); handleOpenEditModal(assignment); }}>Edit</button>
                         <button
                             className="view-btn"
                             onClick={e => {
@@ -246,7 +252,6 @@ const Assignments = () => {
                           >
                             View
                           </button>
-                        <button className="edit-btn" onClick={(e) => { e.stopPropagation(); handleOpenEditModal(assignment); }}>Edit</button>
                         <button
                             className="delete-btn"
                             onClick={(e) => {
@@ -291,6 +296,7 @@ const Assignments = () => {
             </div>
             <div className="form-group"><label>Assignment Name:</label><input type="text" value={createFormData.name} onChange={(e) => setCreateFormData({...createFormData, name: e.target.value})} required /></div>
             <div className="form-group"><label>Assignment File:</label><input type="file" id="assignment-file-input" accept=".pdf" onChange={(e) => setCreateFormData({...createFormData, file: e.target.files[0]})} required /></div>
+            <div className="form-group"><label>Answer File:</label><input type="file" id="assignment-file-input" accept=".pdf" onChange={(e) => setCreateFormData({...createFormData, answerFile: e.target.files[0]})} /></div>
             <div className="form-group"><label>Start Date:</label><input type="datetime-local" value={createFormData.startDate} onChange={(e) => setCreateFormData({...createFormData, startDate: e.target.value})} required /></div>
             <div className="form-group"><label>End Date:</label><input type="datetime-local" value={createFormData.endDate} onChange={(e) => setCreateFormData({...createFormData, endDate: e.target.value})} required /></div>
             {error && <div className="error-message">{error}</div>}
@@ -305,6 +311,7 @@ const Assignments = () => {
         <form onSubmit={handleEditSubmit}>
             <div className="form-group"><label>Assignment Name:</label><input type="text" value={editFormData.name} onChange={(e) => setEditFormData({...editFormData, name: e.target.value})} required /></div>
             <div className="form-group"><label>Assignment File (Leave blank to keep existing):</label><input type="file" onChange={(e) => setEditFormData({...editFormData, file: e.target.files[0]})} /></div>
+            <div className="form-group"><label>Answers File (Leave blank to keep existing):</label><input type="file" onChange={(e) => setEditFormData({...editFormData, answerFile: e.target.files[0]})} /></div>
             <div className="form-group"><label>Start Date:</label><input type="datetime-local" value={editFormData.startDate} onChange={(e) => setEditFormData({...editFormData, startDate: e.target.value})} required /></div>
             <div className="form-group"><label>End Date:</label><input type="datetime-local" value={editFormData.endDate} onChange={(e) => setEditFormData({...editFormData, endDate: e.target.value})} required /></div>
             <div className="form-group checkbox-group">
