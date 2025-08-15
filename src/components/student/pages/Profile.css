@@ -252,3 +252,27 @@
     opacity: 0.9;
     transform: translateY(-1px);
 } 
+
+.pdf-viewer-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.75);
+    z-index: 1000;
+  }
+  
+  .pdf-viewer-modal {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90vw;
+    height: 90vh;
+    background: #fff;
+    overflow: hidden;
+    border-radius: 8px;
+    outline: none;
+    padding: 0;
+  }

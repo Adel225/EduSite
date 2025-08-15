@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 // import { useParams } from 'react-router-dom';
 import { API_URL } from '../../../config';
 import './Profile.css';
+import MarkedPDFViewer from '../../PDFAnnotationEditor/MarkedPDFViewer';
+import Modal from 'react-modal';
 
 const Profile = () => {
     const [user, setUser] = useState(null);
@@ -12,6 +14,8 @@ const Profile = () => {
     //     confirmNewPassword: ''
     // });
     const [error, setError] = useState('');
+    const [isViewerOpen, setIsViewerOpen] = useState(false);
+    const [dataToView, setDataToView] = useState(null); // Will hold { pdfUrl, annotationData }
     // const [success, setSuccess] = useState('');
 
     const fetchUserData = async () => {
@@ -88,11 +92,10 @@ const Profile = () => {
     // };
 
     const handleDeleteSubmission = async (submissionId, type, submissionName) => {
-        // Show confirmation popup
         const isConfirmed = window.confirm(`Are you sure you want to delete this submission${submissionName ? ` for ${submissionName}` : ''}?`);
         
         if (!isConfirmed) {
-            return; // If user clicks Cancel, don't proceed with deletion
+            return;
         }
 
         try {
@@ -122,6 +125,56 @@ const Profile = () => {
         }
     };
 
+     const handleViewSubmission = async (submission, type) => {
+        // If the submission is not marked yet, open the original file in a new tab.
+        if (submission.score === undefined || submission.score === null) {
+            const path = type === 'exam' ? submission.filePath : submission.path;
+            if (path) {
+                window.open(path, '_blank');
+            } else {
+                alert('No submission file found.');
+            }
+            return;
+        }
+
+        // If it IS marked, fetch the full data with annotations and open the modal viewer.
+        const studentId = submission.studentId._id || submission.studentId;
+        const groupId = submission.groupId;
+        let url = '';
+
+        if (type === 'exam') {
+            const examId = submission.examId._id || submission.examId;
+            url = `${API_URL}/exams/submissions?examId=${examId}&studentId=${studentId}&groupId=${groupId}`;
+        } else {
+            const assignmentId = submission.assignmentId._id || submission.assignmentId;
+            url = `${API_URL}/assignments/submissions?assignmentId=${assignmentId}&studentId=${studentId}&groupId=${groupId}`;
+        }
+        
+        try {
+            const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+            const response = await fetch(url, { headers: { 'Authorization': `MonaEdu ${token}` } });
+            const data = await response.json();
+
+            if (data.data && data.data.length > 0) {
+                const fullSubmission = data.data[0];
+                setDataToView({
+                    pdfUrl: fullSubmission.filePath || fullSubmission.path,
+                    annotationData: fullSubmission.annotationData
+                });
+                setIsViewerOpen(true);
+            } else {
+                throw new Error(data.message || 'Could not find submission details.');
+            }
+        } catch (err) {
+            alert(`Error: ${err.message}`);
+        }
+    };
+
+    const handleCloseViewer = () => {
+        setIsViewerOpen(false);
+        setDataToView(null);
+    };
+
     if (loading) {
         return <div>Loading...</div>;
     }
@@ -131,7 +184,8 @@ const Profile = () => {
     }
 
     return (
-        <div className="profile-container">
+        <>
+            <div className="profile-container">
             <h2>Profile</h2>
             {error && <div className="error-message">{error}</div>}
             
@@ -205,10 +259,7 @@ const Profile = () => {
                                     {submission.teacherFeedback && <p><strong>Feedback:</strong> {submission.teacherFeedback}</p>}
                                 </div>
                                 <div className="submission-actions">
-                                    <button 
-                                        className="action-btn view"
-                                        onClick={() => window.open(submission.path, '_blank')}
-                                    >
+                                    <button className="action-btn view" onClick={() => handleViewSubmission(submission, 'assignment')}>
                                         View
                                     </button>
                                     <button 
@@ -248,10 +299,7 @@ const Profile = () => {
                                     {submission.teacherFeedback && <p><strong>Feedback:</strong> {submission.teacherFeedback}</p>}
                                 </div>
                                 <div className="submission-actions">
-                                    <button 
-                                        className="action-btn view"
-                                        onClick={() => window.open(submission.filePath, '_blank')}
-                                    >
+                                    <button className="action-btn view" onClick={() => handleViewSubmission(submission, 'exam')}>
                                         View
                                     </button>
                                     <button 
@@ -311,6 +359,22 @@ const Profile = () => {
                 </form>
             </div> */}
         </div>
+            <Modal
+                isOpen={isViewerOpen}
+                onRequestClose={handleCloseViewer}
+                contentLabel="View Marked Submission"
+                className="pdf-viewer-modal" // Use a class for full-screen styling
+                overlayClassName="pdf-viewer-modal-overlay"
+            >
+                {dataToView && (
+                    <MarkedPDFViewer
+                        pdfUrl={dataToView.pdfUrl}
+                        annotationData={dataToView.annotationData}
+                    />
+                )}
+                <button onClick={handleCloseViewer} style={{position: 'fixed', top: '20px', right: '20px', zIndex: 2001, padding: '10px 20px', cursor: 'pointer'}}>Close</button>
+            </Modal>
+        </>
     );
 };
 
