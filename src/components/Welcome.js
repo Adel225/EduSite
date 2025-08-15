@@ -148,7 +148,7 @@ const Welcome = () => {
                         </div>
                         <div className="about-image">
                             <div className="content-image-wrapper soft-rectangle">
-                                <img src="https://res.cloudinary.com/dwcy6vc23/image/upload/v1691015553/sample.jpg" alt="Mona AboElazm" />
+                                <img src="https://res.cloudinary.com/dwcy6vc23/image/upload/v1755290433/EduSite/about_me_uelwkb.svg" alt="Mona AboElazm" />
                             </div>
                         </div>
                     </div>
@@ -161,7 +161,7 @@ const Welcome = () => {
                         
                         <div className="content-layout" style={{marginBottom: '4rem'}}>
                             <div className="content-image">
-                                <img src="https://res.cloudinary.com/dwcy6vc23/image/upload/v1692917668/a4jpegwtdrrny5fbmrll.png" width="500" height="500" alt="A Unique Approach" />
+                                <img src="https://res.cloudinary.com/dwcy6vc23/image/upload/v1755290426/EduSite/A_Fresh_Perspective_baccia.svg" width="500" height="500" alt="A Unique Approach" />
                             </div>
                             <div className="content-text">
                                 <h3>A Fresh Perspective</h3>
@@ -173,7 +173,7 @@ const Welcome = () => {
 
                         <div className="content-layout reverse">
                             <div className="content-image">
-                                <img src="https://res.cloudinary.com/dwcy6vc23/image/upload/v1692917668/a4jpegwtdrrny5fbmrll.png" width="500" height="500" alt="Supporting Team" />
+                                <img src="https://res.cloudinary.com/dwcy6vc23/image/upload/v1755290418/EduSite/Experts_by_Your_Side_nn9prd.svg" width="500" height="500" alt="Supporting Team" />
                             </div>
                             <div className="content-text">
                                 <h3>Experts by Your Side</h3>
@@ -271,21 +271,21 @@ const Welcome = () => {
                         
                         <div className={`faq-item ${activeFaq === 1 ? 'active' : ''}`}>
                             <div className="faq-question" onClick={() => toggleFaq(1)}>
-                                <span>Q: Placeholder question one?</span>
+                                <span>How will your lessons help me improve my maths grades?</span>
                                 <span className="faq-icon">{activeFaq === 1 ? '-' : '+'}</span>
                             </div>
                             <div className="faq-answer">
-                                <p>Placeholder answer for the first question. This text explains the details in a clear and concise way.</p>
+                                <p>My lessons are designed to break down complex IGCSE maths concepts into simple, easy-to-follow steps. You’ll receive targeted practice, clear explanations, and strategies for tackling tricky exam questions so you can boost both your confidence and your marks.</p>
                             </div>
                         </div>
 
                         <div className={`faq-item ${activeFaq === 2 ? 'active' : ''}`}>
                             <div className="faq-question" onClick={() => toggleFaq(2)}>
-                                <span>Q: Placeholder question two?</span>
+                                <span>What makes your teaching style different?</span>
                                 <span className="faq-icon">{activeFaq === 2 ? '-' : '+'}</span>
                             </div>
                             <div className="faq-answer">
-                                <p>Placeholder answer for the second question, providing more valuable information to prospective students and parents.</p>
+                                <p>I focus on building a solid foundation first — strengthening core skills before moving to advanced problem-solving. Lessons are interactive, personalised, and adapted to your pace, ensuring no topic is left unclear.</p>
                             </div>
                         </div>
 

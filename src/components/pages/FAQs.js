@@ -10,23 +10,28 @@ const FAQs = () => {
     const faqsData = [
         {
             id: 1,
-            question: 'Q: Why should I choose you as my tutor?',
-            answer: 'Placeholder answer: With years of specialized experience, a proven track record of student success, and a passion for making math understandable, I provide a learning experience that goes beyond the textbook.'
+            question: 'Q: How will your lessons help me improve my maths grades?',
+            answer: 'My lessons are designed to break down complex IGCSE maths concepts into simple, easy-to-follow steps. You’ll receive targeted practice, clear explanations, and strategies for tackling tricky exam questions so you can boost both your confidence and your marks.'
         },
         {
             id: 2,
-            question: 'Q: What sets you apart from other tutors?',
-            answer: 'Placeholder answer: My approach is highly personalized. I focus on identifying each student\'s unique strengths and weaknesses to build a tailored curriculum that fosters both confidence and competence.'
+            question: 'Q: What makes your teaching style different?',
+            answer: 'I focus on building a solid foundation first — strengthening core skills before moving to advanced problem-solving. Lessons are interactive, personalised, and adapted to your pace, ensuring no topic is left unclear.'
         },
         {
             id: 3,
-            question: 'Q: What does your course include?',
-            answer: 'Placeholder answer: Courses include live interactive sessions, a comprehensive library of materials and notes, regular assignments with personalized feedback, and continuous progress tracking.'
+            question: 'Q: Have your students achieved top results before?',
+            answer: 'Yes — many of my students have moved from struggling with maths to achieving A* grades. Their progress comes from consistent practice, focused feedback, and learning how to approach exam questions effectively.'
         },
         {
             id: 4,
-            question: 'Q: What makes your students excel in their exams?',
-            answer: 'Placeholder answer: We focus on deep conceptual understanding rather than rote memorization. By teaching problem-solving strategies and critical thinking skills, students are equipped to handle any question that comes their way.'
+            question: 'Q: What exactly will I get when I join your course?',
+            answer: 'You’ll get structured lesson plans, concise revision notes, topic-by-topic worksheets, exam-style questions, and live support. Every resource is aligned with the Cambridge and Edexcel IGCSE syllabus to keep you exam-ready.'
+        },
+        {
+            id: 5,
+            question: 'Q: How can I be sure I’ll see results?',
+            answer: 'If you attend lessons regularly, complete the homework, and apply the techniques we cover, you’ll see steady improvement — and if you put in consistent effort, top grades are within reach.'
         },
     ];
 
