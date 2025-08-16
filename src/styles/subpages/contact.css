@@ -79,11 +79,16 @@
     margin-top: 0;
     margin-bottom: 3.5rem;
 }
-.contact-info-item { /* ... (This style from your previous CSS can remain) ... */ }
+.space > a { 
+    color: var(--dark-text) !important;
+}
+.space > a:hover { 
+    color: var(--primary-color) !important;
+}
 
 /* --- Responsive Adjustments --- */
 @media (max-width: 992px) {
     .contact-content-grid {
-        grid-template-columns: 1fr; /* Stack columns on tablets and mobile */
+        grid-template-columns: 1fr; 
     }
 }

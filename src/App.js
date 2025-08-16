@@ -6,6 +6,7 @@ import ScrollToTop from './utils/ScrollToTop.js';
 import ResponsiveLayout from './components/layout/ResponsiveLayout'; 
 import Welcome from './components/Welcome.js';
 import Courses from './components/pages/Courses';
+import CourseDetails from './components/pages/CourseDetails'; 
 import Testimonials from './components/pages/Testimonials';
 import About from './components/pages/About';
 import FAQs from './components/pages/FAQs';
@@ -180,6 +181,7 @@ return (
         <Route path="/about" element={<Layout><About /></Layout>} />
         <Route path="/faqs" element={<Layout><FAQs /></Layout>} />
         <Route path="/contact" element={<Layout><Contact /></Layout>} />
+        <Route path="/courses/:courseName" element={<Layout><CourseDetails /></Layout>} />
         <Route path="/demo" element={<Demo />} />
 
     <Route path="/redirecting" element={<Redirecting />} />

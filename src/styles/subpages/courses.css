@@ -1,0 +1,198 @@
+/* src/styles/courses.css */
+
+.courses-page-container {
+    padding: 0; /* Allows hero to be full-width */
+}
+
+/* --- Hero Section --- */
+.courses-hero-section {
+    padding: 2rem 1.5rem;
+    text-align: center;
+    color: #fff;
+    background-size: cover;
+    background-position: center;
+    background-color: var(--dark-text);
+}
+
+.courses-hero-section h1 {
+    font-size: 3rem;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+}
+@media (max-width: 768px) {
+    .contact-hero-section h1 {
+        font-size: 2.1rem;
+    }
+}
+
+/* --- Main Content --- */
+.courses-main-content {
+    padding: 5rem 1.5rem;
+}
+
+.courses-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 2.5rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* --- Course Card Styling --- */
+.course-card {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 5px 25px rgba(0,0,0,0.07);
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    padding: 2rem;
+    border: 1px solid var(--primary-color);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.course-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.1);
+}
+
+.course-icon {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background-color: var(--bg-light);
+    color: var(--primary-color);
+    margin: 0 auto 1.5rem auto;
+}
+
+.course-icon svg {
+    width: 28px;
+    height: 28px;
+}
+
+.course-card h3 {
+    font-size: 1.4rem;
+    color: var(--dark-text);
+    margin: 0 0 0.75rem 0;
+}
+
+.course-card p {
+    color: var(--body-text);
+    flex-grow: 1; /* Pushes the button to the bottom */
+    margin-bottom: 1.5rem;
+}
+
+/* --- Custom Course Card --- */
+.course-card.custom {
+    background: var(--bg-light);
+    border: 2px dashed var(--primary-color);
+}
+
+.course-card.custom h3 {
+    color: var(--primary-color);
+}
+
+.course-card.custom .course-icon {
+    background-color: var(--primary-color);
+    color: #fff;
+}
+
+ /* modal styling  */
+
+.form-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.6);
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.form-modal {
+    background: white;
+    padding: 2.5rem;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 600px;
+    outline: none;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+}
+
+.form-modal h2 {
+    margin-top: 0;
+    margin-bottom: 2rem;
+    color: var(--dark-text);
+    text-align: center;
+}
+
+.form-modal .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.form-modal input,
+.form-modal select,
+.form-modal textarea {
+    width: 100%;
+    padding: 0.8rem 1rem;
+    border: 1px solid var(--border-light);
+    border-radius: 6px;
+    font-size: 1rem;
+    font-family: inherit;
+    box-sizing: border-box;
+}
+
+.form-modal textarea {
+    min-height: 120px;
+    resize: vertical;
+    width: 100%;
+    margin-bottom: 1.5rem;
+}
+
+.form-modal .submit-button {
+    display: block;
+    width: 100%;
+    padding: 0.9rem;
+    background: var(--primary-color);
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-size: 1.1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.form-modal .submit-button:hover {
+    background: #4e59a0;
+}
+
+.form-modal .submit-message {
+    text-align: center;
+    margin-top: 1rem;
+    padding: 0.75rem;
+    border-radius: 6px;
+}
+.form-modal .submit-message.success {
+    background-color: #d4edda;
+    color: #155724;
+}
+.form-modal .submit-message.error {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+/* Responsive adjustment for the form grid inside the modal */
+@media (max-width: 500px) {
+    .form-modal .form-grid {
+    grid-template-columns: 1fr;
+    }
+}

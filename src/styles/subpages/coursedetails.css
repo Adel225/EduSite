@@ -1,0 +1,106 @@
+/* src/styles/coursedetails.css */
+
+.course-details-page {
+    padding-bottom: 5rem; /* Add space before the footer */
+}
+
+/* --- Hero Section --- */
+.course-details-hero {
+    padding: 5rem 1.5rem;
+    text-align: center;
+    color: #fff;
+    background-size: cover;
+    background-position: center;
+    background-color: var(--dark-text); /* Fallback */
+    margin-bottom: 5rem;
+}
+
+.course-details-hero h1 {
+    font-size: 3rem;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    margin: 0;
+}
+
+/* --- Main Content Layout --- */
+.details-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr; /* Main content is twice as wide as sidebar */
+    gap: 4rem;
+    align-items: flex-start;
+}
+
+/* --- Left Column: Main Details --- */
+.course-main-details h2 {
+    font-size: 2rem;
+    color: var(--dark-text);
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+}
+
+.course-main-details p {
+    font-size: 1.1rem;
+    line-height: 1.8;
+    margin-bottom: 2rem;
+}
+
+.learning-outcomes-list {
+    list-style: none;
+    padding: 0;
+    margin-top: 2rem;
+}
+
+.learning-outcomes-list li {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    font-size: 1.05rem;
+    margin-bottom: 1rem;
+}
+
+.learning-outcomes-list svg {
+    width: 24px;
+    height: 24px;
+    color: var(--primary-color);
+    flex-shrink: 0;
+}
+
+/* --- Right Column: Sidebar Card --- */
+.course-sidebar {
+    background-color: var(--bg-light);
+    padding: 2rem;
+    border-radius: 8px;
+    position: sticky;
+    top: 120px; /* Adjust based on your header height */
+}
+
+.course-sidebar-item {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border-light);
+}
+.course-sidebar-item:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+.course-sidebar-item h4 {
+    margin: 0 0 0.5rem 0;
+    color: var(--dark-text);
+}
+
+.enroll-now-btn {
+    width: 100%;
+    padding: 0.9rem;
+    font-size: 1.1rem;
+}
+
+/* --- Responsive Adjustments --- */
+@media (max-width: 992px) {
+    .details-grid {
+        grid-template-columns: 1fr; /* Stack columns on tablets and mobile */
+    }
+    .course-sidebar {
+        position: static; /* Un-stick the sidebar on mobile */
+        margin-top: 3rem;
+    }
+}
