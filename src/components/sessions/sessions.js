@@ -1,4 +1,5 @@
-    import React, { useState } from 'react';
+    import React, { useState, useMemo  } from 'react';
+    import { useAuth } from '../../utils/AuthContext';
     import '../../styles/sessions.css';
     import '../../styles/exams.css';
     import { API_URL } from '../../config';
@@ -25,6 +26,30 @@
     });
 
     const grades = [6,7,8,9,10,11,12];
+
+    const { user } = useAuth(); // Get the user from the global context
+
+    // --- HIGHLIGHT: Process assistant permissions for SESSIONS ---
+    const assistantPermissions = useMemo(() => {
+        if (user?.role !== 'assistant') return null;
+        const permissions = {
+            allowedGradeNumbers: new Set(),
+            allowedGroupIds: new Set(),
+        };
+        user.permissions?.sections?.forEach(p => {
+            permissions.allowedGradeNumbers.add(p.grade);
+            permissions.allowedGroupIds.add(p.groupId);
+        });
+        return {
+            ...permissions,
+            allowedGradeNumbers: Array.from(permissions.allowedGradeNumbers).sort((a, b) => a - b),
+        };
+    }, [user]);
+
+    const displayedGrades = assistantPermissions ? assistantPermissions.allowedGradeNumbers : grades;
+    const displayedGroups = groups.filter(g => 
+        assistantPermissions ? assistantPermissions.allowedGroupIds.has(g._id) : true
+    );
 
     const fetchGroups = async (grade) => {
         setLoadingGroups(true);
@@ -193,7 +218,7 @@
         <div className="exams-left">
             <h2>Select Grade</h2>
             <div className="grades-list">
-            {grades.map((grade) => (
+            {displayedGrades.map((grade) => (
                 <div
                 key={grade}
                 className={`grade-card ${selectedGrade === grade ? 'selected' : ''}`}
@@ -213,7 +238,7 @@
                 <div className="error">{error}</div>
                 ) : (
                 <div className="groups-list">
-                    {groups.map((group) => (
+                    {displayedGroups.map((group) => (
                     <div 
                         key={group._id} 
                         className={`group-item ${selectedGroupId === group._id ? 'selected' : ''}`}
@@ -270,7 +295,7 @@
                 required
                 >
                 <option value="">Select Grade</option>
-                {grades.map(grade => (
+                {displayedGrades.map(grade => (
                     <option key={grade} value={grade}>Grade {grade}</option>
                 ))}
                 </select>
@@ -291,14 +316,14 @@
                                 if (selectedGroups.length === groups.length) {
                                 setSelectedGroups([]);
                                 } else {
-                                setSelectedGroups(groups.map(group => group._id));
+                                setSelectedGroups(displayedGroups.map(group => group._id));
                                 }
                             }}
                             />
                             Select All Groups
                         </label>
                         </div>
-                        {groups.map((group) => (
+                        {displayedGroups.map((group) => (
                         <div key={group._id} className="group-checkbox-row">
                             <label>
                             <input

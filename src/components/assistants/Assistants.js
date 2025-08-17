@@ -1,5 +1,5 @@
 // src/components/assistants/Assistants.js
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback  } from 'react';
 import Modal from 'react-modal';
 import { API_URL } from '../../config';
 import '../../styles/assistants.css';
@@ -96,8 +96,14 @@ const Assistants = () => {
     // --- Permissions Modal Logic ---
     const handleOpenPermissionsModal = async (assistant) => {
         setCurrentItem(assistant);
-        // The API returns the permissions object directly on the assistant object
-        setPermissions(assistant.permissions || {}); 
+        const initialPermissions = {};
+        for (const category in assistant.permissions) {
+            if (Array.isArray(assistant.permissions[category])) {
+                initialPermissions[category] = new Set(assistant.permissions[category].map(p => p.groupId));
+            }
+        }
+        setPermissions(initialPermissions || {}); 
+        console.log(initialPermissions);
         setIsPermissionsModalOpen(true);
     };
 
@@ -132,28 +138,39 @@ const Assistants = () => {
     };
     
     const handlePermissionCheckboxChange = (groupId, category) => {
-        const currentPermissions = permissions[category] || [];
-        const newPermissions = currentPermissions.includes(groupId)
-            ? currentPermissions.filter(id => id !== groupId)
-            : [...currentPermissions, groupId];
-        setPermissions(prev => ({ ...prev, [category]: newPermissions }));
+        setPermissions(prev => {
+            const newCategoryPermissions = new Set(prev[category] || []);
+            if (newCategoryPermissions.has(groupId)) {
+                newCategoryPermissions.delete(groupId);
+            } else {
+                newCategoryPermissions.add(groupId);
+            }
+            return { ...prev, [category]: newCategoryPermissions };
+        });
     };
     
     const handlePermissionsSave = async () => {
         setSubmitStatus("Saving...");
         try {
+            const payload = { permissions: {} };
+            for (const category in permissions) {
+                payload.permissions[category] = Array.from(permissions[category]);
+            }
+
             const token = localStorage.getItem('token') || sessionStorage.getItem('token');
             const response = await fetch(`${API_URL}/assistant/${currentItem._id}/permissions`, {
                 method: 'PUT',
                 headers: { 'Authorization': `MonaEdu ${token}`, 'Content-Type': 'application/json' },
-                body: JSON.stringify({ permissions })
+                body: JSON.stringify(payload) 
             });
+
             const result = await response.json();
-            if (!response.ok) throw new Error(result.message);
+            if (!response.ok) throw new Error(result.message || "Failed to update permissions.");
             
             setSubmitStatus("Permissions updated successfully!");
-            fetchAssistants(); // Refresh the main list data
+            fetchAssistants(); 
             setTimeout(handleClosePermissionsModal, 1500);
+
         } catch (err) {
             setSubmitStatus(`Error: ${err.message}`);
         }
@@ -168,7 +185,7 @@ const Assistants = () => {
                 <div>
                     <h4>{category.charAt(0).toUpperCase() + category.slice(1)}</h4>
                     <div className="permission-summary">
-                        {permissions[category]?.length || 0} groups selected
+                        {permissions[category]?.size || 0} groups selected
                     </div>
                 </div>
                 <span>{activePermissionAccordion === category ? '−' : '+'}</span>
@@ -187,7 +204,7 @@ const Assistants = () => {
                     <div className="groups-checkbox-list">
                         {(selectedGrades[category] || []).flatMap(grade => groupsByGrade[grade] || []).map(group => (
                             <label key={group._id}>
-                                <input type="checkbox" checked={permissions[category]?.includes(group._id)} onChange={() => handlePermissionCheckboxChange(group._id, category)} />
+                                <input type="checkbox" checked={permissions[category]?.has(group._id)} onChange={() => handlePermissionCheckboxChange(group._id, category)} />
                                 {group.groupname} (Grade {group.grade})
                             </label>
                         ))}
@@ -242,7 +259,7 @@ const Assistants = () => {
                         {renderPermissionsCategory('assignments')}
                         {renderPermissionsCategory('exams')}
                         {renderPermissionsCategory('materials')}
-                        {renderPermissionsCategory('sessions')}
+                        {renderPermissionsCategory('sections')}
                         {renderPermissionsCategory('groups')}
                     </div>
                     {submitStatus && <p>{submitStatus}</p>}

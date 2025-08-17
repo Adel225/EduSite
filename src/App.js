@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { HashRouter as Router, Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import ScrollToTop from './utils/ScrollToTop.js';
+import { useAuth } from '../src/utils/AuthContext.js';
 
 // Layout Component
 import ResponsiveLayout from './components/layout/ResponsiveLayout'; 
+import DashboardLayout from './components/layout/DashboardLayout';
 import Welcome from './components/Welcome.js';
 import Courses from './components/pages/Courses';
 import CourseDetails from './components/pages/CourseDetails'; 
@@ -14,8 +16,10 @@ import Contact from './components/pages/Contact';
 import Demo from './components/pages/Demo';
 import Layout from './components/Layout'; 
 
+import { AuthProvider } from './utils/AuthContext.js';
+
 // Sidebar Components
-import Sidebar from './components/Sidebar'; // Teacher's Sidebar
+// import Sidebar from './components/Sidebar'; // Teacher's Sidebar
 import StudentSidebar from './components/student/StudentSidebar'; 
 
 // Page/Feature Components (no changes to these imports)
@@ -67,188 +71,95 @@ const GlobalLoadingIndicator = () => (
 </div>
 );
 
-const AuthInitializerAndMainApp = () => {
-const [isLoading, setIsLoading] = useState(true);
-const navigate = useNavigate();
-const location = useLocation();
 
+const AppRoutes = () => {
+  const { user, isLoading } = useAuth();
 
-useEffect(() => {
-    let isMounted = true;
-    const performCheck = async () => {
-      const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-      const currentPath = location.pathname;
+  // The AuthProvider is now handling the initial loading state for the whole app
+  if (isLoading) {
+      return <GlobalLoadingIndicator />;
+  }
 
-      if (!token) {
-        if (isMounted) setIsLoading(false);
-        return;
-      }
+  // This component now only defines the routing rules based on the user's status.
+  // The redirect logic is handled by the PrivateRoute components.
+  return (
+      <Routes>
+          {/* Public Routes */}
+          <Route path="/" element={<Welcome />} />
+          <Route path="/courses" element={<Layout><Courses /></Layout>} />
+          <Route path="/testimonials" element={<Layout><Testimonials /></Layout>} />
+          <Route path="/about" element={<Layout><About /></Layout>} />
+          <Route path="/faqs" element={<Layout><FAQs /></Layout>} />
+          <Route path="/contact" element={<Layout><Contact /></Layout>} />
+          <Route path="/courses/:courseName" element={<Layout><CourseDetails /></Layout>} />
+          <Route path="/demo" element={<Demo />} />
+          <Route path="/redirecting" element={<Redirecting />} />
+          
+          {/* Auth Routes */}
+          <Route path="/admin/login" element={!user ? <AdminLogin /> : <Navigate to="/dashboard/sessions" />} />
+          <Route path="/login" element={!user ? <Login /> : <Navigate to="/student/sessions" />} />
+          <Route path="/signup" element={!user ? <SignUp /> : <Navigate to="/redirecting" />} />
 
-      try {
-        const response = await fetch(`${API_URL}/student/profile`, {
-          method: 'GET',
-          headers: {
-            'Authorization': `MonaEdu ${token}`,
-            'Content-Type': 'application/json',
-          },
-        });
-
-        if (!isMounted) return;
-
-        if (response.ok) {
-          const profileData = await response.json();
-          if (profileData.data) {
-            const isTeacher = profileData.data.role === "main_teacher";
-            const isAssistant = profileData.data.role === "assistant";
-            const isStudent = !!profileData.data.userName;
-
-            if (isTeacher) {
-              if (['/login', '/admin/login', '/signup', '/redirecting'].includes(currentPath)) {
-                navigate('/dashboard/sessions', { replace: true });
+          {/* Private Teacher/Assistant Route */}
+          <Route
+              path="/dashboard/*"
+              element={
+                  user && (user.role === 'main_teacher' || user.role === 'assistant') ? 
+                  <DashboardLayout><DashboardRoutes /></DashboardLayout> : 
+                  <Navigate to="/admin/login" />
               }
-            } else if (isStudent) {
-              if (['/login', '/admin/login', '/signup', '/redirecting'].includes(currentPath)) {
-                navigate('/student/', { replace: true });
+          />
+
+          {/* Private Student Route */}
+          <Route
+              path="/student/*"
+              element={
+                  user && user.userName ? 
+                  <ResponsiveLayout SidebarComponent={StudentSidebar}><StudentRoutes /></ResponsiveLayout> : 
+                  <Navigate to="/login" />
               }
-            } else { 
-              localStorage.removeItem('token');
-              sessionStorage.removeItem('token');
-              if (!['/login', '/admin/login', '/signup'].includes(currentPath)) {
-                navigate('/login', { state: { error: "The login credentials aren't right." }, replace: true });
-              }
-            }
-          } else { 
-            localStorage.removeItem('token');
-            sessionStorage.removeItem('token');
-            if (!['/login', '/admin/login', '/signup'].includes(currentPath)) {
-              navigate('/login', { state: { error: "Failed to verify login. Please try again." }, replace: true });
-            }
-          }
-        } else { 
-          localStorage.removeItem('token');
-          sessionStorage.removeItem('token');
-          if (!['/login', '/admin/login', '/signup'].includes(currentPath)) {
-              navigate('/login', { replace: true, state: { error: "Session expired or invalid. Please login again." } });
-          }
-        }
-      } catch (error) {
-        if (isMounted) {
-          console.error('Error during initial auth check:', error);
-          localStorage.removeItem('token');
-          sessionStorage.removeItem('token');
-          if (!['/login', '/admin/login', '/signup'].includes(currentPath)) {
-            navigate('/login', { state: { error: "A network error occurred. Please try again." }, replace: true });
-          }
-        }
-      } finally {
-        if (isMounted) setIsLoading(false);
-      }
-    };
-
-    performCheck();
-    
-    return () => {
-      isMounted = false;
-    };
-  }, [navigate, location.pathname]); 
-
-if (isLoading) {
-    return <GlobalLoadingIndicator />;
-}
-
-const isAuthenticated = () => {
-    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-    return !!token;
+          />
+          
+          <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+  );
 };
 
-const PrivateRoute = ({ children }) => {
-    const currentRouteLocation = useLocation(); 
-    const auth = isAuthenticated();
-    
-    if (!auth) {
-    return <Navigate to="/login" state={{ from: currentRouteLocation }} replace />;
-    }
-    return children;
-};
+// --- HIGHLIGHT: Add these two new components for cleaner routing ---
 
-return (
-    <Routes>
-        
-        <Route path="/" element={<Welcome />} />
-
-        <Route path="/courses" element={<Layout><Courses /></Layout>} />
-        <Route path="/testimonials" element={<Layout><Testimonials /></Layout>} />
-        <Route path="/about" element={<Layout><About /></Layout>} />
-        <Route path="/faqs" element={<Layout><FAQs /></Layout>} />
-        <Route path="/contact" element={<Layout><Contact /></Layout>} />
-        <Route path="/courses/:courseName" element={<Layout><CourseDetails /></Layout>} />
-        <Route path="/demo" element={<Demo />} />
-
-    <Route path="/redirecting" element={<Redirecting />} />
-    <Route path="/admin/login" element={<AdminLogin />} />
-    <Route path="/login" element={<Login />} />
-    <Route path="/signup" element={<SignUp />} />
-
-    {/* TEACHER DASHBOARD ROUTES - USING RESPONSIVE LAYOUT */}
-    <Route
-        path="/dashboard/*"
-        element={
-        <PrivateRoute>
-            {/* ++ WRAPPED WITH RESPONSIVE LAYOUT, PASSING TEACHER'S SIDEBAR */}
-            <ResponsiveLayout SidebarComponent={Sidebar}>
-                {/* Original structure of .app, .main-content, and nested Routes is now children */}
-                {/* <Header /> is removed from here; ResponsiveLayout handles it. */}
-                {/* <div className="app"> -- This class might be handled by ResponsiveLayout or its CSS now */}
-                    {/* <Sidebar /> is removed; ResponsiveLayout handles it via SidebarComponent prop */}
-                    {/* <div className="main-content"> -- This class might be handled by ResponsiveLayout or its CSS now */}
-                        <Routes>
-                            <Route path="exams" element={<Exams />} />
-                            <Route path="assignments" element={<Assignments />} />
-                            <Route path="assignments/grade/:grade/group/:groupId/assignment/:assignmentId" element={<AssignmentSubmissions />} />
-                            <Route path="exams/grade/:grade/group/:groupId/exam/:examId" element={<ExamSubmissions />} />
-                            
-                            <Route path="sessions" element={<Sessions />} />
-                            <Route path="sessions/:sessionId" element={<SessionDetails />} />
-                            <Route path="materials" element={<Materials />} />
-                            <Route path="groups" element={<Groups />} />
-                            <Route path="assistants" element={<Assistants />} />
-                            <Route path="groups/:grade/:group" element={<GroupDetails />} />
-                        </Routes>
-                    {/* </div> */}
-                {/* </div> */}
-            </ResponsiveLayout>
-        </PrivateRoute>
-        }
-    />
-
-    {/* STUDENT DASHBOARD ROUTES - USING RESPONSIVE LAYOUT */}
-    <Route
-        path="/student/*"
-        element={
-        <PrivateRoute>
-            <ResponsiveLayout SidebarComponent={StudentSidebar}>
-                        <Routes>
-                            <Route index element={<StudentSessions />} />
-                            <Route path="assignments" element={<StudentAssignments />} />
-                            <Route path="sessions" element={<StudentSessions />} />
-                            <Route path="exams" element={<StudentExams />} />
-                            <Route path="materials" element={<StudentMaterials />} />
-                            <Route path="profile" element={<Profile />} />
-                        </Routes>
-            </ResponsiveLayout>
-        </PrivateRoute>
-        } 
-    />
-    <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+const DashboardRoutes = () => (
+  <Routes>
+      <Route path="sessions" element={<Sessions />} />
+      <Route path="sessions/:sessionId" element={<SessionDetails />} />
+      <Route path="exams" element={<Exams />} />
+      <Route path="exams/grade/:grade/group/:groupId/exam/:examId" element={<ExamSubmissions />} />
+      <Route path="assignments" element={<Assignments />} />
+      <Route path="assignments/grade/:grade/group/:groupId/assignment/:assignmentId" element={<AssignmentSubmissions />} />
+      <Route path="materials" element={<Materials />} />
+      <Route path="groups" element={<Groups />} />
+      <Route path="groups/:grade/:group" element={<GroupDetails />} />
+      <Route path="assistants" element={<Assistants />} />
+  </Routes>
 );
-};
+
+const StudentRoutes = () => (
+  <Routes>
+      <Route index element={<StudentSessions />} />
+      <Route path="sessions" element={<StudentSessions />} />
+      <Route path="assignments" element={<StudentAssignments />} />
+      <Route path="exams" element={<StudentExams />} />
+      <Route path="materials" element={<StudentMaterials />} />
+      <Route path="profile" element={<Profile />} />
+  </Routes>
+);
 
 const App = () => {
 return (
     <Router>
-      <ScrollToTop />
-      <AuthInitializerAndMainApp />
+      <AuthProvider>
+        <ScrollToTop />
+        <AppRoutes  />
+      </AuthProvider>
     </Router>
 );
 };

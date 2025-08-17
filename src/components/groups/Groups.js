@@ -1,11 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback  } from 'react';
+import { useAuth } from '../../utils/AuthContext';
 import '../../styles/groups.css';
 import { NavLink } from 'react-router-dom';
 import Modal from 'react-modal'; // Import Modal
 import { API_URL } from '../../config';
 
-
-const Grades = [6,7,8,9,10,11,12];
 
 const Groups = () => {
   const [allGroups, setAllGroups] = useState({});
@@ -23,76 +22,140 @@ const Groups = () => {
   const [currentGrade, setCurrentGrade] = useState(null);
   const [formData, setFormData] = useState({ groupName: '' });
 
-  useEffect(() => {
-    fetchAllGroups();
-    fetchAllUnassignedStudents();
-  }, []);
+  const Grades = [6,7,8,9,10,11,12];
 
-  const fetchAllGroups = async () => {
+  const { user } = useAuth(); 
+
+  // --- HIGHLIGHT: Process assistant permissions for GROUPS ---
+  const assistantPermissions = useMemo(() => {
+    if (user?.role !== 'assistant') return null;
+    const permissions = {
+        allowedGradeNumbers: new Set(),
+        allowedGroupIds: new Set(),
+    };
+    user.permissions?.groups?.forEach(p => {
+        permissions.allowedGradeNumbers.add(p.grade);
+        permissions.allowedGroupIds.add(p.groupId);
+    });
+    return {
+        ...permissions,
+        allowedGradeNumbers: Array.from(permissions.allowedGradeNumbers).sort((a, b) => a - b),
+    };
+  }, [user]);
+
+  // --- HIGHLIGHT: Create the list of grades that the UI will actually render ---
+  const displayedGrades = assistantPermissions ? assistantPermissions.allowedGradeNumbers : Grades;
+
+  // --- HIGHLIGHT: Replaced both fetch functions with a single, permission-aware one ---
+  const fetchAllData = useCallback(async () => {
     setLoadingGroups(true);
-    setError(null);
-    try {
-      const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-      const requests = Grades.map(grade =>
-        fetch(`${API_URL}/group/grades?grade=${grade}`, {
-          headers: {
-            'Authorization': `MonaEdu ${token}`
-          }
-        }).then(res => res.json())
-      );
-
-      const results = await Promise.all(requests);
-      const newAllGroups = {};
-      results.forEach((data, index) => {
-        const grade = Grades[index];
-        if (data.Message === "Groups fetched successfully") {
-          newAllGroups[grade] = data.groups;
-        } else {
-          console.error(`Failed to fetch groups for grade ${grade}:`, data.Message);
-          newAllGroups[grade] = []; // Ensure an empty array if fetch fails for a grade
-        }
-      });
-      setAllGroups(newAllGroups);
-    } catch (err) {
-      console.error('Error fetching all groups:', err);
-      setError('Error loading groups. Please try again.');
-    } finally {
-      setLoadingGroups(false);
-    }
-  };
-
-  const fetchAllUnassignedStudents = async () => {
     setLoadingUnassigned(true);
     setError(null);
+    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+    const gradesToFetch = assistantPermissions ? assistantPermissions.allowedGradeNumbers : Grades;
+    
     try {
-      const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-      const requests = Grades.map(grade =>
-        fetch(`${API_URL}/student/grade/${grade}/unassigned`, {
-          headers: {
-            'Authorization': `MonaEdu ${token}`
-          }
-        }).then(res => res.json())
+      // Fetch Groups
+      const groupRequests = gradesToFetch.map(grade =>
+        fetch(`${API_URL}/group/grades?grade=${grade}`, { headers: { 'Authorization': `MonaEdu ${token}` } }).then(res => res.json())
       );
-
-      const results = await Promise.all(requests);
-      const newUnassignedStudentsByGrade = {};
-      results.forEach((data, index) => {
-        const grade = Grades[index];
-        if (data.Message === "Unassigned students fetched successfully" || data.Message === "No Student Attached to it") {
-          newUnassignedStudentsByGrade[grade] = data.students || [];
-        } else {
-          console.error(`Failed to fetch unassigned students for grade ${grade}:`, data.Message);
-          newUnassignedStudentsByGrade[grade] = [];
-        }
+      const groupResults = await Promise.all(groupRequests);
+      const newAllGroups = {};
+      groupResults.forEach((data, index) => {
+        const grade = gradesToFetch[index];
+        if (data.Message === "Groups fetched successfully") newAllGroups[grade] = data.groups || [];
       });
-      setUnassignedStudentsByGrade(newUnassignedStudentsByGrade);
+      setAllGroups(newAllGroups);
+
+      // Fetch Unassigned Students
+      const studentRequests = gradesToFetch.map(grade =>
+        fetch(`${API_URL}/student/grade/${grade}/unassigned`, { headers: { 'Authorization': `MonaEdu ${token}` } }).then(res => res.json())
+      );
+      const studentResults = await Promise.all(studentRequests);
+      const newUnassignedStudents = {};
+      studentResults.forEach((data, index) => {
+        const grade = gradesToFetch[index];
+        if (data.Message === "Unassigned students fetched successfully" || data.Message === "No Student Attached to it") newUnassignedStudents[grade] = data.students || [];
+      });
+      setUnassignedStudentsByGrade(newUnassignedStudents);
+
     } catch (err) {
-      console.error('Error fetching all unassigned students:', err);
-      setError(err.message || 'Error loading unassigned students. Please try again.');
+      setError('Error loading page data. Please try again.');
     } finally {
+      setLoadingGroups(false);
       setLoadingUnassigned(false);
     }
-  };
+  }, [assistantPermissions]); // Re-fetches if permissions change
+
+  useEffect(() => {
+    fetchAllData();
+  }, [fetchAllData]);
+
+  // const fetchAllGroups = async () => {
+  //   setLoadingGroups(true);
+  //   setError(null);
+  //   try {
+  //     const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+  //     const requests = Grades.map(grade =>
+  //       fetch(`${API_URL}/group/grades?grade=${grade}`, {
+  //         headers: {
+  //           'Authorization': `MonaEdu ${token}`
+  //         }
+  //       }).then(res => res.json())
+  //     );
+
+  //     const results = await Promise.all(requests);
+  //     const newAllGroups = {};
+  //     results.forEach((data, index) => {
+  //       const grade = Grades[index];
+  //       if (data.Message === "Groups fetched successfully") {
+  //         newAllGroups[grade] = data.groups;
+  //       } else {
+  //         console.error(`Failed to fetch groups for grade ${grade}:`, data.Message);
+  //         newAllGroups[grade] = []; // Ensure an empty array if fetch fails for a grade
+  //       }
+  //     });
+  //     setAllGroups(newAllGroups);
+  //   } catch (err) {
+  //     console.error('Error fetching all groups:', err);
+  //     setError('Error loading groups. Please try again.');
+  //   } finally {
+  //     setLoadingGroups(false);
+  //   }
+  // };
+
+  // const fetchAllUnassignedStudents = async () => {
+  //   setLoadingUnassigned(true);
+  //   setError(null);
+  //   try {
+  //     const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+  //     const requests = Grades.map(grade =>
+  //       fetch(`${API_URL}/student/grade/${grade}/unassigned`, {
+  //         headers: {
+  //           'Authorization': `MonaEdu ${token}`
+  //         }
+  //       }).then(res => res.json())
+  //     );
+
+  //     const results = await Promise.all(requests);
+  //     const newUnassignedStudentsByGrade = {};
+  //     results.forEach((data, index) => {
+  //       const grade = Grades[index];
+  //       if (data.Message === "Unassigned students fetched successfully" || data.Message === "No Student Attached to it") {
+  //         newUnassignedStudentsByGrade[grade] = data.students || [];
+  //       } else {
+  //         console.error(`Failed to fetch unassigned students for grade ${grade}:`, data.Message);
+  //         newUnassignedStudentsByGrade[grade] = [];
+  //       }
+  //     });
+  //     setUnassignedStudentsByGrade(newUnassignedStudentsByGrade);
+  //   } catch (err) {
+  //     console.error('Error fetching all unassigned students:', err);
+  //     setError(err.message || 'Error loading unassigned students. Please try again.');
+  //   } finally {
+  //     setLoadingUnassigned(false);
+  //   }
+  // };
 
   const handleDeleteGroup = async (groupId, groupName) => {
     if (window.confirm(`Are you sure you want to delete group "${groupName}"?`)) {
@@ -114,7 +177,7 @@ const Groups = () => {
           throw new Error(result.Message || 'Failed to delete group');
         }
 
-        fetchAllGroups(); 
+        fetchAllData();
         alert(result.Message || `Group "${groupName}" deleted successfully.`);
       } catch (err) {
         console.error('Error deleting group:', err);
@@ -149,8 +212,7 @@ const Groups = () => {
         }
 
         // Refresh both lists
-        fetchAllGroups();
-        fetchAllUnassignedStudents();
+        fetchAllData();
         alert(result.Message || `Student ${studentName} added to group "${groupName}" successfully.`);
       } catch (err) {
         console.error('Error adding student to group:', err);
@@ -219,7 +281,7 @@ const Groups = () => {
         throw new Error(result.Message || 'Failed to create group');
       }
 
-      fetchAllGroups(); // Refresh the groups list
+      fetchAllData();
       alert(result.Message || 'Group created successfully');
       handleCloseModal();
     } catch (err) {
@@ -236,7 +298,7 @@ const Groups = () => {
   return (
     <div className="groups-page">
       <h2>Groups & Unassigned Students</h2>
-      {Grades.map(grade => (
+      {displayedGrades.map(grade => (
         <div key={grade} className="grade-section">
           <div className="grade-header">
             <h3>Grade {grade}</h3>
@@ -249,7 +311,7 @@ const Groups = () => {
               <h4 className="container-title">Groups</h4>
               {allGroups[grade] && allGroups[grade].length > 0 ? (
                 <div className="groups-container">
-                  {allGroups[grade].map((group, index) => (
+                  {allGroups[grade].filter(g => assistantPermissions ? assistantPermissions.allowedGroupIds.has(g._id) : true).map((group, index) => (
                     <div key={group._id} className="group-card">
                       <h4>{group.groupname}</h4>
                       <p>Students: {group.enrolledStudents ? group.enrolledStudents.length : 0}</p>
@@ -297,7 +359,7 @@ const Groups = () => {
                             value=""
                           >
                             <option value="">Add to Group</option>
-                            {allGroups[grade] && allGroups[grade].map(group => (
+                            {allGroups[grade] && allGroups[grade].filter(g => assistantPermissions ? assistantPermissions.allowedGroupIds.has(g._id) : true).map(group => (
                               <option key={group._id} value={group._id}>{group.groupname}</option>
                             ))}
                           </select>

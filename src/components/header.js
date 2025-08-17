@@ -2,6 +2,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../utils/AuthContext'; 
 import '../styles/header.css'; // Ensure this CSS is adapted
 
 // Simple Hamburger SVG Icon (or use an icon library)
@@ -14,11 +15,11 @@ const HamburgerIcon = () => (
 // Accept onToggleSidebar and isMobile as props
 const Header = ({ onToggleSidebar, isMobile }) => {
   const navigate = useNavigate();
+  const { logout } = useAuth();
 
   const handleLogout = () => {
-    localStorage.removeItem('token'); 
-    sessionStorage.removeItem('token');
-    navigate('/login');
+    logout();
+    navigate('/login'); 
   };
 
   return (

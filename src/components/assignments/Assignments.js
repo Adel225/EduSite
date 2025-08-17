@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo  } from 'react';
+import { useAuth } from '../../utils/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import Modal from 'react-modal';
 import { API_URL } from '../../config';
@@ -36,6 +37,36 @@ const Assignments = () => {
   const [editFormData, setEditFormData] = useState({ name: '', file: null, answerFile: null, startDate: '', endDate: '', allowSubmissionsAfterDueDate: false });
 
   const grades = [6,7,8,9,10,11,12];
+
+  const { user } = useAuth(); // Get the globally stored user
+
+  // --- HIGHLIGHT: Process assistant permissions once using useMemo ---
+  const assistantPermissions = useMemo(() => {
+    if (user?.role !== 'assistant') {
+        return null;
+    }
+    const permissions = {
+        allowedGradeNumbers: new Set(),
+        allowedGroupIds: new Set(),
+    };
+    user.permissions?.assignments?.forEach(p => {
+        permissions.allowedGradeNumbers.add(p.grade);
+        permissions.allowedGroupIds.add(p.groupId);
+    });
+    return {
+        ...permissions,
+        allowedGradeNumbers: Array.from(permissions.allowedGradeNumbers).sort((a, b) => a - b),
+    };
+  }, [user]);
+
+  // --- HIGHLIGHT: Create the lists that the UI will actually render ---
+  // If user is an assistant, show their permitted grades. Otherwise, show all grades.
+  const displayedGrades = assistantPermissions ? assistantPermissions.allowedGradeNumbers : grades;
+
+  // Filter the fetched groups based on the assistant's permissions.
+  const displayedGroups = groups.filter(g => 
+    assistantPermissions ? assistantPermissions.allowedGroupIds.has(g._id) : true
+  );
 
   const fetchGroups = async (grade) => {
     setLoadingGroups(true);
@@ -212,14 +243,14 @@ const Assignments = () => {
         <div className="assignments-left">
           <h2>Select Grade</h2>
           <div className="grades-list">
-            {grades.map((grade) => (<div key={grade} className={`grade-card ${selectedGrade === grade ? 'selected' : ''}`} onClick={() => handleGradeChange({ target: { value: grade } })}><h3>Grade {grade}</h3></div>))}
+            {displayedGrades.map((grade) => (<div key={grade} className={`grade-card ${selectedGrade === grade ? 'selected' : ''}`} onClick={() => handleGradeChange({ target: { value: grade } })}><h3>Grade {grade}</h3></div>))}
           </div>
           {selectedGrade && (
             <div className="groups-section">
               <h3>Groups in Grade {selectedGrade}</h3>
               {loadingGroups ? <div className="loading">Loading...</div> : (
                 <div className="groups-list">
-                  {groups.map((group) => (<div key={group._id} className={`group-item ${selectedGroupId === group._id ? 'selected' : ''}`} onClick={() => handleGroupClick(group._id)}>{group.groupname}</div>))}
+                  {displayedGroups.map((group) => (<div key={group._id} className={`group-item ${selectedGroupId === group._id ? 'selected' : ''}`} onClick={() => handleGroupClick(group._id)}>{group.groupname}</div>))}
                 </div>
               )}
             </div>
@@ -275,12 +306,12 @@ const Assignments = () => {
         <div className="assignments-right">
           <h2>Upload new Assignment</h2>
           <form onSubmit={handleCreateSubmit}>
-            <div className="form-group"><label>Grade:</label><select value={selectedGrade} onChange={handleGradeChange} required><option value="">Select Grade</option>{grades.map(grade => (<option key={grade} value={grade}>Grade {grade}</option>))}</select></div>
+            <div className="form-group"><label>Grade:</label><select value={selectedGrade} onChange={handleGradeChange} required><option value="">Select Grade</option>{displayedGrades.map(grade => (<option key={grade} value={grade}>Grade {grade}</option>))}</select></div>
             <div className="form-group">
               <label>Groups:</label>
               <div className="groups-list checkbox-style">
                 <div className="select-all-row"><label><input type="checkbox" checked={selectedGroups.length === groups.length && groups.length > 0} onChange={() => setSelectedGroups(selectedGroups.length === groups.length ? [] : groups.map(g => g._id))} /> Select All Groups</label></div>
-                {groups.map((group) => (
+                {displayedGroups.map((group) => (
                       <div key={group._id} className="group-checkbox-row">
                         <label>
                           <input

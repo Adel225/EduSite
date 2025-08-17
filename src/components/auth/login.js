@@ -4,6 +4,7 @@ import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import './auth.css'; // Path from src/components/auth/login.js to src/components/auth/auth.css
 import { API_URL } from '../../config'; // Path from src/components/auth/login.js to src/config.js
+import { useAuth } from '../../utils/AuthContext'; 
 
 const Login = () => {
     const [email, setEmail] = useState('');
@@ -12,6 +13,7 @@ const Login = () => {
     const [error, setError] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
+    const { login } = useAuth(); 
     const navigate = useNavigate();
     const location = useLocation();
 
@@ -31,24 +33,20 @@ const Login = () => {
         try {
             const response = await fetch(`${API_URL}/student/login`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    email,
-                    password
-                })
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password })
             });
 
             const data = await response.json();
             
             if (data.token) {
-                if (rememberMe) {
-                    localStorage.setItem('token', data.token);
-                } else {
-                    sessionStorage.setItem('token', data.token);
+                // --- HIGHLIGHT: Call the central login function ---
+                const user = await login(data.token, rememberMe);
+                
+                // Redirect based on the user data returned from the context
+                if (user?.userName) {
+                    navigate('/student/sessions', { replace: true });
                 }
-                navigate('/student/sessions', { replace: true }); 
             } else {
                 setError(data.Message || 'Login failed');
             }
@@ -59,6 +57,43 @@ const Login = () => {
             setLoading(false);
         }
     };
+
+    // const handleSubmit = async (e) => {
+    //     e.preventDefault();
+    //     setError(''); 
+    //     setLoading(true);
+
+    //     try {
+    //         const response = await fetch(`${API_URL}/student/login`, {
+    //             method: 'POST',
+    //             headers: {
+    //                 'Content-Type': 'application/json',
+    //             },
+    //             body: JSON.stringify({
+    //                 email,
+    //                 password
+    //             })
+    //         });
+
+    //         const data = await response.json();
+            
+    //         if (data.token) {
+    //             if (rememberMe) {
+    //                 localStorage.setItem('token', data.token);
+    //             } else {
+    //                 sessionStorage.setItem('token', data.token);
+    //             }
+    //             navigate('/student/sessions', { replace: true }); 
+    //         } else {
+    //             setError(data.Message || 'Login failed');
+    //         }
+    //     } catch (err) {
+    //         setError('An error occurred during login. Please check your connection.');
+    //         console.error('Login error:', err);
+    //     } finally {
+    //         setLoading(false);
+    //     }
+    // };
 
 
     return (

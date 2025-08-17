@@ -1,6 +1,7 @@
 import React, { useState , useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
+import { useAuth } from '../../utils/AuthContext';
 import './auth.css';
 import { API_URL } from '../../config';
 
@@ -10,6 +11,7 @@ const AdminLogin = () => {
     const [rememberMe, setRememberMe] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
+    const { login } = useAuth();
     const [error, setError] = useState('');
     const navigate = useNavigate();
 
@@ -21,38 +23,30 @@ const AdminLogin = () => {
         try {
             const response = await fetch(`${API_URL}/student/teacher/login`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    email,
-                    password
-                })
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password })
             });
 
             const data = await response.json();
-            // console.log('Login response:', data); // Debug log
             
             if (data.token) {
-                // Save token to localStorage
-                if (rememberMe) {
-                    localStorage.setItem('token', data.token);
-                } 
-                else {
-                    sessionStorage.setItem('token', data.token);
+                const user = await login(data.token, rememberMe);
+                
+                // Redirect based on the user data returned from the context
+                if (user?.role === 'main_teacher' || user?.role === 'assistant') {
+                    navigate('/dashboard/sessions', { replace: true });
                 }
-                navigate('/dashboard/sessions');
             } else {
-                // Display error message from API
                 setError(data.Message || 'Login failed');
             }
         } catch (err) {
             setError('An error occurred during login');
             console.error('Login error:', err);
-        }finally {
+        } finally {
             setLoading(false);
         }
     };
+
 
     return (
         <div className="auth-container">

@@ -6,7 +6,7 @@ import '../../styles/welcome.css';
 
 const About = () => {
     const heroBackgroundImage = 'https://res.cloudinary.com/dwcy6vc23/image/upload/v1755143782/EduSite/toolxox.com-Ei3cN_1_mprt2u.jpg';
-    const teacherPhotoUrl = 'https://res.cloudinary.com/dwcy6vc23/image/upload/v1691015553/sample.jpg';
+    const teacherPhotoUrl = 'https://res.cloudinary.com/dwcy6vc23/image/upload/v1755290433/EduSite/about_me_uelwkb.svg';
 
     return (
         <div className="about-page-container">
@@ -22,7 +22,7 @@ const About = () => {
                     <div className="content-layout">
                         <div className="content-text about-detailed-text">
                             <h2>Education is an Activity Directed at Achieving Aims</h2>
-                            <p>Over 20 years of experience teaching Mathematics, with expertise in the Cambridge, Edexcel, and Oxford curricula across international schools.</p>
+                            <p className='bold-p'>Over 20 years of experience teaching Mathematics, with expertise in the Cambridge, Edexcel, and Oxford curricula across international schools.</p>
                             <p>My extensive experience ensures a holistic approach that builds critical thinking and problem-solving skills, making mathematics accessible and engaging for every student.</p>
                             <p>Discover how my approach to mathematics goes beyond formulas, equipping your child with the critical thinking skills to succeed.</p>
                             
@@ -32,8 +32,8 @@ const About = () => {
                             </Link>
                         </div>
                         <div className="content-image">
-                            <div className="content-image-wrapper soft-rectangle">
-                                <img src={teacherPhotoUrl} alt="Dr. Mona AboElazm" />
+                            <div className="content-image-wrapper ">
+                                <img src={teacherPhotoUrl} alt="Mrs. Mona AbouElazm" />
                             </div>
                         </div>
                     </div>
