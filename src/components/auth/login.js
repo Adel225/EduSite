@@ -18,13 +18,6 @@ const Login = () => {
     const location = useLocation();
 
 
-    useEffect(() => {
-        if (location.state?.error) {
-            setError(location.state.error);
-            navigate(location.pathname, { replace: true, state: {} });
-        }
-    }, [location.state, location.pathname, navigate]);
-
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError(''); 
@@ -40,61 +33,20 @@ const Login = () => {
             const data = await response.json();
             
             if (data.token) {
-                // --- HIGHLIGHT: Call the central login function ---
-                const user = await login(data.token, rememberMe);
-                
-                // Redirect based on the user data returned from the context
-                if (user?.userName) {
-                    navigate('/student/sessions', { replace: true });
-                }
+                // --- HIGHLIGHT: Call the central login function. No more navigating from here. ---
+                await login(data.token, rememberMe);
+                // The AppRoutes component will now detect the user change and handle the redirect.
             } else {
                 setError(data.Message || 'Login failed');
+                setLoading(false); // Stop loading ONLY on failure
             }
         } catch (err) {
             setError('An error occurred during login. Please check your connection.');
             console.error('Login error:', err);
-        } finally {
-            setLoading(false);
+            setLoading(false); // Stop loading ONLY on failure
         }
+        // On success, the loading spinner will continue until the page redirects.
     };
-
-    // const handleSubmit = async (e) => {
-    //     e.preventDefault();
-    //     setError(''); 
-    //     setLoading(true);
-
-    //     try {
-    //         const response = await fetch(`${API_URL}/student/login`, {
-    //             method: 'POST',
-    //             headers: {
-    //                 'Content-Type': 'application/json',
-    //             },
-    //             body: JSON.stringify({
-    //                 email,
-    //                 password
-    //             })
-    //         });
-
-    //         const data = await response.json();
-            
-    //         if (data.token) {
-    //             if (rememberMe) {
-    //                 localStorage.setItem('token', data.token);
-    //             } else {
-    //                 sessionStorage.setItem('token', data.token);
-    //             }
-    //             navigate('/student/sessions', { replace: true }); 
-    //         } else {
-    //             setError(data.Message || 'Login failed');
-    //         }
-    //     } catch (err) {
-    //         setError('An error occurred during login. Please check your connection.');
-    //         console.error('Login error:', err);
-    //     } finally {
-    //         setLoading(false);
-    //     }
-    // };
-
 
     return (
         <div className="auth-container">

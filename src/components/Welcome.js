@@ -179,7 +179,7 @@ const Welcome = () => {
                             
                         </div>
                         <div className="about-image">
-                            <div className="content-image-wrapper soft-rectangle">
+                            <div className="content-image-wrapper ">
                                 <img src="https://res.cloudinary.com/dwcy6vc23/image/upload/v1755290433/EduSite/about_me_uelwkb.svg" alt="Mona AboElazm" />
                             </div>
                         </div>

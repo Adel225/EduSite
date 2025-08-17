@@ -21,7 +21,7 @@ const WelcomeHeader = () => {
             <div className="top-bar">
                 <div className="top-bar-content">
                     <div className="social-links">
-                        <a href="https://facebook.com" target="_blank" rel="noopener noreferrer"><img src="https://img.icons8.com/?size=100&id=118467&format=png&color=FFFFFF" width="24" height="24" /> Facebook</a>
+                        <a href="https://www.facebook.com/profile.php?id=61550633945227" target="_blank" rel="noopener noreferrer"><img src="https://img.icons8.com/?size=100&id=118467&format=png&color=FFFFFF" width="24" height="24" /> Facebook</a>
                         <a href="https://instagram.com" target="_blank" rel="noopener noreferrer"><img src="https://img.icons8.com/?size=100&id=59813&format=png&color=FFFFFF" width="24" height="24" /> Instagram</a>
                     </div>
                     <div className="contact-info">

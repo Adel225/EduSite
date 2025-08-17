@@ -30,23 +30,18 @@ const AdminLogin = () => {
             const data = await response.json();
             
             if (data.token) {
-                const user = await login(data.token, rememberMe);
-                
-                // Redirect based on the user data returned from the context
-                if (user?.role === 'main_teacher' || user?.role === 'assistant') {
-                    navigate('/dashboard/sessions', { replace: true });
-                }
+                // --- HIGHLIGHT: Call the central login function. No more navigating from here. ---
+                await login(data.token, rememberMe);
             } else {
                 setError(data.Message || 'Login failed');
+                setLoading(false); // Stop loading on failure
             }
         } catch (err) {
             setError('An error occurred during login');
             console.error('Login error:', err);
-        } finally {
-            setLoading(false);
+            setLoading(false); // Stop loading on failure
         }
     };
-
 
     return (
         <div className="auth-container">

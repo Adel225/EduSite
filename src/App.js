@@ -74,14 +74,31 @@ const GlobalLoadingIndicator = () => (
 
 const AppRoutes = () => {
   const { user, isLoading } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
 
-  // The AuthProvider is now handling the initial loading state for the whole app
+  // --- HIGHLIGHT: This useEffect is the central "brain" for all automatic redirects ---
+  useEffect(() => {
+      if (isLoading) {
+          return; // Don't do anything until the initial auth check is complete
+      }
+
+      const authRedirectPages = ['/login', '/admin/login', '/redirecting'];
+
+      if (user && authRedirectPages.includes(location.pathname)) {
+          // User is logged in and on a page that should redirect.
+          if (user.role === 'main_teacher' || user.role === 'assistant') {
+              navigate('/dashboard/sessions', { replace: true });
+          } else if (user.userName) {
+              navigate('/student/sessions', { replace: true });
+          }
+      }
+  }, [user, isLoading, location.pathname, navigate]);
+
   if (isLoading) {
       return <GlobalLoadingIndicator />;
   }
 
-  // This component now only defines the routing rules based on the user's status.
-  // The redirect logic is handled by the PrivateRoute components.
   return (
       <Routes>
           {/* Public Routes */}
@@ -95,29 +112,21 @@ const AppRoutes = () => {
           <Route path="/demo" element={<Demo />} />
           <Route path="/redirecting" element={<Redirecting />} />
           
-          {/* Auth Routes */}
-          <Route path="/admin/login" element={!user ? <AdminLogin /> : <Navigate to="/dashboard/sessions" />} />
-          <Route path="/login" element={!user ? <Login /> : <Navigate to="/student/sessions" />} />
-          <Route path="/signup" element={!user ? <SignUp /> : <Navigate to="/redirecting" />} />
+          {/* --- HIGHLIGHT: Simplified Auth Routes --- */}
+          {/* These routes now correctly allow access if no user is present.
+              If a user IS present, the useEffect above will handle the redirect. */}
+          <Route path="/admin/login" element={!user ? <AdminLogin /> : <Redirecting />} />
+          <Route path="/login" element={!user ? <Login /> : <Redirecting />} />
+          <Route path="/signup" element={<SignUp />} />
 
-          {/* Private Teacher/Assistant Route */}
+          {/* Private Routes */}
           <Route
               path="/dashboard/*"
-              element={
-                  user && (user.role === 'main_teacher' || user.role === 'assistant') ? 
-                  <DashboardLayout><DashboardRoutes /></DashboardLayout> : 
-                  <Navigate to="/admin/login" />
-              }
+              element={user && (user.role === 'main_teacher' || user.role === 'assistant') ? <DashboardLayout><DashboardRoutes /></DashboardLayout> : <Navigate to="/admin/login" state={{ from: location }} replace />}
           />
-
-          {/* Private Student Route */}
           <Route
               path="/student/*"
-              element={
-                  user && user.userName ? 
-                  <ResponsiveLayout SidebarComponent={StudentSidebar}><StudentRoutes /></ResponsiveLayout> : 
-                  <Navigate to="/login" />
-              }
+              element={user && user.userName ? <ResponsiveLayout SidebarComponent={StudentSidebar}><StudentRoutes /></ResponsiveLayout> : <Navigate to="/login" state={{ from: location }} replace />}
           />
           
           <Route path="*" element={<Navigate to="/" replace />} />
