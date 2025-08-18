@@ -15,13 +15,20 @@ const ExamSubmissions = () => {
     const [sortBy, setSortBy] = useState('name');
     const [sortOrder, setSortOrder] = useState('asc');
 
+    const [isNotesModalOpen, setIsNotesModalOpen] = useState(false);
+    const [modalData, setModalData] = useState({ title: '', content: '' });
+
     const [isEditorOpen, setIsEditorOpen] = useState(false);
     const [selectedSubmissionForMarking, setSelectedSubmissionForMarking] = useState(null);
 
     // const [isViewerOpen, setIsViewerOpen] = useState(false);
     // const [selectedSubmissionForViewing, setSelectedSubmissionForViewing] = useState(null);
 
-
+    const openNotesModal = (title, content) => {
+        setModalData({ title, content });
+        setIsNotesModalOpen(true);
+    };
+    const closeNotesModal = () => setIsNotesModalOpen(false);
 
 const fetchExamAndSubmissions = useCallback(async () => {
     setLoading(true);
@@ -127,7 +134,7 @@ const handleOpenMarkEditor = async (studentId) => {
         console.log("api call : " , `${API_URL}/exams/submissions?examId=${examId}&groupId=${groupId}&studentId=${studentId}`)
         console.log(data);
 
-        if (data.message === "Student submission statuses fetched successfully." && data.data.length > 0) {
+        if (data.message === "Submissions fetched successfully." && data.data.length > 0) {
             const submission = data.data[0];
             if (submission.submissions[0].filePath) {
                 setSelectedSubmissionForMarking(submission);
@@ -224,8 +231,16 @@ return (
                 </span>
                 </td>
                 <td>{student.submittedAt ? new Date(student.submittedAt).toLocaleDateString() : '-'}</td>
-                <td>{student.notes || '-'}</td>
-                <td>{student.teacherFeedback || '-'}</td>
+                <td>
+                    {student.notes ? (
+                        <button className="view-notes-btn" onClick={() => openNotesModal('Student Notes', student.notes)}>View</button>
+                    ) : ('-')}
+                </td>
+                <td>
+                    {student.teacherFeedback ? (
+                        <button className="view-notes-btn" onClick={() => openNotesModal('Teacher Feedback', student.teacherFeedback)}>View</button>
+                    ) : ('-')}
+                </td>
                 <td>{student.score || '-'}</td>
                 <td>
                 <div className="action-buttons">
@@ -250,6 +265,24 @@ return (
         </tbody>
         </table>
     </div>
+
+    <Modal
+        isOpen={isNotesModalOpen}
+        onRequestClose={closeNotesModal}
+        contentLabel="Submission Details"
+        className="notes-modal"
+        overlayClassName="notes-modal-overlay"
+    >
+        <div className="notes-modal-header">
+            <h3>{modalData.title}</h3>
+            <button className="close-modal-btn" onClick={closeNotesModal}>×</button>
+        </div>
+        <div className="notes-modal-body">
+            <p>{modalData.content}</p>
+        </div>
+    </Modal>
+
+
     {/* --- PDF Editor Modal --- */}
     {selectedSubmissionForMarking && (
                 <Modal
@@ -260,15 +293,15 @@ return (
                     overlayClassName="pdf-editor-modal-overlay"
                 >
                     <div className="modal-header">
-                        <h2>Marking: {selectedSubmissionForMarking.studentId.firstName} {selectedSubmissionForMarking.studentId.lastName}'s Submission</h2>
+                        <h2>Marking: {selectedSubmissionForMarking.firstName} {selectedSubmissionForMarking.lastName}'s Submission</h2>
                         <button onClick={handleCloseMarkEditor} className="close-modal-btn">×</button>
                     </div>
                     <div className="modal-body">
                         <PDFAnnotationEditor
-                            pdfUrl={selectedSubmissionForMarking.filePath}
-                            submissionId={selectedSubmissionForMarking._id}
-                            initialAnnotationData={selectedSubmissionForMarking.annotationData}
-                            initialScore={selectedSubmissionForMarking.score}
+                            pdfUrl={selectedSubmissionForMarking.submissions[0].filePath}
+                            submissionId={selectedSubmissionForMarking.submissions[0]._id}
+                            initialAnnotationData={selectedSubmissionForMarking.submissions[0].annotationData}
+                            initialScore={selectedSubmissionForMarking.submissions[0].score}
                             onSaveSuccess={handleSaveSuccess}
                             markType="exam"
                         />

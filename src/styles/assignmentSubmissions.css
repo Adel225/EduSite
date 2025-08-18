@@ -292,3 +292,77 @@
   overflow-y: auto;
 }
 */
+
+
+
+
+
+
+
+
+
+
+
+/* --- HIGHLIGHT: New styles for Notes/Feedback --- */
+
+/* Button to open the modal */
+.view-notes-btn {
+  background-color: #6c757d; /* A neutral gray */
+  color: white;
+  border: none;
+  padding: 0.4rem 0.8rem;
+  border-radius: 5px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.view-notes-btn:hover {
+  background-color: #5a6268;
+}
+
+/* Modal for displaying the text */
+.notes-modal-overlay {
+position: fixed;
+top: 0;
+left: 0;
+right: 0;
+bottom: 0;
+background-color: rgba(0, 0, 0, 0.7);
+z-index: 1000;
+display: flex;
+justify-content: center;
+align-items: center;
+}
+
+.notes-modal {
+background: white;
+padding: 2rem;
+border-radius: 8px;
+width: 90%;
+max-width: 500px;
+outline: none;
+box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+}
+
+.notes-modal-header {
+display: flex;
+justify-content: space-between;
+align-items: center;
+border-bottom: 1px solid #e0e0e0;
+padding-bottom: 1rem;
+margin-bottom: 1rem;
+}
+
+.notes-modal-header h3 {
+margin: 0;
+color: var(--dark-text);
+}
+
+.notes-modal-body {
+white-space: pre-wrap; /* Preserves line breaks and spacing */
+line-height: 1.6;
+color: var(--body-text);
+max-height: 60vh;
+overflow-y: auto;
+}

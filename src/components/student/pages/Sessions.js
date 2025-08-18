@@ -26,6 +26,7 @@ const StudentSessions = () => {
     const [selectedMaterial, setSelectedMaterial] = useState(null);
     const [pdfUrlToView, setPdfUrlToView] = useState('');
     const [modalLoading, setModalLoading] = useState(false);
+    const [mobileModalView, setMobileModalView] = useState('info'); 
 
     useEffect(() => {
         const fetchStudentDataAndSessions = async () => {
@@ -153,6 +154,7 @@ const StudentSessions = () => {
         setIsMaterialModalOpen(true);
         setModalLoading(true);
         setError(null);
+        setMobileModalView('info');
         try {
             const token = localStorage.getItem('token') || sessionStorage.getItem('token');
             const response = await fetch(`${API_URL}/material/${materialId}`, {
@@ -252,8 +254,8 @@ const StudentSessions = () => {
             )}
         </div>
         <Modal
-                isOpen={isMaterialModalOpen}
-                onRequestClose={closeMaterialModal}
+                isOpen={isMaterialModalOpen} // or isMaterialModalOpen for StudentSessions
+                onRequestClose={closeMaterialModal} // or closeMaterialModal for StudentSessions
                 contentLabel="View Material"
                 className="material-modal"
                 overlayClassName="material-modal-overlay"
@@ -265,7 +267,8 @@ const StudentSessions = () => {
                                 <h2>{selectedMaterial.name}</h2>
                                 <button onClick={closeMaterialModal} className="close-modal-btn">×</button>
                             </div>
-                            <div className="material-modal-body">
+                            
+                            <div className={`material-modal-body ${mobileModalView === 'pdf' ? 'view-pdf' : ''}`}>
                                 <div className="content-sidebar">
                                     <p className="material-description">{selectedMaterial.description}</p>
                                     
@@ -297,9 +300,15 @@ const StudentSessions = () => {
                                         ) : <p className="no-resources-message">No links provided.</p>}
                                     </div>
                                 </div>
+                                
                                 <div className="pdf-viewer-main">
                                     {pdfUrlToView ? <PDFViewer pdfUrl={pdfUrlToView} /> : <div className="loading">No PDF to display.</div>}
                                 </div>
+                            </div>
+
+                            <div className="mobile-view-switcher">
+                                <button className={mobileModalView === 'info' ? 'active' : ''} onClick={() => setMobileModalView('info')}>Info</button>
+                                <button className={mobileModalView === 'pdf' ? 'active' : ''} onClick={() => setMobileModalView('pdf')}>PDF Viewer</button>
                             </div>
                         </>
                     )

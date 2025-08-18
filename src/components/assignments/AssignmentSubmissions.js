@@ -17,11 +17,21 @@ const AssignmentSubmissions = () => {
     const [sortBy, setSortBy] = useState('name');
     const [sortOrder, setSortOrder] = useState('asc');
 
+    const [isNotesModalOpen, setIsNotesModalOpen] = useState(false);
+    const [modalData, setModalData] = useState({ title: '', content: '' });
+
     const [isEditorOpen, setIsEditorOpen] = useState(false);
     const [selectedSubmissionForMarking, setSelectedSubmissionForMarking] = useState(null);
 
     // const [isViewerOpen, setIsViewerOpen] = useState(false);
     // const [selectedSubmissionForViewing, setSelectedSubmissionForViewing] = useState(null);
+
+    // --- HIGHLIGHT: Add functions to control the notes modal ---
+    const openNotesModal = (title, content) => {
+        setModalData({ title, content });
+        setIsNotesModalOpen(true);
+    };
+    const closeNotesModal = () => setIsNotesModalOpen(false);
 
 
 const fetchAssignmentAndSubmissions = useCallback(async () => {
@@ -212,7 +222,7 @@ return (
         <thead>
             <tr>
             <th>Student Name</th>
-            <th>Username</th>
+            {/* <th>Username</th> */}
             <th>Status</th>
             <th>Submission Date</th>
             <th>Student Notes</th>
@@ -225,15 +235,23 @@ return (
             {filteredSubmissions.map((student) => (
             <tr key={student._id}>
                 <td>{student.firstName} {student.lastName}</td>
-                <td>{student.userName} <br/> <p>id: {student._id}</p></td>
+                {/* <td>{student.userName} <br/> <p>id: {student._id}</p></td> */}
                 <td>
                 <span className={`status-badge ${student.status === 'submitted' ? 'submitted' : 'not-submitted'}`}>
                     {student.status}
                 </span>
                 </td>
                 <td>{student.submissionDetails?.SubmitDate ? new Date(student.submissionDetails.SubmitDate).toLocaleDateString() : '-'}</td>
-                <td>{student.submissionDetails?.notes || '-'}</td>
-                <td>{student.submissionDetails?.teacherFeedback || '-'}</td>
+                <td>
+                    {student.submissionDetails?.notes ? (
+                        <button className="view-notes-btn" onClick={() => openNotesModal('Student Notes', student.submissionDetails.notes)}>View</button>
+                    ) : ('-')}
+                </td>
+                <td>
+                    {student.submissionDetails?.teacherFeedback ? (
+                        <button className="view-notes-btn" onClick={() => openNotesModal('Teacher Feedback', student.submissionDetails.teacherFeedback)}>View</button>
+                    ) : ('-')}
+                </td>
                 <td>{student.submissionDetails?.score || '-'}</td>
                 <td>
                 <div className="action-buttons">
@@ -258,6 +276,23 @@ return (
         </tbody>
         </table>
     </div>
+
+    <Modal
+        isOpen={isNotesModalOpen}
+        onRequestClose={closeNotesModal}
+        contentLabel="Submission Details"
+        className="notes-modal"
+        overlayClassName="notes-modal-overlay"
+    >
+        <div className="notes-modal-header">
+            <h3>{modalData.title}</h3>
+            <button className="close-modal-btn" onClick={closeNotesModal}>×</button>
+        </div>
+        <div className="notes-modal-body">
+            <p>{modalData.content}</p>
+        </div>
+    </Modal>
+    
      {/* --- PDF Editor Modal --- */}
     {selectedSubmissionForMarking && (
                 <Modal

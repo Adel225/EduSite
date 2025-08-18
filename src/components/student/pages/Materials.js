@@ -110,8 +110,8 @@ const Materials = () => {
             </div>
 
             <Modal
-                isOpen={isPdfModalOpen}
-                onRequestClose={handleClosePdfModal}
+                isOpen={isPdfModalOpen} // or isMaterialModalOpen for StudentSessions
+                onRequestClose={handleClosePdfModal} // or closeMaterialModal for StudentSessions
                 contentLabel="View Material"
                 className="material-modal"
                 overlayClassName="material-modal-overlay"
@@ -124,8 +124,8 @@ const Materials = () => {
                                 <button onClick={handleClosePdfModal} className="close-modal-btn">×</button>
                             </div>
                             
-                            <div className="material-modal-body">
-                                <div className={`content-sidebar ${mobileModalView === 'info' ? 'active' : ''}`}>
+                            <div className={`material-modal-body ${mobileModalView === 'pdf' ? 'view-pdf' : ''}`}>
+                                <div className="content-sidebar">
                                     <p className="material-description">{selectedMaterial.description}</p>
                                     
                                     <div className="resource-section">
@@ -157,7 +157,7 @@ const Materials = () => {
                                     </div>
                                 </div>
                                 
-                                <div className={`pdf-viewer-main ${mobileModalView === 'pdf' ? 'active' : ''}`}>
+                                <div className="pdf-viewer-main">
                                     {pdfUrlToView ? <PDFViewer pdfUrl={pdfUrlToView} /> : <div className="loading">No PDF to display.</div>}
                                 </div>
                             </div>

@@ -129,7 +129,7 @@ const Exams = () => {
       const data = await response.json();
       
       if (data.message === "Exams fetched successfully") {
-        setExams(data.data || []);
+        setExams(data.exams || []);
       } else {
         setError('Failed to fetch exams');
         setExams([]);
