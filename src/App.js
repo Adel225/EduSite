@@ -146,7 +146,7 @@ const DashboardRoutes = () => (
       <Route path="assignments/grade/:grade/group/:groupId/assignment/:assignmentId" element={<AssignmentSubmissions />} />
       <Route path="materials" element={<Materials />} />
       <Route path="groups" element={<Groups />} />
-      <Route path="groups/:grade/:group" element={<GroupDetails />} />
+      <Route path="groups/:grade/:groupId" element={<GroupDetails />} />
       <Route path="assistants" element={<Assistants />} />
   </Routes>
 );

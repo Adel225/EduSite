@@ -1,9 +1,10 @@
 // Groups.js
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import Modal from "react-modal";
 import { API_URL } from '../../config';
 import "../../styles/groups.css"
+import { useAuth } from '../../utils/AuthContext';
 
 
 // const API_URL = process.env.REACT_APP_API_URL;
@@ -13,8 +14,7 @@ Modal.setAppElement("#root");
 
 export default function Groups() {
   const navigate = useNavigate();
-  const token =
-    localStorage.getItem("token") || sessionStorage.getItem("token");
+  const token = localStorage.getItem("token") || sessionStorage.getItem("token");
 
   // --- State ---
   const [groups, setGroups] = useState({});
@@ -28,9 +28,6 @@ export default function Groups() {
   const [viewingStudent, setViewingStudent] = useState(null);
   const [newGroupName, setNewGroupName] = useState("");
 
-  // student details modal
-  const [selectedStudent, setSelectedStudent] = useState(null);
-
   // bulk selection
   const [selectedStudents, setSelectedStudents] = useState([]);
   const [bulkTargetGroup, setBulkTargetGroup] = useState("");
@@ -38,6 +35,28 @@ export default function Groups() {
 
   // search
   const [searchQuery, setSearchQuery] = useState("");
+
+  const { user } = useAuth(); 
+
+  // --- HIGHLIGHT: Process assistant permissions for GROUPS ---
+  const assistantPermissions = useMemo(() => {
+    if (user?.role !== 'assistant') return null;
+    const permissions = {
+        allowedGradeNumbers: new Set(),
+        allowedGroupIds: new Set(),
+    };
+    user.permissions?.groups?.forEach(p => {
+        permissions.allowedGradeNumbers.add(p.grade);
+        permissions.allowedGroupIds.add(p.groupId);
+    });
+    return {
+        ...permissions,
+        allowedGradeNumbers: Array.from(permissions.allowedGradeNumbers).sort((a, b) => a - b),
+    };
+  }, [user]);
+
+  const displayedGrades = assistantPermissions ? assistantPermissions.allowedGradeNumbers : Grades;
+
 
   // --- Fetch groups & unassigned for a grade ---
   const fetchGroups = async (grade) => {
@@ -223,9 +242,11 @@ export default function Groups() {
       {/* Header */}
       <div className="groups-header">
         <h2>Groups & Students</h2>
-        <button className="add-group-btn" onClick={openModal}>
-          + Add New Group
-        </button>
+        {user?.role === 'main_teacher' && (
+            <button className="add-group-btn" onClick={openModal}>
+              + Add New Group
+            </button>
+        )}
       </div>
 
       {/* Grade selector */}
@@ -237,7 +258,7 @@ export default function Groups() {
           onChange={(e) => setCurrentGrade(e.target.value)}
         >
           <option value="">-- Choose Grade --</option>
-          {Grades.map((g) => (
+          {displayedGrades.map((g) => (
             <option key={g} value={g}>
               Grade {g}
             </option>
@@ -254,7 +275,9 @@ export default function Groups() {
           <div className="groups-list-container">
             <h3>Groups</h3>
             {groups[currentGrade] && groups[currentGrade].length > 0 ? (
-              groups[currentGrade].map((group, idx) => (
+              groups[currentGrade]
+                .filter(g => assistantPermissions ? assistantPermissions.allowedGroupIds.has(g._id) : true)
+                .map((group, idx) => (
                 <div key={group._id} className="group-row">
                   <span>
                     {group.groupname} ({group.enrolledStudents.length} Students)
@@ -264,20 +287,22 @@ export default function Groups() {
                       className="view-btn"
                       onClick={() =>
                         navigate(
-                          `/dashboard/groups/${currentGrade}/group${idx + 1}`
+                          `/dashboard/groups/${currentGrade}/${group._id}`
                         )
                       }
                     >
                       View
                     </button>
-                    <button
-                      className="delete-btn"
-                      onClick={() =>
-                        handleDeleteGroup(group._id, currentGrade)
-                      }
-                    >
-                      Delete
-                    </button>
+                    {user?.role === 'main_teacher' && (
+                        <button
+                          className="delete-btn"
+                          onClick={() =>
+                            handleDeleteGroup(group._id, currentGrade)
+                          }
+                        >
+                          Delete
+                        </button>
+                    )}
                   </div>
                 </div>
               ))
@@ -357,7 +382,9 @@ export default function Groups() {
                 >
                   <option value="">Select group...</option>
                   {groups[currentGrade] &&
-                    groups[currentGrade].map((g) => (
+                    groups[currentGrade]
+                      .filter(g => assistantPermissions ? assistantPermissions.allowedGroupIds.has(g._id) : true)
+                      .map((g) => (
                       <option key={g._id} value={g._id}>
                         {g.groupname}
                       </option>

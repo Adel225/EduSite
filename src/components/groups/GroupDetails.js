@@ -9,9 +9,8 @@ Modal.setAppElement("#root");
 
 
 const GroupDetails = () => {
-  const { grade, group: groupNumberString } = useParams(); // group will be 'group1', 'group2', etc.
   const navigate = useNavigate();
-  const groupNumber = parseInt(groupNumberString.replace('group', ''), 10);
+  const { grade, groupId } = useParams();
 
   const [groupStudents, setGroupStudents] = useState([]);
   const [groupName, setGroupName] = useState("");
@@ -29,58 +28,32 @@ const GroupDetails = () => {
   useEffect(() => {
     fetchGroupStudents();
     // eslint-disable-next-line
-  }, [grade, groupNumberString]);
+  }, [grade]);
 
   const fetchGroupStudents = async () => {
     setLoading(true);
     setError(null);
     try {
       const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-      if (!token) {
-        setError('Authentication token not found. Please log in.');
-        setLoading(false);
-        return;
-      }
+      if (!token) throw new Error('Authentication token not found.');
 
-      const groupResponse = await fetch(`${API_URL}/group/grades?grade=${grade}`, {
+      // --- FIX: Fetch the single group directly by its ID ---
+      const response = await fetch(`${API_URL}/group/id?_id=${groupId}`, {
         headers: { 'Authorization': `MonaEdu ${token}` }
       });
+      if (!response.ok) throw new Error('Failed to fetch group details');
 
-      if (!groupResponse.ok) {
-        const errorData = await groupResponse.json();
-        throw new Error(errorData.Message || 'Failed to fetch groups');
-      }
-
-      const groupData = await groupResponse.json();
-
-      if (groupData.Message === "Groups fetched successfully") {
-        const targetGroup = groupData.groups[groupNumber - 1];
-        setGroupName(targetGroup.groupname);
-        if (targetGroup) {
-          setCurrentGroupId(targetGroup._id);
-
-          const students = targetGroup.enrolledStudents.map(student => ({
-            _id: student._id,
-            userName: student.userName,
-            firstName: student.firstName,
-            lastName: student.lastName,
-            phone: student.phone,
-            parentPhone: student.parentPhone,
-            email: student.email,
-            parentemail: student.email
-          }));
-
-          setGroupStudents(students);
-        } else {
-          setError('Group not found at this index. Please check the URL.');
-          setGroupStudents([]);
-          setCurrentGroupId(null);
-        }
+      const data = await response.json();
+      if (data.Message === "Done") {
+        const group = data.group;
+        setGroupName(group.groupname);
+        setCurrentGroupId(group._id); 
+        setGroupStudents(group.enrolledStudents || []);
       } else {
-        throw new Error(groupData.Message || 'Failed to fetch groups: Unexpected message');
+        throw new Error('Group not found.');
       }
     } catch (err) {
-      setError(err.message || 'Error loading group students. Please try again.');
+      setError(err.message || 'Error loading group students.');
     } finally {
       setLoading(false);
     }
@@ -134,7 +107,7 @@ const GroupDetails = () => {
     <div className="group-details-page">
       {/* Header */}
       <div className="details-header">
-        <h2>Grade {grade} – {groupName || `Group ${groupNumber}`}</h2>
+        <h2>Grade {grade} – {groupName}</h2>
         <button className="back-btn" onClick={() => navigate(-1)}>← Back</button>
       </div>
 
@@ -182,20 +155,18 @@ const GroupDetails = () => {
               <p><strong>Username:</strong> {viewingStudent.userName}</p>
             </div>
             <div className="form-group">
-            <p><strong>Name:</strong> {viewingStudent.firstName} {viewingStudent.lastName}</p>
+              <p><strong>Name:</strong> {viewingStudent.firstName} {viewingStudent.lastName}</p>
             </div>
             <div className="form-group">
-            <p><strong>Email:</strong> {viewingStudent.email}</p>
+              <p><strong>Email:</strong> {viewingStudent.email}</p>
             </div>
             <div className="form-group">
-            <p><strong>Phone:</strong> {viewingStudent.phone}</p>
+              <p><strong>Phone:</strong> {viewingStudent.phone}</p>
             </div>
             <div className="form-group">
-            <p><strong>Parent Phone:</strong> {viewingStudent.parentPhone}</p>
+              <p><strong>Parent Phone:</strong> {viewingStudent.parentPhone}</p>
             </div>
-            <div className="form-group">
-            <p><strong>Parent Email:</strong> {viewingStudent.parentemail}</p>
-            </div>
+            
 
             <div className="form-actions">
               <button
