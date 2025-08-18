@@ -1,430 +1,453 @@
-import React, { useState, useEffect, useMemo, useCallback  } from 'react';
-import { useAuth } from '../../utils/AuthContext';
-import '../../styles/groups.css';
-import { NavLink } from 'react-router-dom';
-import Modal from 'react-modal'; // Import Modal
+// Groups.js
+import React, { useEffect, useState, useRef } from "react";
+import { useNavigate } from "react-router-dom";
+import Modal from "react-modal";
 import { API_URL } from '../../config';
+import "../../styles/groups.css"
 
 
-const Groups = () => {
-  const [allGroups, setAllGroups] = useState({});
-  const [unassignedStudentsByGrade, setUnassignedStudentsByGrade] = useState({});
-  const [loadingGroups, setLoadingGroups] = useState(true);
-  const [loadingUnassigned, setLoadingUnassigned] = useState(true);
+// const API_URL = process.env.REACT_APP_API_URL;
+const Grades = [6, 7, 8, 9, 10, 11, 12];
+
+Modal.setAppElement("#root");
+
+export default function Groups() {
+  const navigate = useNavigate();
+  const token =
+    localStorage.getItem("token") || sessionStorage.getItem("token");
+
+  // --- State ---
+  const [groups, setGroups] = useState({});
+  const [unassigned, setUnassigned] = useState({});
+  const [currentGrade, setCurrentGrade] = useState("");
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [deletingGroupId, setDeletingGroupId] = useState(null);
-  const [addingStudentId, setAddingStudentId] = useState(null);
+
+  // add group modal
+  const [modalIsOpen, setModalIsOpen] = useState(false);
   const [viewingStudent, setViewingStudent] = useState(null);
-  
-  // --- NEW: State for modal-based group creation ---
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isAddingGroup, setIsAddingGroup] = useState(false);
-  const [currentGrade, setCurrentGrade] = useState(null);
-  const [formData, setFormData] = useState({ groupName: '' });
+  const [newGroupName, setNewGroupName] = useState("");
 
-  const Grades = [6,7,8,9,10,11,12];
+  // student details modal
+  const [selectedStudent, setSelectedStudent] = useState(null);
 
-  const { user } = useAuth(); 
+  // bulk selection
+  const [selectedStudents, setSelectedStudents] = useState([]);
+  const [bulkTargetGroup, setBulkTargetGroup] = useState("");
+  const selectAllRef = useRef(null);
 
-  // --- HIGHLIGHT: Process assistant permissions for GROUPS ---
-  const assistantPermissions = useMemo(() => {
-    if (user?.role !== 'assistant') return null;
-    const permissions = {
-        allowedGradeNumbers: new Set(),
-        allowedGroupIds: new Set(),
-    };
-    user.permissions?.groups?.forEach(p => {
-        permissions.allowedGradeNumbers.add(p.grade);
-        permissions.allowedGroupIds.add(p.groupId);
-    });
-    return {
-        ...permissions,
-        allowedGradeNumbers: Array.from(permissions.allowedGradeNumbers).sort((a, b) => a - b),
-    };
-  }, [user]);
+  // search
+  const [searchQuery, setSearchQuery] = useState("");
 
-  // --- HIGHLIGHT: Create the list of grades that the UI will actually render ---
-  const displayedGrades = assistantPermissions ? assistantPermissions.allowedGradeNumbers : Grades;
-
-  // --- HIGHLIGHT: Replaced both fetch functions with a single, permission-aware one ---
-  const fetchAllData = useCallback(async () => {
-    setLoadingGroups(true);
-    setLoadingUnassigned(true);
-    setError(null);
-    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-    const gradesToFetch = assistantPermissions ? assistantPermissions.allowedGradeNumbers : Grades;
-    
+  // --- Fetch groups & unassigned for a grade ---
+  const fetchGroups = async (grade) => {
     try {
-      // Fetch Groups
-      const groupRequests = gradesToFetch.map(grade =>
-        fetch(`${API_URL}/group/grades?grade=${grade}`, { headers: { 'Authorization': `MonaEdu ${token}` } }).then(res => res.json())
-      );
-      const groupResults = await Promise.all(groupRequests);
-      const newAllGroups = {};
-      groupResults.forEach((data, index) => {
-        const grade = gradesToFetch[index];
-        if (data.Message === "Groups fetched successfully") newAllGroups[grade] = data.groups || [];
+      const res = await fetch(`${API_URL}/group/grades?grade=${grade}`, {
+        headers: { Authorization: `MonaEdu ${token}` },
       });
-      setAllGroups(newAllGroups);
-
-      // Fetch Unassigned Students
-      const studentRequests = gradesToFetch.map(grade =>
-        fetch(`${API_URL}/student/grade/${grade}/unassigned`, { headers: { 'Authorization': `MonaEdu ${token}` } }).then(res => res.json())
-      );
-      const studentResults = await Promise.all(studentRequests);
-      const newUnassignedStudents = {};
-      studentResults.forEach((data, index) => {
-        const grade = gradesToFetch[index];
-        if (data.Message === "Unassigned students fetched successfully" || data.Message === "No Student Attached to it") newUnassignedStudents[grade] = data.students || [];
-      });
-      setUnassignedStudentsByGrade(newUnassignedStudents);
-
+      if (!res.ok) throw new Error("Failed to fetch groups");
+      const data = await res.json();
+      setGroups((prev) => ({ ...prev, [grade]: data.groups || [] }));
+      console.log(groups);
     } catch (err) {
-      setError('Error loading page data. Please try again.');
-    } finally {
-      setLoadingGroups(false);
-      setLoadingUnassigned(false);
+      console.error(err);
+      setGroups((prev) => ({ ...prev, [grade]: [] }));
     }
-  }, [assistantPermissions]); // Re-fetches if permissions change
+  };
 
+  const fetchUnassigned = async (grade) => {
+    try {
+      const res = await fetch(
+        `${API_URL}/student/grade/${grade}/unassigned`,
+        { headers: { Authorization: `MonaEdu ${token}` } }
+      );
+      if (!res.ok) throw new Error("Failed to fetch unassigned students");
+      const data = await res.json();
+      setUnassigned((prev) => ({ ...prev, [grade]: data.students || [] }));
+    } catch (err) {
+      console.error(err);
+      setUnassigned((prev) => ({ ...prev, [grade]: [] }));
+    }
+  };
+
+  const loadGradeData = async (grade) => {
+    if (!grade) return;
+    setLoading(true);
+    await Promise.all([fetchGroups(grade), fetchUnassigned(grade)]);
+    setLoading(false);
+    setSelectedStudents([]);
+    setBulkTargetGroup("");
+    setSearchQuery("");
+  };
+
+  // --- Effects ---
   useEffect(() => {
-    fetchAllData();
-  }, [fetchAllData]);
+    if (currentGrade) {
+      loadGradeData(currentGrade);
+    }
+    // eslint-disable-next-line
+  }, [currentGrade]);
 
-  // const fetchAllGroups = async () => {
-  //   setLoadingGroups(true);
-  //   setError(null);
-  //   try {
-  //     const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-  //     const requests = Grades.map(grade =>
-  //       fetch(`${API_URL}/group/grades?grade=${grade}`, {
-  //         headers: {
-  //           'Authorization': `MonaEdu ${token}`
-  //         }
-  //       }).then(res => res.json())
-  //     );
+  // --- Handlers ---
+  const openModal = () => setModalIsOpen(true);
+  const closeModal = () => setModalIsOpen(false);
 
-  //     const results = await Promise.all(requests);
-  //     const newAllGroups = {};
-  //     results.forEach((data, index) => {
-  //       const grade = Grades[index];
-  //       if (data.Message === "Groups fetched successfully") {
-  //         newAllGroups[grade] = data.groups;
-  //       } else {
-  //         console.error(`Failed to fetch groups for grade ${grade}:`, data.Message);
-  //         newAllGroups[grade] = []; // Ensure an empty array if fetch fails for a grade
-  //       }
-  //     });
-  //     setAllGroups(newAllGroups);
-  //   } catch (err) {
-  //     console.error('Error fetching all groups:', err);
-  //     setError('Error loading groups. Please try again.');
-  //   } finally {
-  //     setLoadingGroups(false);
-  //   }
-  // };
-
-  // const fetchAllUnassignedStudents = async () => {
-  //   setLoadingUnassigned(true);
-  //   setError(null);
-  //   try {
-  //     const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-  //     const requests = Grades.map(grade =>
-  //       fetch(`${API_URL}/student/grade/${grade}/unassigned`, {
-  //         headers: {
-  //           'Authorization': `MonaEdu ${token}`
-  //         }
-  //       }).then(res => res.json())
-  //     );
-
-  //     const results = await Promise.all(requests);
-  //     const newUnassignedStudentsByGrade = {};
-  //     results.forEach((data, index) => {
-  //       const grade = Grades[index];
-  //       if (data.Message === "Unassigned students fetched successfully" || data.Message === "No Student Attached to it") {
-  //         newUnassignedStudentsByGrade[grade] = data.students || [];
-  //       } else {
-  //         console.error(`Failed to fetch unassigned students for grade ${grade}:`, data.Message);
-  //         newUnassignedStudentsByGrade[grade] = [];
-  //       }
-  //     });
-  //     setUnassignedStudentsByGrade(newUnassignedStudentsByGrade);
-  //   } catch (err) {
-  //     console.error('Error fetching all unassigned students:', err);
-  //     setError(err.message || 'Error loading unassigned students. Please try again.');
-  //   } finally {
-  //     setLoadingUnassigned(false);
-  //   }
-  // };
-
-  const handleDeleteGroup = async (groupId, groupName) => {
-    if (window.confirm(`Are you sure you want to delete group "${groupName}"?`)) {
-      setDeletingGroupId(groupId);
-      try {
-        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-        const response = await fetch(`${API_URL}/group/deletegroup`, {
-          method: 'DELETE',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `MonaEdu ${token}`
-          },
-          body: JSON.stringify({ groupid : groupId })
-        });
-
-        const result = await response.json();
-
-        if (!response.ok) {
-          throw new Error(result.Message || 'Failed to delete group');
-        }
-
-        fetchAllData();
-        alert(result.Message || `Group "${groupName}" deleted successfully.`);
-      } catch (err) {
-        console.error('Error deleting group:', err);
-        setError(err.message || 'Error deleting group. Please try again.');
-      } finally {
-        setDeletingGroupId(null);
-      }
+  const handleCreateGroup = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await fetch(`${API_URL}/group/create`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `MonaEdu ${token}`,
+        },
+        body: JSON.stringify({
+          grade: currentGrade,
+          groupname: newGroupName,
+        }),
+      });
+      if (!res.ok) throw new Error("Failed to create group");
+      await loadGradeData(currentGrade);
+      setNewGroupName("");
+      closeModal();
+    } catch (err) {
+      alert("Error creating group");
     }
   };
 
-  const handleAddStudentToGroup = async (studentId, groupId, groupName, studentName) => {
-    if (window.confirm(`Add ${studentName} to group "${groupName}"?`)) {
-      setAddingStudentId(studentId); // Use this to disable the specific student's buttons
-      try {
-        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-        const response = await fetch(`${API_URL}/group/addstudent`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `MonaEdu ${token}`
-          },
-          body: JSON.stringify({ 
-            groupid : groupId, 
-            studentid : studentId 
-          })
-        });
-
-        const result = await response.json();
-
-        if (!response.ok) {
-          throw new Error(result.Message || 'Failed to add student to group');
-        }
-
-        // Refresh both lists
-        fetchAllData();
-        alert(result.Message || `Student ${studentName} added to group "${groupName}" successfully.`);
-      } catch (err) {
-        console.error('Error adding student to group:', err);
-        setError(err.message || 'Error adding student. Please try again.');
-      } finally {
-        setAddingStudentId(null);
-      }
+  const handleDeleteGroup = async (groupid, grade) => {
+    if (!window.confirm("Delete this group?")) return;
+    try {
+      const res = await fetch(`${API_URL}/group/deletegroup`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `MonaEdu ${token}`,
+        },
+        body: JSON.stringify({ groupid }),
+      });
+      if (!res.ok) throw new Error("Failed to delete group");
+      await loadGradeData(grade);
+    } catch (err) {
+      alert("Error deleting group");
     }
-  };
-
-  const handleViewStudent = (student) => {
-    setViewingStudent(student);
   };
 
   const closeViewStudentModal = () => {
     setViewingStudent(null);
   };
 
-  const getUnassignedStudentsForGrade = (grade) => {
-    return unassignedStudentsByGrade[grade] || [];
+  // --- Bulk selection ---
+  const toggleStudentSelection = (id) => {
+    setSelectedStudents((prev) =>
+      prev.includes(id) ? prev.filter((s) => s !== id) : [...prev, id]
+    );
   };
 
-  // --- REFACTORED: Group creation logic for modal ---
-  const handleOpenModal = (grade) => {
-    setCurrentGrade(grade);
-    setFormData({ groupName: '' });
-    setError(null);
-    setIsModalOpen(true);
+  const toggleSelectAll = () => {
+    const students = unassigned[currentGrade] || [];
+    if (selectedStudents.length === students.length) {
+      setSelectedStudents([]);
+    } else {
+      setSelectedStudents(students.map((s) => s._id));
+    }
   };
 
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-    setCurrentGrade(null);
-  };
+  useEffect(() => {
+    if (!selectAllRef.current) return;
+    const students = unassigned[currentGrade] || [];
+    if (selectedStudents.length === 0) {
+      selectAllRef.current.indeterminate = false;
+      selectAllRef.current.checked = false;
+    } else if (selectedStudents.length === students.length) {
+      selectAllRef.current.indeterminate = false;
+      selectAllRef.current.checked = true;
+    } else {
+      selectAllRef.current.indeterminate = true;
+    }
+  }, [selectedStudents, currentGrade, unassigned]);
 
-  const handleAddGroup = async (e) => {
-    e.preventDefault();
-    if (!formData.groupName.trim()) {
-      setError('Please enter a group name.');
+  // --- Bulk add ---
+  const handleBulkAddStudents = async () => {
+    if (!bulkTargetGroup || selectedStudents.length === 0) return;
+    if (!window.confirm(`Add ${selectedStudents.length} students to this group?`))
       return;
+
+    const chunks = [];
+    for (let i = 0; i < selectedStudents.length; i += 20) {
+      chunks.push(selectedStudents.slice(i, i + 20));
     }
 
-    setIsAddingGroup(true);
-    setError(null);
     try {
-      const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-      const response = await fetch(`${API_URL}/group/create`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `MonaEdu ${token}`
-        },
-        body: JSON.stringify({
-          grade: parseInt(currentGrade),
-          groupname: formData.groupName.trim()
-        })
-      });
-
-      const result = await response.json();
-      
-      if (!response.ok) {
-        if (response.status === 500 && result.message === 'Invalid Data') {
-          alert('This group name already exists. Please choose another one.');
-          return;
-        }
-        throw new Error(result.Message || 'Failed to create group');
+      for (const chunk of chunks) {
+        const res = await fetch(`${API_URL}/group/addstudent`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `MonaEdu ${token}`,
+          },
+          body: JSON.stringify({
+            groupid: bulkTargetGroup,
+            studentIds: chunk,
+          }),
+        });
+        if (!res.ok) throw new Error("Bulk add failed");
       }
-
-      fetchAllData();
-      alert(result.Message || 'Group created successfully');
-      handleCloseModal();
+      await loadGradeData(currentGrade);
+      setSelectedStudents([]);
+      setBulkTargetGroup("");
     } catch (err) {
-      console.error('Error creating group:', err);
-      setError(err.message || 'Error creating group. Please try again.');
-    } finally {
-      setIsAddingGroup(false);
+      alert("Error adding multiple students");
     }
   };
 
-  if (loadingGroups || loadingUnassigned) return <div className="loading">Loading groups and unassigned students...</div>;
-  if (error) return <div className="error">{error}</div>;
+  // --- Filter students ---
+  const filteredStudents =
+  (unassigned[currentGrade] || []).filter((s) => {
+    const q = searchQuery.toLowerCase();
+    const first = (s.firstName || "").toLowerCase();
+    const last = (s.lastName || "").toLowerCase();
+    const email = (s.email || "").toLowerCase();
+    const username = (s.userName || "").toLowerCase();
+    return (
+      first.includes(q) ||
+      last.includes(q) ||
+      email.includes(q) ||
+      username.includes(q)
+    );
+  });
 
+  // --- JSX ---
   return (
     <div className="groups-page">
-      <h2>Groups & Unassigned Students</h2>
-      {displayedGrades.map(grade => (
-        <div key={grade} className="grade-section">
-          <div className="grade-header">
-            <h3>Grade {grade}</h3>
-            <button className="add-group-btn" onClick={() => handleOpenModal(grade)}>
-              + Add Group
-            </button>
-          </div>
-          <div className="grade-content-container">
-            <div className="groups-list-container">
-              <h4 className="container-title">Groups</h4>
-              {allGroups[grade] && allGroups[grade].length > 0 ? (
-                <div className="groups-container">
-                  {allGroups[grade].filter(g => assistantPermissions ? assistantPermissions.allowedGroupIds.has(g._id) : true).map((group, index) => (
-                    <div key={group._id} className="group-card">
-                      <h4>{group.groupname}</h4>
-                      <p>Students: {group.enrolledStudents ? group.enrolledStudents.length : 0}</p>
-                      <div className="group-card-actions">
-                        {(() => {
-                          const navLinkPath = `/dashboard/groups/${grade}/group${index + 1}`;
-                          return (
-                            <NavLink to={navLinkPath} className="view-students-btn">View Students</NavLink>
-                          );
-                        })()}
-                        <button 
-                          className="delete-group-btn"
-                          onClick={() => handleDeleteGroup(group._id, group.groupname)}
-                          disabled={deletingGroupId === group._id}
-                        >
-                          {deletingGroupId === group._id ? 'Deleting...' : 'Delete'}
-                        </button>
-                      </div>
-                    </div>
-                  ))}
+      {/* Header */}
+      <div className="groups-header">
+        <h2>Groups & Students</h2>
+        <button className="add-group-btn" onClick={openModal}>
+          + Add New Group
+        </button>
+      </div>
+
+      {/* Grade selector */}
+      <div className="grade-selector">
+        <label htmlFor="grade-select">Select Grade: </label>
+        <select
+          id="grade-select"
+          value={currentGrade}
+          onChange={(e) => setCurrentGrade(e.target.value)}
+        >
+          <option value="">-- Choose Grade --</option>
+          {Grades.map((g) => (
+            <option key={g} value={g}>
+              Grade {g}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {loading && <p>Loading...</p>}
+      {error && <div className="error-banner">{error}</div>}
+
+      {currentGrade && !loading && (
+        <div className="grade-content-container">
+          {/* Groups column */}
+          <div className="groups-list-container">
+            <h3>Groups</h3>
+            {groups[currentGrade] && groups[currentGrade].length > 0 ? (
+              groups[currentGrade].map((group, idx) => (
+                <div key={group._id} className="group-row">
+                  <span>
+                    {group.groupname} ({group.enrolledStudents.length} Students)
+                  </span>
+                  <div className="group-actions">
+                    <button
+                      className="view-btn"
+                      onClick={() =>
+                        navigate(
+                          `/dashboard/groups/${currentGrade}/group${idx + 1}`
+                        )
+                      }
+                    >
+                      View
+                    </button>
+                    <button
+                      className="delete-btn"
+                      onClick={() =>
+                        handleDeleteGroup(group._id, currentGrade)
+                      }
+                    >
+                      Delete
+                    </button>
+                  </div>
                 </div>
+              ))
+            ) : (
+              <p>No groups found for this grade.</p>
+            )}
+          </div>
+
+          {/* Unassigned students column */}
+          <div className="unassigned-students-container">
+            <h3>Unassigned Students</h3>
+
+            <div className="students-toolbar">
+              <input
+                type="text"
+                placeholder="Search students..."
+                className="search-input"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+              <label className="select-all">
+                <input
+                  type="checkbox"
+                  ref={selectAllRef}
+                  onChange={toggleSelectAll}
+                />
+                Select All
+              </label>
+            </div>
+
+            <div className="students-list">
+              {filteredStudents.length > 0 ? (
+                filteredStudents.map((student) => (
+                  <div key={student._id} className="student-row">
+                    <div className="student-info">
+                      <input
+                        type="checkbox"
+                        className="student-checkbox"
+                        checked={selectedStudents.includes(student._id)}
+                        onChange={() => toggleStudentSelection(student._id)}
+                      />
+                      <span>
+                          {student.firstName} {student.lastName}
+                      </span>
+                    </div>
+                    <div className="student-actions">
+                      <button onClick={() =>  setViewingStudent(student)}>
+                        View
+                      </button>
+                      {/* <select
+                        onChange={(e) =>
+                          handleAddSingleStudent(student._id, e.target.value)
+                        }
+                      >
+                        <option value="">Add to group...</option>
+                        {groups[currentGrade] &&
+                          groups[currentGrade].map((g) => (
+                            <option key={g._id} value={g._id}>
+                              {g.groupname}
+                            </option>
+                          ))}
+                      </select> */}
+                    </div>
+                  </div>
+                ))
               ) : (
-                <p>No groups found for Grade {grade}.</p>
+                <p>No unassigned students found.</p>
               )}
             </div>
 
-            <div className="unassigned-students-container">
-              <h4>Unassigned Students</h4>
-              {getUnassignedStudentsForGrade(grade).length > 0 ? (
-                <div className="students-list">
-                  {getUnassignedStudentsForGrade(grade).map(student => (
-                    <div key={student._id} className="student-card">
-                      <p><strong>{student.firstName} {student.lastName}</strong></p>
-                      <div className="student-actions">
-                        <button className="view-btn" onClick={() => handleViewStudent(student)}>View</button>
-                        <div className="add-to-group-dropdown">
-                          <select 
-                            onChange={(e) => handleAddStudentToGroup(
-                              student._id,
-                              e.target.value,
-                              e.target.options[e.target.selectedIndex].text,
-                              student.userName
-                            )}
-                            disabled={addingStudentId === student._id || !allGroups[grade] || allGroups[grade].length === 0}
-                            value=""
-                          >
-                            <option value="">Add to Group</option>
-                            {allGroups[grade] && allGroups[grade].filter(g => assistantPermissions ? assistantPermissions.allowedGroupIds.has(g._id) : true).map(group => (
-                              <option key={group._id} value={group._id}>{group.groupname}</option>
-                            ))}
-                          </select>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p>No unassigned students found for Grade {grade}.</p>
-              )}
-            </div>
-          </div>
-        </div>
-      ))}
-
-      {viewingStudent && (
-        <div className="modal-overlay">
-          <div className="modal-content">
-            <h3>Student Details</h3>
-            <p><strong>Username:</strong> {viewingStudent.userName}</p>
-            <p><strong>First Name:</strong> {viewingStudent.firstName}</p>
-            <p><strong>Last Name:</strong> {viewingStudent.lastName}</p>
-            <p><strong>Email:</strong> {viewingStudent.email}</p>
-            <p><strong>Phone:</strong> {viewingStudent.phone || 'N/A'}</p>
-            <button className="close-modal-btn" onClick={closeViewStudentModal}>Close</button>
+            {selectedStudents.length > 0 && (
+              <div className="bulk-actions-bar">
+                <span>{selectedStudents.length} selected</span>
+                <select
+                  value={bulkTargetGroup}
+                  onChange={(e) => setBulkTargetGroup(e.target.value)}
+                >
+                  <option value="">Select group...</option>
+                  {groups[currentGrade] &&
+                    groups[currentGrade].map((g) => (
+                      <option key={g._id} value={g._id}>
+                        {g.groupname}
+                      </option>
+                    ))}
+                </select>
+                <button onClick={handleBulkAddStudents}>Add Students</button>
+              </div>
+            )}
           </div>
         </div>
       )}
 
+      {/* Add group modal */}
       <Modal
-        isOpen={isModalOpen}
-        onRequestClose={handleCloseModal}
-        contentLabel="Add New Group"
+        isOpen={modalIsOpen}
+        onRequestClose={closeModal}
         className="form-modal"
         overlayClassName="form-modal-overlay"
       >
-        <h2>Create New Group for Grade {currentGrade}</h2>
-        <form onSubmit={handleAddGroup}>
+        <h2>Create New Group</h2>
+        <form onSubmit={handleCreateGroup}>
           <div className="form-group">
-            <label htmlFor="groupName">Group Name:</label>
+            <label>Group Name</label>
             <input
-              type="text"
-              id="groupName"
-              value={formData.groupName}
-              onChange={(e) => setFormData({ ...formData, groupName: e.target.value })}
-              placeholder="Enter new group name"
+              value={newGroupName}
+              onChange={(e) => setNewGroupName(e.target.value)}
               required
             />
           </div>
-
-          {error && <div className="error-message">{error}</div>}
-
           <div className="form-actions">
-            <button type="button" className="cancel-btn" onClick={handleCloseModal} disabled={isAddingGroup}>
+            <button
+              type="button"
+              className="cancel-btn"
+              onClick={closeModal}
+            >
               Cancel
             </button>
-            <button type="submit" disabled={isAddingGroup}>
-              {isAddingGroup ? 'Creating...' : 'Create Group'}
-            </button>
+            <button type="submit">Create</button>
           </div>
         </form>
       </Modal>
+
+      {/* Student details modal */}
+      {/* {selectedStudent && (
+        <div className="modal-overlay">
+          <div className="student-modal">
+            <div className="student-modal-header">
+              <h3>Student Details</h3>
+              <button className="student-modal-close" onClick={closeStudentModal}>
+                &times;
+              </button>
+            </div>
+            <div className="student-modal-body">
+              <p><strong>Name:</strong> {selectedStudent.firstName} {selectedStudent.lastName}</p>
+              <p><strong>Email:</strong> {selectedStudent.email}</p>
+            </div>
+          </div>
+        </div>
+      )} */}
+      <Modal
+        isOpen={!!viewingStudent}
+        onRequestClose={closeViewStudentModal}
+        className="form-modal"
+        overlayClassName="form-modal-overlay"
+      >
+        <h2>Student Details</h2>
+        {viewingStudent && (
+          <>
+            <div className="form-group">
+              <p><strong>Username:</strong> {viewingStudent.userName}</p>
+            </div>
+            <div className="form-group">
+              <p><strong>Name:</strong> {viewingStudent.firstName} {viewingStudent.lastName}</p>
+            </div>
+            <div className="form-group">
+              <p><strong>Email:</strong> {viewingStudent.email}</p>
+            </div>
+
+            <div className="form-actions">
+              <button
+                type="button"
+                className="cancel-btn"
+                onClick={closeViewStudentModal}
+              >
+                Close
+              </button>
+            </div>
+          </>
+        )}
+      </Modal>
     </div>
   );
-};
-
-export default Groups;
+}

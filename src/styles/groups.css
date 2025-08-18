@@ -1,267 +1,265 @@
-.groups-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 20px;
-    padding: 20px;
-    font-family: Arial, sans-serif;
-    margin-left: 20px;
-  }
-  
-  .grade-section {
-    background-color: #f9f9f9;
-    border-radius: 8px;
-    padding: 15px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  }
-  .add-button {
-    margin-top: 10px;
-    padding: 8px 12px;
-    background-color: #6200ea;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 0.9rem;
-  }
-  
-  .add-button:hover {
-    background-color: #3700b3;
-  }
-  .grade-section h3 {
-    margin: 0;
-    font-size: 1.2rem;
-    color: #333;
-  }
-  
-  .grade-section p {
-    margin: 5px 0 15px;
-    font-size: 0.9rem;
-    color: #666;
-  }
-  
-  .group-item {
-    display: flex;
-    justify-content: space-between;
-    padding: 8px 0;
-    border-bottom: 1px solid #eee;
-    cursor: pointer;
-  }
-  
-  .group-item:last-child {
-    border-bottom: none;
-  }
-  
-  .group-item span {
-    font-size: 0.9rem;
-    color: #555;
-  }
-  .delete-button {
-    margin-left: 10px;
-    padding: 5px 10px;
-    background-color: #e53935;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 0.9rem;
-  }
-  
-  .delete-button:hover {
-    background-color: #b71c1c;
-  }
+/* ---------------------------------
+   Groups Page - Modern Compact UI
+----------------------------------- */
 
 .groups-page {
-  padding: 20px;
+  font-family: "Inter", system-ui, Arial, sans-serif;
+  padding: 24px;
+  color: #2d2d2d;
+  background: #f8f9fa;
+  min-height: 100vh;
 }
 
-.grade-section {
-  margin-bottom: 30px;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  padding: 15px;
-  background-color: #f9f9f9;
-}
-
-.grade-section h3 {
-  color: #333;
-  margin-bottom: 15px;
-  border-bottom: 2px solid #ccc;
-  padding-bottom: 10px;
-}
-
-.groups-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: 20px;
-}
-
-.group-card {
-  background-color: #fff;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  padding: 15px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+/* --- Header --- */
+.groups-header {
   display: flex;
-  flex-direction: column;
   justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
 }
 
-.group-card h4 {
-  color: #007bff;
-  margin-bottom: 10px;
+.groups-header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #222;
 }
 
-.group-card p {
-  color: #555;
-  font-size: 0.9em;
-}
-
-.loading,
-.error {
-  text-align: center;
-  padding: 20px;
-  font-size: 1.2em;
-  color: #666;
-}
-
-.error {
-  color: #dc3545;
-  background-color: #f8d7da;
-  border: 1px solid #f5c6cb;
-  border-radius: 4px;
-  margin: 20px;
-}
-
-.group-card button.delete-group-btn {
-  background-color: #dc3545;
-  color: white;
-  border: none;
-  padding: 8px 12px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 0.9em;
-  margin-top: 10px;
-  align-self: flex-start;
-}
-
-.group-card button.delete-group-btn:hover {
-  background-color: #c82333;
-}
-
-.group-card button.delete-group-btn:disabled {
-  background-color: #e0e0e0;
-  cursor: not-allowed;
-}
-
-.grade-content-container {
-  display: flex;
-  gap: 20px;
-  flex-wrap: wrap; /* Allow wrapping for smaller screens */
-}
-
-.groups-list-container,
-.unassigned-students-container {
-  flex: 1; /* Distribute space equally */
-  min-width: 300px; /* Minimum width before wrapping */
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  padding: 15px;
-  background-color: #ffffff;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-}
-
-.unassigned-students-container h4,
-.groups-list-container h4 {
-  color: #333;
-  margin-bottom: 15px;
-  border-bottom: 1px solid #eee;
-  padding-bottom: 10px;
-}
-
-.students-list {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 15px;
-}
-
-.student-card {
-  background-color: #f0f0f0;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  padding: 10px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-}
-
-.student-card p {
-  margin: 5px 0;
-  font-size: 0.9em;
-  color: #333;
-}
-
-.student-card p strong {
-  color: #000;
-}
-
-.student-actions {
-  display: flex;
-  gap: 8px;
-  margin-top: 10px;
-  flex-wrap: wrap;
-}
-
-.student-actions button,
-.add-to-group-dropdown select {
-  padding: 8px 12px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 0.85em;
-}
-
-.view-btn {
+.add-group-btn {
   background-color: #007bff;
-  color: white;
+  color: #fff;
   border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: background 0.2s;
 }
-
-.view-btn:hover {
+.add-group-btn:hover {
   background-color: #0056b3;
 }
 
-.delete-btn {
-  background-color: #dc3545;
-  color: white;
+/* --- Grade Selector --- */
+.grade-selector {
+  margin-bottom: 20px;
+}
+.grade-selector label {
+  font-weight: 500;
+  margin-right: 8px;
+}
+.grade-selector select {
+  padding: 6px 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  background: #fff;
+}
+
+/* --- Layout --- */
+.grade-content-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+/* --- Panels --- */
+.groups-list-container,
+.unassigned-students-container {
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.groups-list-container h3,
+.unassigned-students-container h3 {
+  margin-top: 0;
+  margin-bottom: 16px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 8px;
+}
+
+/* -----------------------
+   Groups Column
+------------------------ */
+.group-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+.group-row:last-child {
+  border-bottom: none;
+}
+
+.group-row span {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #333;
+}
+
+.group-actions button {
+  margin-left: 8px;
+  padding: 5px 10px;
+  font-size: 0.8rem;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.group-actions .view-btn {
+  background: #007bff;
+  color: #fff;
+}
+.group-actions .view-btn:hover {
+  background: #0056b3;
+}
+
+.group-actions .delete-btn {
+  background: #dc3545;
+  color: #fff;
+}
+.group-actions .delete-btn:hover {
+  background: #b71c1c;
+}
+
+/* -----------------------
+   Unassigned Students
+------------------------ */
+
+/* Toolbar */
+.students-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+  gap: 10px;
+}
+
+.search-input {
+  flex: 1;
+  padding: 6px 10px;
+  font-size: 0.9rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+.select-all {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+/* List */
+.students-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.student-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 10px;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  background: #fafafa;
+  transition: background 0.2s;
+}
+.student-row:hover {
+  background: #f1f5f9;
+}
+
+.student-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+/* Actions */
+.student-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.student-actions button,
+.student-actions select {
+  padding: 5px 10px;
+  font-size: 0.8rem;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  background: #fff;
+  cursor: pointer;
+}
+.student-actions button {
+  background: #007bff;
+  color: #fff;
   border: none;
 }
-
-.delete-btn:hover {
-  background-color: #c82333;
+.student-actions button:hover {
+  background: #0056b3;
 }
 
-.add-to-group-dropdown select {
-  background-color: #28a745;
-  color: white;
+/* Bulk footer */
+.bulk-actions-bar {
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid #eee;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.bulk-actions-bar span {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #444;
+}
+
+.bulk-actions-bar select {
+  padding: 6px 10px;
+  font-size: 0.9rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background: #fff;
+}
+
+.bulk-actions-bar button {
+  background: #28a745;
+  color: #fff;
   border: none;
-  appearance: none; /* Remove default browser dropdown arrow */
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  padding-right: 25px; /* Space for custom arrow */
-  background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23ffffff%22%20d%3D%22M287%2C197.351L146.2%2C56.652L5.4%2C197.351L0%2C191.951L146.2%2C45.952L292.4%2C191.951L287%2C197.351z%22%2F%3E%3C%2Fsvg%3E');
-  background-repeat: no-repeat;
-  background-position: right 8px top 50%;
-  background-size: 12px auto;
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  font-weight: 500;
+}
+.bulk-actions-bar button:hover {
+  background: #218838;
 }
 
-.add-to-group-dropdown select:hover {
-  background-color: #218838;
-}
-
+/* -----------------------
+   Modal + Feedback
+------------------------ */
 .modal-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.6);
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -269,204 +267,296 @@
 }
 
 .modal-content {
-  background-color: white;
-  padding: 30px;
+  background: #fff;
+  padding: 24px;
   border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  max-width: 500px;
-  width: 90%;
-  text-align: left;
+  max-width: 480px;
+  width: 100%;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .modal-content h3 {
   margin-top: 0;
-  color: #333;
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 16px;
   border-bottom: 1px solid #eee;
-  padding-bottom: 10px;
-  margin-bottom: 20px;
-}
-
-.modal-content p {
-  margin-bottom: 10px;
+  padding-bottom: 8px;
 }
 
 .close-modal-btn {
-  background-color: #6c757d;
-  color: white;
-  border: none;
-  padding: 10px 15px;
-  border-radius: 4px;
-  cursor: pointer;
-  margin-top: 20px;
-  float: right;
-}
-
-.close-modal-btn:hover {
-  background-color: #5a6268;
-}
-
-/* GroupDetails.js specific styles (reusing student-card, modal-overlay, etc.) */
-.group-details-page {
-  padding: 20px;
-}
-
-.group-details-page h2 {
-  color: #333;
-  margin-bottom: 20px;
-  border-bottom: 2px solid #ccc;
-  padding-bottom: 10px;
-}
-
-.students-list-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 20px;
-}
-
-.group-card-actions {
-  display: flex;
-  gap: 10px;
-  margin-top: 15px;
-  flex-wrap: wrap;
-}
-
-.group-card-actions .view-students-btn {
-  background-color: #007bff;
-  color: white;
+  background: #6c757d;
+  color: #fff;
   border: none;
   padding: 8px 12px;
-  border-radius: 4px;
+  border-radius: 6px;
   cursor: pointer;
-  font-size: 0.9em;
-  text-decoration: none;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+  margin-top: 10px;
+}
+.close-modal-btn:hover {
+  background: #5a6268;
 }
 
-.group-card-actions .view-students-btn:hover {
-  background-color: #0056b3;
+.error-banner {
+  color: #dc3545;
+  background: #f8d7da;
+  padding: 8px 12px;
+  border-radius: 6px;
+  margin: 12px 0;
+  font-size: 0.9rem;
+  font-weight: 500;
 }
 
-.grade-header {
+/* -------------------------
+   Group Details Page
+-------------------------- */
+.group-details-page {
+  padding: 24px;
+}
+
+.details-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1rem;
-  padding-bottom: 0.5rem;
-  border-bottom: 1px solid #e0e0e0;
+  margin-bottom: 20px;
 }
 
-.add-group-btn {
-  background-color: #007bff;
-  color: white;
+.group-details-page h2 {
+  margin: 0;
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #222;
+}
+
+.back-btn {
+  background: #6c757d;
+  color: #fff;
   border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 5px;
+  padding: 6px 12px;
+  border-radius: 6px;
   cursor: pointer;
-  font-weight: 500;
-  font-size: 0.9rem;
-  transition: background-color 0.2s ease;
+  font-size: 0.85rem;
+}
+.back-btn:hover {
+  background: #5a6268;
 }
 
-.add-group-btn:hover {
-  background-color: #0056b3;
-}
-
-.container-title {
-  margin-top: 0;
-  margin-bottom: 1rem;
-  color: #495057;
-}
-
-/* --- Modal Styles (reusing from assignments.css for consistency) --- */
-
-.form-modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.6);
-  z-index: 1000;
+.students-list-container {
   display: flex;
-  justify-content: center;
-  align-items: center;
+  flex-direction: column;
+  gap: 10px;
 }
 
+.student-actions button {
+  padding: 5px 10px;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.student-actions .remove-btn {
+  background: #dc3545;
+  color: #fff;
+}
+.student-actions .remove-btn:hover {
+  background: #b71c1c;
+}
+
+/* Search bar in group details */
+
+.group-details-page .search-bar {
+  margin-bottom: 20px;
+}
+
+.group-details-page .search-bar input {
+  width: 30%;
+  padding: 10px 14px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 0.95rem;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 900px) {
+  .grade-content-container {
+    grid-template-columns: 1fr; /* stack vertically */
+  }
+
+  .groups-list-container,
+  .unassigned-students-container {
+    width: 90%;
+  }
+
+  /* Make cards fit mobile screens */
+  .group-card,
+  .student-card {
+    width: 100%;
+    margin: 0;
+    box-sizing: border-box;
+  }
+
+  /* Header adjustments */
+  .grade-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .add-group-btn {
+    width: 100%;
+    text-align: center;
+  }
+
+  /* Search bar full width */
+  .search-bar input {
+    width: 100%;
+    padding: 10px;
+    font-size: 1rem;
+  }
+
+  /* Student actions stack */
+  .student-actions {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .student-actions button,
+  .add-to-group-dropdown select {
+    width: 100%;
+    text-align: center;
+  }
+}
+
+/* Even smaller devices */
+@media (max-width: 480px) {
+  .groups-page {
+    padding: 10px;
+  }
+
+  .group-card,
+  .student-card {
+    padding: 10px;
+    font-size: 0.85rem;
+  }
+
+  .add-group-btn {
+    font-size: 0.85rem;
+    padding: 0.6rem;
+  }
+}
+
+/* --- Modal general responsiveness --- */
 .form-modal {
   background: white;
-  padding: 2.5rem;
+  padding: 2rem;
   border-radius: 8px;
   width: 90%;
   max-width: 500px;
-  outline: none;
-  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+  box-sizing: border-box;
 }
 
-.form-modal h2 {
-  margin-top: 0;
-  margin-bottom: 1.5rem;
-  color: #333;
-  font-size: 1.5rem;
-  text-align: center;
-}
+/* Adjust for tablets and below */
+@media (max-width: 768px) {
+  .form-modal {
+    width: 95%;
+    padding: 1.5rem;
+  }
 
-.form-group {
-    margin-bottom: 1.5rem;
-}
-.form-group label {
-    display: block;
-    margin-bottom: 0.5rem;
-    font-weight: 500;
-    color: #495057;
-}
+  .form-modal h2 {
+    font-size: 1.2rem;
+  }
 
-.form-group input {
+  .form-group input {
+    font-size: 0.9rem;
+    padding: 0.6rem;
+  }
+
+  .form-actions button {
     width: 100%;
-    padding: 0.75rem;
-    border: 1px solid #ced4da;
-    border-radius: 4px;
+    font-size: 0.9rem;
+    padding: 0.8rem;
+  }
+}
+
+/* For very small devices */
+@media (max-width: 480px) {
+  .form-modal {
+    padding: 1rem;
+  }
+
+  .form-modal h2 {
     font-size: 1rem;
+  }
 }
 
-.form-actions {
+
+/* Modern modal card for student  */
+.student-modal {
+  background: #fff;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 450px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+  animation: fadeIn 0.25s ease;
+  overflow: hidden;
+}
+
+/* Header */
+.student-modal-header {
   display: flex;
-  justify-content: flex-end;
-  gap: 1rem;
-  margin-top: 2rem;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid #eee;
 }
 
-.form-actions button {
-  padding: 0.6rem 1.2rem;
-  border-radius: 5px;
+.student-modal-header h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  color: #333;
+}
+
+/* Close button (×) */
+.student-modal-close {
+  background: transparent;
   border: none;
+  font-size: 1.5rem;
+  color: #555;
   cursor: pointer;
-  font-weight: 500;
-  font-size: 1rem;
+  transition: color 0.2s ease;
+}
+.student-modal-close:hover {
+  color: #000;
 }
 
-.form-actions .cancel-btn {
-  background-color: #6c757d;
-  color: white;
+/* Body */
+.student-modal-body {
+  padding: 20px;
 }
-.form-actions .cancel-btn:hover {
-  background-color: #5a6268;
+.student-modal-body p {
+  margin: 12px 0;
+  font-size: 0.95rem;
+  color: #444;
 }
-
-.form-actions button[type="submit"] {
-    background-color: #28a745;
-    color: white;
-}
-.form-actions button[type="submit"]:hover {
-    background-color: #218838;
+.student-modal-body strong {
+  color: #000;
 }
 
-.error-message {
-  color: #dc3545;
-  background-color: #f8d7da;
-  padding: 0.75rem;
-  border-radius: 4px;
-  margin-bottom: 1rem;
-  text-align: center;
+/* Simple fade-in animation */
+@keyframes fadeIn {
+  from { transform: translateY(-10px); opacity: 0; }
+  to   { transform: translateY(0); opacity: 1; }
+}
+
+/* Mobile adjustments */
+@media (max-width: 480px) {
+  .student-modal {
+    width: 95%;
+    border-radius: 8px;
+  }
+  .student-modal-header h3 {
+    font-size: 1rem;
+  }
 }
