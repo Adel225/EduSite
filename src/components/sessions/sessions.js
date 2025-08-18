@@ -376,9 +376,7 @@
             {error && <div className="error-message">{error}</div>}
             {submitStatus && <div className="submit-status">{submitStatus}</div>}
 
-            <button type="submit" disabled={submitStatus === 'Uploading exam...'}>
-                {submitStatus === 'Uploading exam...' ? 'Uploading...' : 'Submit'}
-            </button>
+            <button type="submit" disabled={submitStatus.includes('...')}>Submit</button>
             </form>
         </div>
         </div>

@@ -36,6 +36,19 @@
   font-weight: 500;
   transition: background 0.2s;
 }
+.add-group-btn.disabled {
+  background-color: #808080;
+  color: #fff;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  cursor: not-allowed;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+.add-group-btn.disabled:hover {
+  background-color: #777777;
+}
 .add-group-btn:hover {
   background-color: #0056b3;
 }

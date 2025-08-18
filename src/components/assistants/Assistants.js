@@ -20,7 +20,7 @@ const Assistants = () => {
     const [permissions, setPermissions] = useState({});
     const [allGrades, setAllGrades] = useState([6, 7, 8, 9, 10, 11, 12]);
     const [groupsByGrade, setGroupsByGrade] = useState({});
-    const [activePermissionAccordion, setActivePermissionAccordion] = useState(null);
+    const [activeTab, setActiveTab] = useState('assignments'); 
     const [selectedGrades, setSelectedGrades] = useState({});
 
     const fetchAssistants = useCallback(async () => {
@@ -96,6 +96,7 @@ const Assistants = () => {
     // --- Permissions Modal Logic ---
     const handleOpenPermissionsModal = async (assistant) => {
         setCurrentItem(assistant);
+        setActiveTab('assignments');
         const initialPermissions = {};
         for (const category in assistant.permissions) {
             if (Array.isArray(assistant.permissions[category])) {
@@ -113,7 +114,7 @@ const Assistants = () => {
         setPermissions({});
         setGroupsByGrade({});
         setSelectedGrades({});
-        setActivePermissionAccordion(null);
+        setActiveTab(null);
     };
 
     const handleGradePillClick = async (grade, category) => {
@@ -169,7 +170,7 @@ const Assistants = () => {
             
             setSubmitStatus("Permissions updated successfully!");
             fetchAssistants(); 
-            setTimeout(handleClosePermissionsModal, 1500);
+            setTimeout(handleClosePermissionsModal, 1000);
 
         } catch (err) {
             setSubmitStatus(`Error: ${err.message}`);
@@ -179,40 +180,6 @@ const Assistants = () => {
     if (loading) return <div className="loading">Loading Assistants...</div>;
     if (error) return <div className="error">{error}</div>;
 
-    const renderPermissionsCategory = (category) => (
-        <div className="permission-category">
-            <div className="permission-header" onClick={() => setActivePermissionAccordion(activePermissionAccordion === category ? null : category)}>
-                <div>
-                    <h4>{category.charAt(0).toUpperCase() + category.slice(1)}</h4>
-                    <div className="permission-summary">
-                        {permissions[category]?.size || 0} groups selected
-                    </div>
-                </div>
-                <span>{activePermissionAccordion === category ? '−' : '+'}</span>
-            </div>
-            <div className={`permission-content ${activePermissionAccordion === category ? 'open' : ''}`}>
-                <div className="permission-body">
-                    <h5>Select Grades to View Groups:</h5>
-                    <div className="grade-pills">
-                        {allGrades.map(grade => (
-                            <div key={grade} className={`grade-pill ${selectedGrades[category]?.includes(grade) ? 'active' : ''}`} onClick={() => handleGradePillClick(grade, category)}>
-                                Grade {grade}
-                            </div>
-                        ))}
-                    </div>
-                    <hr />
-                    <div className="groups-checkbox-list">
-                        {(selectedGrades[category] || []).flatMap(grade => groupsByGrade[grade] || []).map(group => (
-                            <label key={group._id}>
-                                <input type="checkbox" checked={permissions[category]?.has(group._id)} onChange={() => handlePermissionCheckboxChange(group._id, category)} />
-                                {group.groupname} (Grade {group.grade})
-                            </label>
-                        ))}
-                    </div>
-                </div>
-            </div>
-        </div>
-    );
 
     return (
         <div className="assistants-page">
@@ -236,7 +203,7 @@ const Assistants = () => {
                 ))}
             </div>
 
-            {/* --- Create Assistant Modal --- */}
+            {/* --- Create Assistant Modal (Unchanged) --- */}
             <Modal isOpen={isCreateModalOpen} onRequestClose={handleCloseCreateModal} className="form-modal" overlayClassName="form-modal-overlay">
                 <h2>Create New Assistant</h2>
                 <form onSubmit={handleCreateSubmit}>
@@ -251,21 +218,63 @@ const Assistants = () => {
                 </form>
             </Modal>
             
-            {/* --- Edit Permissions Modal --- */}
+            {/* --- NEW: Refactored Edit Permissions Modal --- */}
             {currentItem && (
-                <Modal isOpen={isPermissionsModalOpen} onRequestClose={handleClosePermissionsModal} className="form-modal" overlayClassName="form-modal-overlay">
-                    <h2>Permissions for {currentItem.name}</h2>
-                    <div>
-                        {renderPermissionsCategory('assignments')}
-                        {renderPermissionsCategory('exams')}
-                        {renderPermissionsCategory('materials')}
-                        {renderPermissionsCategory('sections')}
-                        {renderPermissionsCategory('groups')}
+                <Modal isOpen={isPermissionsModalOpen} onRequestClose={handleClosePermissionsModal} className="permissions-modal" overlayClassName="form-modal-overlay">
+                    <div className="permissions-modal-header">
+                        <h2>Permissions for {currentItem.name}</h2>
                     </div>
-                    {submitStatus && <p>{submitStatus}</p>}
-                    <div className="form-actions">
+
+                    <div className="permissions-modal-body">
+                        <div className="permission-tabs">
+                            {['assignments', 'exams', 'materials', 'sessions', 'groups'].map(cat => (
+                                <div key={cat} className={`permission-tab ${activeTab === cat ? 'active' : ''}`} onClick={() => setActiveTab(cat)}>
+                                    {cat.charAt(0).toUpperCase() + cat.slice(1)}
+                                </div>
+                            ))}
+                        </div>
+                        
+                        {activeTab && (
+                            <div className="permission-filters">
+                                <h5>Select Grades to View Groups:</h5>
+                                <div className="grade-pills">
+                                    {allGrades.map(grade => (
+                                        <div key={grade} className={`grade-pill ${selectedGrades[activeTab]?.includes(grade) ? 'active' : ''}`} onClick={() => handleGradePillClick(grade, activeTab)}>
+                                            Grade {grade}
+                                        </div>
+                                    ))}
+                                </div>
+                                <hr/>
+                                <h5>Grant Access to Groups:</h5>
+                                <div className="groups-checkbox-list">
+                                    {(selectedGrades[activeTab] || []).map(grade => (
+                                        (groupsByGrade[grade] || []).map(group => (
+                                            <label key={group._id} className="group-check-row">
+                                                <input 
+                                                    type="checkbox" 
+                                                    checked={permissions[activeTab]?.has(group._id)} 
+                                                    onChange={() => handlePermissionCheckboxChange(group._id, activeTab)} 
+                                                />
+                                                {group.groupname} (Grade {grade})
+                                            </label>
+                                        ))
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                    
+                    <div className="permissions-modal-footer">
+                        {submitStatus && <p>{submitStatus}</p>}
                         <button type="button" className="cancel-btn" onClick={handleClosePermissionsModal}>Cancel</button>
-                        <button type="button" className="save-btn" onClick={handlePermissionsSave} disabled={submitStatus === 'Saving...'}>Save Changes</button>
+                        <button 
+                            type="button" 
+                            className="save-btn" 
+                            onClick={handlePermissionsSave} 
+                            disabled={submitStatus === 'Saving...'}
+                            >
+                                Save Changes
+                        </button>
                     </div>
                 </Modal>
             )}

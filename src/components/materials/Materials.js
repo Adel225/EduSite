@@ -255,7 +255,7 @@ const Materials = () => {
         <div className="materials-left">
             <h2>Select Grade</h2>
             <div className="grades-list">
-                {displayedGrades.map((grade) => ( <div key={grade} className={`grade-card ${selectedGrade === String(grade) ? 'selected' : ''}`} onClick={() => handleGradeChange({ target: { value: grade } })}><h3>Grade {grade}</h3></div> ))}
+                {displayedGrades.map((grade) => ( <div key={grade} className={`grade-card ${selectedGrade === grade ? 'selected' : ''}`} onClick={() => handleGradeChange({ target: { value: grade } })}><h3>Grade {grade}</h3></div> ))}
             </div>
             {selectedGrade && (
                 <div className="groups-section">

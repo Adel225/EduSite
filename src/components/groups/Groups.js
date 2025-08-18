@@ -21,6 +21,7 @@ export default function Groups() {
   const [unassigned, setUnassigned] = useState({});
   const [currentGrade, setCurrentGrade] = useState("");
   const [loading, setLoading] = useState(false);
+  const [createloading, setCreateLoading] = useState(false);
   const [error, setError] = useState(null);
 
   // add group modal
@@ -113,6 +114,7 @@ export default function Groups() {
 
   const handleCreateGroup = async (e) => {
     e.preventDefault();
+    setCreateLoading(true);
     try {
       const res = await fetch(`${API_URL}/group/create`, {
         method: "POST",
@@ -125,12 +127,17 @@ export default function Groups() {
           groupname: newGroupName,
         }),
       });
-      if (!res.ok) throw new Error("Failed to create group");
+      if (!res.ok) {
+        setCreateLoading(false);
+        throw new Error("Failed to create group");
+      }
       await loadGradeData(currentGrade);
       setNewGroupName("");
+      setCreateLoading(false);
       closeModal();
     } catch (err) {
       alert("Error creating group");
+      setCreateLoading(false);
     }
   };
 
@@ -243,7 +250,12 @@ export default function Groups() {
       <div className="groups-header">
         <h2>Groups & Students</h2>
         {user?.role === 'main_teacher' && (
-            <button className="add-group-btn" onClick={openModal}>
+            <button 
+              className={`add-group-btn ${!currentGrade ? 'disabled' : ""}`}
+              onClick={() => { if (currentGrade) { openModal(); } } }
+              disabled={!currentGrade ? true : false}
+              title={!currentGrade ? "Please select a grade first" : "Add a new group"}
+              >
               + Add New Group
             </button>
         )}
@@ -422,7 +434,9 @@ export default function Groups() {
             >
               Cancel
             </button>
-            <button type="submit">Create</button>
+            <button type="submit">
+              {createloading ? <div className="loading-spinner-small"></div> : 'Create'}
+            </button>
           </div>
         </form>
       </Modal>

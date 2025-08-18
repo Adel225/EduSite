@@ -163,7 +163,7 @@ const Assignments = () => {
 
       if (result.message === "Assignment created successfully") {
         setSubmitStatus(`Assignment "${result.assignment.name}" created successfully`);
-        setCreateFormData({ name: '', file: null, startDate: '', endDate: '' });
+        setCreateFormData({ name: '', file: null, startDate: '', endDate: '', answerFile: null });
         setSelectedGroups([]);
         document.getElementById('assignment-file-input').value = null;
         if(selectedGroupId) handleGroupClick(selectedGroupId);
