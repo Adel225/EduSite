@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import '../../../styles/exams.css';
+const API_URL = process.env.REACT_APP_API_URL;
 
 const Exams = () => {
     const [exams, setExams] = useState([]);
@@ -18,13 +19,12 @@ const Exams = () => {
     const fetchExams = async () => {
         try {
             const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-            const response = await fetch('https://backend-edu-site-5cnm.vercel.app/exams', {
+            const response = await fetch(`${API_URL}/exams`, {
                 headers: {
                     'Authorization': `MonaEdu ${token}`
                 }
             });
             const data = await response.json();
-            console.log(data);
             
             if (data.message === "Exams fetched successfully") {
                 setExams(data.data);
@@ -55,9 +55,8 @@ const Exams = () => {
             const formData = new FormData();
             formData.append('examId', selectedExam);
             formData.append('notes', notes);
-            formData.append('file', file);  // This will maintain the file's name and type automatically
-            console.log(formData);
-            const response = await fetch('https://backend-edu-site-5cnm.vercel.app/exams/submit', {
+            formData.append('file', file); 
+            const response = await fetch(`${API_URL}/exams/submit`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `MonaEdu ${token}`
@@ -95,38 +94,31 @@ const Exams = () => {
     const downloadExam = async (examId) => {
         try {
             const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-            console.log('Download exam: examId =', examId);
-            const response = await fetch(`https://backend-edu-site-5cnm.vercel.app/exams/download?examId=${examId}`, {
+            const response = await fetch(`${API_URL}/exams/download?examId=${examId}`, {
                 method: 'GET',
                 headers: {
                     'authorization': `MonaEdu ${token}`
                 }
             });
-            console.log('Response status:', response.status);
-            console.log('Response headers:', response.headers);
 
             if (!response.ok) {
                 // Try to parse JSON error message
                 try {
                     const data = await response.json();
-                    console.log('Backend error response:', data);
                     if (data && data.message) {
                         setError(data.message);
                     } else {
                         setError('Failed to download exam');
                     }
                 } catch (jsonErr) {
-                    console.log('Error parsing error response as JSON:', jsonErr);
                     setError('Failed to download exam');
                 }
                 throw new Error('Failed to download exam');
             }
 
-            // Check for JSON error in a 200 response (edge case)
             const contentType = response.headers.get('content-type');
             if (contentType && contentType.includes('application/json')) {
                 const data = await response.json();
-                console.log('Backend JSON response (200):', data);
                 if (data && data.message && data.message.includes('This exam is not available at this time')) {
                     window.alert('This Exam is not available at this time');
                     return;
@@ -137,12 +129,8 @@ const Exams = () => {
                 }
             }
 
-            // Get the blob from the response
             const blob = await response.blob();
-            console.log('Blob:', blob);
-            // Create a URL for the blob
             const url = window.URL.createObjectURL(blob);
-            // Create a temporary link element
             const link = document.createElement('a');
             link.href = url;
             link.download = `exam-${examId}.pdf`;
@@ -259,7 +247,7 @@ const Exams = () => {
                     >
                         {submitting ? (
                             <>
-                                <div className="loading-spinner"></div>
+                                {/* <div className="loading-spinner"></div> */}
                                 Uploading...
                             </>
                         ) : (

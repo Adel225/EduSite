@@ -1,8 +1,7 @@
 // PDFViewer.jsx
 import React, { useState, useRef, useEffect } from 'react';
 import { Document, Page, pdfjs } from 'react-pdf';
-import 'react-pdf/dist/esm/Page/AnnotationLayer.css'; // Required for styling, even if layer not rendered
-// No TextLayer.css needed if renderTextLayer is false
+import 'react-pdf/dist/esm/Page/AnnotationLayer.css'; 
 
 pdfjs.GlobalWorkerOptions.workerSrc = `${process.env.PUBLIC_URL}/pdf.worker.min.mjs`;
 

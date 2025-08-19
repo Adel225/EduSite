@@ -4,6 +4,7 @@ import { useParams, Link } from 'react-router-dom';
 import Modal from 'react-modal';
 import '../../styles/subpages/coursedetails.css'; 
 import '../../styles/welcome.css'; 
+const API_URL = process.env.REACT_APP_API_URL;
 
 
 const coursesDetailsData = {
@@ -39,7 +40,7 @@ const CourseDetails = () => {
     const [course, setCourse] = useState(null);
     const [isEnrollModalOpen, setIsEnrollModalOpen] = useState(false);
     
-    const [enrollmentData, setEnrollmentData] = useState({ name: '', email: '', phone: '' });
+    const [enrollmentData, setEnrollmentData] = useState({ name: '', email: '', phone: '', grade : '' });
     const [submitStatus, setSubmitStatus] = useState({ message: '', type: '' });
 
     useEffect(() => {
@@ -49,12 +50,43 @@ const CourseDetails = () => {
 
     const handleEnrollSubmit = async (e) => {
         e.preventDefault();
+        // --- HIGHLIGHT: Check for the grade field ---
+        if (!enrollmentData.grade) {
+            setSubmitStatus({ message: 'Please select your grade level.', type: 'error' });
+            return;
+        }
         setSubmitStatus({ message: 'Sending...', type: 'loading' });
-        console.log("Enrolling:", { ...enrollmentData, courseName: course.name });
-        setTimeout(() => {
+        
+        try {
+            const payload = {
+                name: enrollmentData.name,
+                email: enrollmentData.email,
+                phone: enrollmentData.phone,
+                grade: enrollmentData.grade,
+                courseName: course.name, 
+            };
+            
+            const response = await fetch(`${API_URL}/courses/create`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload),
+            });
+
+            const result = await response.json();
+            if (!response.ok) {
+                throw new Error(result.message || 'Failed to send enrollment request.');
+            }
+            
             setSubmitStatus({ message: 'Enrollment request sent successfully!', type: 'success' });
-            setIsEnrollModalOpen(false);
-        }, 1500);
+            setTimeout(() => {
+                setIsEnrollModalOpen(false);
+                setEnrollmentData({ name: '', email: '', phone: '', grade: '' }); 
+                setSubmitStatus({ message: '', type: '' });
+            }, 2000);
+
+        } catch (error) {
+            setSubmitStatus({ message: error.message, type: 'error' });
+        }
     };
 
     if (!course) {
@@ -116,6 +148,24 @@ const CourseDetails = () => {
                     <div className="form-group"><label>Your Name *</label><input type="text" value={enrollmentData.name} onChange={(e) => setEnrollmentData({...enrollmentData, name: e.target.value})} required/></div>
                     <div className="form-group"><label>Your Email *</label><input type="email" value={enrollmentData.email} onChange={(e) => setEnrollmentData({...enrollmentData, email: e.target.value})} required/></div>
                     <div className="form-group"><label>Phone Number *</label><input type="tel" value={enrollmentData.phone} onChange={(e) => setEnrollmentData({...enrollmentData, phone: e.target.value})} required/></div>
+                    <div className="form-group">
+                        <label>Your Grade Level *</label>
+                        <select
+                            name="grade"
+                            value={enrollmentData.grade}
+                            onChange={(e) => setEnrollmentData({...enrollmentData, grade: e.target.value})}
+                            required
+                        >
+                            <option value="" disabled>Select your grade...</option>
+                            <option value="6">Grade 6</option>
+                            <option value="7">Grade 7</option>
+                            <option value="8">Grade 8</option>
+                            <option value="9">Grade 9</option>
+                            <option value="10">Grade 10</option>
+                            <option value="11">Grade 11</option>
+                            <option value="12">Grade 12</option>
+                        </select>
+                    </div>
                     
                     <button type="submit" className="submit-button" disabled={submitStatus.type === 'loading'}>
                         {submitStatus.type === 'loading' ? 'Sending...' : 'Enroll Now'}

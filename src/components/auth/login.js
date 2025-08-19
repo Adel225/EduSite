@@ -1,10 +1,10 @@
 // src/components/auth/login.js (example path)
-import React, { useState, useEffect } from 'react';
-import { useNavigate, Link, useLocation } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
-import './auth.css'; // Path from src/components/auth/login.js to src/components/auth/auth.css
-import { API_URL } from '../../config'; // Path from src/components/auth/login.js to src/config.js
+import './auth.css'; 
 import { useAuth } from '../../utils/AuthContext'; 
+const API_URL = process.env.REACT_APP_API_URL;
 
 const Login = () => {
     const [email, setEmail] = useState('');
@@ -14,8 +14,6 @@ const Login = () => {
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
     const { login } = useAuth(); 
-    const navigate = useNavigate();
-    const location = useLocation();
 
 
     const handleSubmit = async (e) => {

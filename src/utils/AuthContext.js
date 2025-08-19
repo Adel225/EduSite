@@ -1,6 +1,7 @@
 // src/utils/AuthContext.js
 import React, { createContext, useState, useEffect, useContext } from 'react';
-import { API_URL } from '../config';
+
+const API_URL = process.env.REACT_APP_API_URL;
 
 // Create the context
 const AuthContext = createContext(null);

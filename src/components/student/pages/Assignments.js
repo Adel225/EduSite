@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import '../../../styles/exams.css';
-import { API_URL } from '../../../config';
+const API_URL = process.env.REACT_APP_API_URL;
 
 const Assignments = () => {
     const [assignments, setAssignments] = useState([]);
@@ -67,16 +67,7 @@ const Assignments = () => {
             formData.append('notes', notes || '');
             formData.append('file', file);
 
-            // Log the form data for debugging
-            console.log('Submitting assignment:', {
-                assignmentId: selectedAssignment,
-                notes: notes || '',
-                fileName: file.name,
-                fileType: file.type,
-                fileSize: file.size
-            });
-
-            const response = await fetch('https://backend-edu-site-5cnm.vercel.app/assignments/submit', {
+            const response = await fetch(`${API_URL}/assignments/submit`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `MonaEdu ${token}` 
@@ -85,7 +76,6 @@ const Assignments = () => {
             });
 
             const data = await response.json();
-            console.log('Server response:', data); // Log the server response
 
             if (data.message === "Cannot submit because the deadline has passed.") {
                 alert("Submission deadline has passed!");
@@ -118,8 +108,7 @@ const Assignments = () => {
         setLoadingDownloads(prev => ({ ...prev, [assignmentId]: true }));
         try {
             const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-            console.log('Download assignment: assignmentId = ', assignmentId);
-            const response = await fetch(`https://backend-edu-site-5cnm.vercel.app/assignments/download?assignmentId=${assignmentId}`, {
+            const response = await fetch(`${API_URL}/assignments/download?assignmentId=${assignmentId}`, {
                 method: 'GET',
                 headers: {
                     'Authorization': `MonaEdu ${token}`
@@ -129,7 +118,6 @@ const Assignments = () => {
             if (!response.ok) {
                 try {
                     const data = await response.json();
-                    console.log('Backend error response:', data);
                     if (data && data.message && data.message.includes('This Assignment is not available at this time')) {
                         window.alert('This assignment is out of range');
                         return;
@@ -140,7 +128,6 @@ const Assignments = () => {
                         setError('Failed to download assignment');
                     }
                 } catch (jsonErr) {
-                    console.log('Error parsing error response as JSON:', jsonErr);
                     setError('Failed to download assignment');
                 }
                 throw new Error('Failed to download assignment');
@@ -320,7 +307,7 @@ const Assignments = () => {
                     >
                         {submitting ? (
                             <>
-                                <div className="loading-spinner"></div>
+                                {/* <div className="loading-spinner"></div> */}
                                 Uploading...
                             </>
                         ) : (

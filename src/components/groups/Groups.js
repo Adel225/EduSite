@@ -2,12 +2,11 @@
 import React, { useEffect, useState, useRef, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import Modal from "react-modal";
-import { API_URL } from '../../config';
 import "../../styles/groups.css"
 import { useAuth } from '../../utils/AuthContext';
+const API_URL = process.env.REACT_APP_API_URL;
 
 
-// const API_URL = process.env.REACT_APP_API_URL;
 const Grades = [6, 7, 8, 9, 10, 11, 12];
 
 Modal.setAppElement("#root");
@@ -68,7 +67,6 @@ export default function Groups() {
       if (!res.ok) throw new Error("Failed to fetch groups");
       const data = await res.json();
       setGroups((prev) => ({ ...prev, [grade]: data.groups || [] }));
-      console.log(groups);
     } catch (err) {
       console.error(err);
       setGroups((prev) => ({ ...prev, [grade]: [] }));

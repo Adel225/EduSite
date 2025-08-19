@@ -2,8 +2,8 @@ import React, { useState, useEffect, useMemo  } from 'react';
 import { useAuth } from '../../utils/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import Modal from 'react-modal';
-import { API_URL } from '../../config';
 import '../../styles/assignments.css';
+const API_URL = process.env.REACT_APP_API_URL;
 
 const toDatetimeLocal = (dateString) => {
   if (!dateString) return '';

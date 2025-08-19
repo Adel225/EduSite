@@ -1,10 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import Modal from 'react-modal';
-import { API_URL } from '../../config';
 import '../../styles/assignmentSubmissions.css';
 import PDFAnnotationEditor from '../PDFAnnotationEditor/PDFAnnotationEditor';
-// import MarkedPDFViewer from '../PDFAnnotationEditor/MarkedPDFViewer';
+const API_URL = process.env.REACT_APP_API_URL;
 
 const AssignmentSubmissions = () => {
     const { groupId, assignmentId } = useParams();
@@ -36,7 +35,7 @@ const AssignmentSubmissions = () => {
 
 const fetchAssignmentAndSubmissions = useCallback(async () => {
     setLoading(true);
-    setError(null);
+    setError(null); 
     try {
         const token = localStorage.getItem('token') || sessionStorage.getItem('token');
         const response = await fetch(
@@ -132,7 +131,6 @@ useEffect(() => {
             { headers: { 'Authorization': `MonaEdu ${token}` } }
         );
         const data = await response.json();
-        console.log(data);
 
         if (data.message === "Submissions fetched successfully." && data.data.length > 0) {
             const submission = data.data[0];
@@ -196,6 +194,7 @@ return (
             <option value="all">All</option>
             <option value="submitted">Submitted</option>
             <option value="not submitted">Not Submitted</option>
+            <option value="marked">Marked</option>
         </select>
         </div>
 
@@ -237,7 +236,10 @@ return (
                 <td>{student.firstName} {student.lastName}</td>
                 {/* <td>{student.userName} <br/> <p>id: {student._id}</p></td> */}
                 <td>
-                <span className={`status-badge ${student.status === 'submitted' ? 'submitted' : 'not-submitted'}`}>
+                <span className={`status-badge ${
+                        student.status === 'marked' ? 'marked' : 
+                        student.status === 'submitted' ? 'submitted' : 'not-submitted'
+                    }`}>
                     {student.status}
                 </span>
                 </td>
@@ -263,11 +265,11 @@ return (
                     View
                     </button> */}
                     <button 
-                    className="mark-btn"
-                    onClick={() => handleOpenMarkEditor(student._id)}
-                    disabled={student.status !== 'submitted'}
-                    >
-                    Mark / View
+                        className="mark-btn"
+                        onClick={() => handleOpenMarkEditor(student._id)}
+                        disabled={student.status === 'not submitted'}
+                        >
+                        Mark / View
                     </button>
                 </div>
                 </td>

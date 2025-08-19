@@ -2,8 +2,8 @@ import React, { useState, useEffect, useMemo  } from 'react';
 import { useAuth } from '../../utils/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import Modal from 'react-modal';
-import { API_URL } from '../../config';
 import '../../styles/exams.css';
+const API_URL = process.env.REACT_APP_API_URL;
 
 const toDatetimeLocal = (dateString) => {
   if (!dateString) return '';
@@ -160,13 +160,6 @@ const Exams = () => {
       allowSubmissionsAfterDueDate: exam.allowSubmissionsAfterDueDate ,
       file: null, // File is never pre-populated
     });
-    console.log({
-      name: exam.Name,
-      startDate: toDatetimeLocal(exam.startdate),
-      endDate: toDatetimeLocal(exam.enddate),
-      allowSubmissionsAfterDueDate: exam.allowSubmissionsAfterDueDate ,
-      file: null,
-    });
     setIsEditModalOpen(true);
   };
 
@@ -239,7 +232,6 @@ const Exams = () => {
             body: formDataToSend,
         });
         const result = await response.json();
-        console.log(result);
         if (!response.ok) throw new Error(result.message || 'Failed to update exam');
 
         setSubmitStatus('Exam updated successfully!');

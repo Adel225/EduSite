@@ -1,10 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
-import { API_URL } from '../../config';
 import '../../styles/assignmentSubmissions.css';
 import Modal from 'react-modal';
 import PDFAnnotationEditor from '../PDFAnnotationEditor/PDFAnnotationEditor';
-// import MarkedPDFViewer from '../PDFAnnotationEditor/MarkedPDFViewer';
+const API_URL = process.env.REACT_APP_API_URL;
 
 const ExamSubmissions = () => {
     const { groupId, examId } = useParams();
@@ -131,8 +130,6 @@ const handleOpenMarkEditor = async (studentId) => {
             { headers: { 'authorization': `MonaEdu ${token}` } }
         );
         const data = await response.json();
-        console.log("api call : " , `${API_URL}/exams/submissions?examId=${examId}&groupId=${groupId}&studentId=${studentId}`)
-        console.log(data);
 
         if (data.message === "Submissions fetched successfully." && data.data.length > 0) {
             const submission = data.data[0];
@@ -303,7 +300,7 @@ return (
                             initialAnnotationData={selectedSubmissionForMarking.submissions[0].annotationData}
                             initialScore={selectedSubmissionForMarking.submissions[0].score}
                             onSaveSuccess={handleSaveSuccess}
-                            markType="exam"
+                            markType="exam" 
                         />
                     </div>
                 </Modal>

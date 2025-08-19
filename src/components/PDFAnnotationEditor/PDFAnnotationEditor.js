@@ -4,7 +4,7 @@ import { Document, Page, pdfjs } from 'react-pdf';
 import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
 import 'react-pdf/dist/esm/Page/TextLayer.css';
 import * as fabric from 'fabric';
-import { API_URL } from '../../config'; 
+const API_URL = process.env.REACT_APP_API_URL;
 
 pdfjs.GlobalWorkerOptions.workerSrc = `${process.env.PUBLIC_URL}/pdf.worker.min.mjs`;
 
@@ -290,12 +290,6 @@ const handleSave = async () => {
         annotationData: annotationDataString,
         feedback : feedback,
     };
-    console.log({
-        submissionId: submissionId,
-        score: score,
-        annotationData: annotationDataString,
-        feedback : feedback,
-    })
 
     // 3. Make the API Call
     const token = localStorage.getItem('token') || sessionStorage.getItem('token');
@@ -371,7 +365,7 @@ return (
         <div style={{ ...styles.toolbar, borderTop: '1px solid #ddd', justifyContent: 'space-between' }}>
             <div style={styles.inputGroup}>
                 <label htmlFor="scoreInput">Score:</label>
-                <input type="number" id="scoreInput" value={score} onChange={(e) => setScore(e.target.value)} style={{ ...styles.inputField, ...styles.scoreInput }}/>
+                <input type="number" id="scoreInput" value={score} required onChange={(e) => setScore(e.target.value)} style={{ ...styles.inputField, ...styles.scoreInput }}/>
             </div>
             <div style={{...styles.inputGroup, flexGrow: 1, margin: '0 1rem' }}>
                     <label htmlFor="feedbackInput">Feedback:</label>
@@ -384,7 +378,7 @@ return (
                         rows="1"
                     />
                 </div>
-            <button onClick={handleSave} disabled={internalIsSaving || !numPages} style={styles.toolButton}>
+            <button onClick={handleSave} disabled={internalIsSaving || !numPages || !score} style={styles.toolButton}>
                 {internalIsSaving ? 'Saving...' : 'Save Changes'}
             </button>
         </div>

@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import '../../styles/groups.css'; // Reusing global groups styles
-import { API_URL } from '../../config';
+import '../../styles/groups.css'; 
 import Modal from "react-modal";
+const API_URL = process.env.REACT_APP_API_URL;
 
 Modal.setAppElement("#root");
-
 
 
 const GroupDetails = () => {

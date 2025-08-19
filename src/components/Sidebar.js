@@ -7,6 +7,7 @@ import MaterialsIcon from '../icons/materials.svg';
 import GroupsIcon from '../icons/groups.svg';
 import SessionIcon from '../icons/session.svg'
 import AssistantIcon from '../icons/user.svg';
+import CoursesIcon from '../icons/bell.svg';
 import '../styles/Sidebar.css'; // Ensure this CSS is adapted
 import { NavLink } from 'react-router-dom';
 
@@ -27,6 +28,7 @@ const Sidebar = ({ isOpen, onNavLinkClick, isMobile }) => {
         <NavLink className={({ isActive }) => (isActive ? 'active-link' : 'li')} to="/dashboard/materials" onClick={onNavLinkClick}><img src={MaterialsIcon} alt="Materials" /> Materials</NavLink><br/><br/>
         <NavLink className={({ isActive }) => (isActive ? 'active-link' : 'li')} to="/dashboard/groups" onClick={onNavLinkClick}><img src={GroupsIcon} alt="Groups" /> Groups</NavLink><br/><br/>
         <NavLink className={({ isActive }) => (isActive ? 'active-link' : 'li')} to="/dashboard/assistants" onClick={onNavLinkClick}><img src={AssistantIcon} alt="Assistants" /> Assistants</NavLink><br/><br/>
+        <NavLink className={({ isActive }) => (isActive ? 'active-link' : 'li')} to="/dashboard/courses-requests-managment" onClick={onNavLinkClick}><img src={CoursesIcon} alt="courses requests" /> Courses requests</NavLink><br/><br/>
       </div>
     </div>
   );

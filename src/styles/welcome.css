@@ -592,7 +592,7 @@
 .content-button {
     background-color: var(--secondary-color); /* A vibrant orange for contrast */
     color: #fff;
-    padding: 0.7rem 1.8rem;
+    padding: 0.7rem 1.4rem;
     border-radius: 6px;
     text-decoration: none;
     font-weight: 500;
@@ -607,6 +607,37 @@
     transform: translateY(-2px);
     box-shadow: 0 4px 10px rgba(0,0,0,0.15);
 }
+
+/* Style for the "Add a review" button */
+.content-button.secondary {
+    background-color: var(--primary-color);
+    color: #fff;
+}
+.content-button.secondary:hover {
+    background-color: var(--primary-dark);
+}
+.view-all-container {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+}
+
+/* Star Rating Component Styles */
+.star-rating {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+}
+
+.star {
+    cursor: pointer;
+    color: #ccc; /* Inactive star color */
+    transition: color 0.2s, transform 0.2s;
+}
+.star.active {color: #f39c12;}
+.star:hover {transform: scale(1.2);}
 
 /* 2. Interactive Polish: Enhanced Hover Effects */
 .feature-card, .testimonial-card, .content-button, .hero-button, .nav-button {

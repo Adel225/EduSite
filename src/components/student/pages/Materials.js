@@ -1,10 +1,10 @@
 // src/components/student/pages/Materials.js
 import React, { useState, useEffect } from 'react';
 import Modal from 'react-modal';
-import { API_URL } from "../../../config.js";
 import PDFViewer from '../../PDFAnnotationEditor/PDFViewer.js'; 
-import '../../../styles/exams.css'; // For main page card layout
-import '../../../styles/materialViewer.css'; // For the modal
+import '../../../styles/exams.css';
+import '../../../styles/materialViewer.css'; 
+const API_URL = process.env.REACT_APP_API_URL;
 
 Modal.setAppElement('#root');
 

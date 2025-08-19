@@ -1,8 +1,8 @@
 // src/components/assistants/Assistants.js
 import React, { useState, useEffect, useCallback  } from 'react';
 import Modal from 'react-modal';
-import { API_URL } from '../../config';
 import '../../styles/assistants.css';
+const API_URL = process.env.REACT_APP_API_URL;
 
 const Assistants = () => {
     const [assistants, setAssistants] = useState([]);
@@ -104,7 +104,6 @@ const Assistants = () => {
             }
         }
         setPermissions(initialPermissions || {}); 
-        console.log(initialPermissions);
         setIsPermissionsModalOpen(true);
     };
 
@@ -132,7 +131,6 @@ const Assistants = () => {
                 const data = await response.json();
                 if (data.groups) {
                     setGroupsByGrade(prev => ({ ...prev, [grade]: data.groups }));
-                    console.log(data.groups);
                 }
             } catch (err) { console.error("Failed to fetch groups for grade", grade, err); }
         }
@@ -249,7 +247,7 @@ const Assistants = () => {
                                 <div className="groups-checkbox-list">
                                     {(selectedGrades[activeTab] || []).map(grade => (
                                         (groupsByGrade[grade] || []).map(group => (
-                                            <label key={group._id} className="group-check-row">
+                                            <label key={group._id} className="group-check-row"> 
                                                 <input 
                                                     type="checkbox" 
                                                     checked={permissions[activeTab]?.has(group._id)} 

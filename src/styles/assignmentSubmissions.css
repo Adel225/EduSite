@@ -134,6 +134,11 @@
   color: #721c24;
 }
 
+.status-badge.marked {
+  background-color: #e3f2fd;
+  color: #1565c0; 
+}
+
 .action-buttons {
   display: flex;
   gap: 0.5rem;

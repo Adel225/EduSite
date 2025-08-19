@@ -2,8 +2,8 @@
     import { useAuth } from '../../utils/AuthContext';
     import '../../styles/sessions.css';
     import '../../styles/exams.css';
-    import { API_URL } from '../../config';
     import { useNavigate } from 'react-router-dom';
+    const API_URL = process.env.REACT_APP_API_URL;
 
     const Sessions = () => {
     const navigate = useNavigate();

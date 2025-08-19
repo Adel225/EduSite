@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import { useAuth } from '../../utils/AuthContext';
 import './auth.css';
-import { API_URL } from '../../config';
+const API_URL = process.env.REACT_APP_API_URL;
 
 const AdminLogin = () => {
     const [email, setEmail] = useState('');

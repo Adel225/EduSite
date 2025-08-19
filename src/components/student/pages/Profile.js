@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 // import { useParams } from 'react-router-dom';
-import { API_URL } from '../../../config';
 import './Profile.css';
 import MarkedPDFViewer from '../../PDFAnnotationEditor/MarkedPDFViewer';
 import Modal from 'react-modal';
+const API_URL = process.env.REACT_APP_API_URL;
 
 const Profile = () => {
     const [user, setUser] = useState(null);
@@ -44,53 +44,6 @@ const Profile = () => {
         fetchUserData();
     }, []);
 
-    // const handleChange = (e) => {
-    //     setPasswords({
-    //         ...passwords,
-    //         [e.target.name]: e.target.value
-    //     });
-    // };
-
-    // const handleSubmit = async (e) => {
-    //     e.preventDefault();
-    //     setError('');
-    //     setSuccess('');
-
-    //     if (passwords.newPassword !== passwords.confirmNewPassword) {
-    //         setError('New passwords do not match');
-    //         return;
-    //     }
-
-    //     try {
-    //         const token = localStorage.getItem('token');
-    //         const response = await fetch('https://backend-edu-site-5cnm.vercel.app/student/change-password', {
-    //             method: 'POST',
-    //             headers: {
-    //                 'Content-Type': 'application/json',
-    //                 'Authorization': `MonaEdu ${token}`
-    //             },
-    //             body: JSON.stringify({
-    //                 currentPassword: passwords.currentPassword,
-    //                 newPassword: passwords.newPassword
-    //             })
-    //         });
-
-    //         const data = await response.json();
-    //         if (data.Message === "Done" || data.Message === "Done ") {
-    //             setSuccess('Password updated successfully');
-    //             setPasswords({
-    //                 currentPassword: '',
-    //                 newPassword: '',
-    //                 confirmNewPassword: ''
-    //             });
-    //         } else {
-    //             setError(data.Message || 'Failed to update password');
-    //         }
-    //     } catch (err) {
-    //         setError('Error updating password');
-    //     }
-    // };
-
     const handleDeleteSubmission = async (submissionId, type, submissionName) => {
         const isConfirmed = window.confirm(`Are you sure you want to delete this submission${submissionName ? ` for ${submissionName}` : ''}?`);
         
@@ -100,7 +53,6 @@ const Profile = () => {
 
         try {
             const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-            console.log(`${API_URL}/${type}`);
             const response = await fetch(`${API_URL}/${type}`, {
                 method: 'DELETE',
                 headers: {
@@ -137,7 +89,6 @@ const Profile = () => {
             return;
         }
 
-        // If it IS marked, fetch the full data with annotations and open the modal viewer.
         const studentId = submission.studentId._id || submission.studentId;
         const groupId = submission.groupId;
         let url = '';

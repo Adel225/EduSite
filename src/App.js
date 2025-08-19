@@ -31,6 +31,7 @@ import GroupDetails from './components/groups/GroupDetails';
 import AssignmentSubmissions from './components/assignments/AssignmentSubmissions';
 import ExamSubmissions from './components/exams/ExamSubmissions';
 import Assistants from './components/assistants/Assistants';
+import CourseRequests from './components/courses/CourseRequests';
 
 import Sessions from './components/sessions/sessions';
 import SessionDetails from './components/sessions/sessionDetails';
@@ -54,12 +55,7 @@ import AdminLogin from './components/auth/teacherLogin';
 // Styles & Config
 import './App.css';
 import Modal from 'react-modal';
-import { API_URL } from './config';
 
-// Header component - ResponsiveLayout will import and use this.
-// If ResponsiveLayout handles its own Header import, this one might be redundant
-// unless Header is used elsewhere outside of ResponsiveLayout.
-// For now, keeping it as ResponsiveLayout might rely on this path.
 import Header from './components/header';
 
 
@@ -148,6 +144,7 @@ const DashboardRoutes = () => (
       <Route path="groups" element={<Groups />} />
       <Route path="groups/:grade/:groupId" element={<GroupDetails />} />
       <Route path="assistants" element={<Assistants />} />
+      <Route path="courses-requests-managment" element={<CourseRequests />} />
   </Routes>
 );
 

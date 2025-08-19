@@ -2,8 +2,8 @@
 import React from 'react';
 import { useAuth } from '../../utils/AuthContext'; 
 import ResponsiveLayout from './ResponsiveLayout';
-import Sidebar from '../Sidebar'; // The main teacher's sidebar
-import AssistantSidebar from '../assistants/AssistantSidebar'; // Our new dynamic assistant sidebar
+import Sidebar from '../Sidebar'; 
+import AssistantSidebar from '../assistants/AssistantSidebar'; 
 
 const DashboardLayout = ({ children }) => {
     const { user, isLoading } = useAuth(); // Get user info and loading status instantly
@@ -17,9 +17,6 @@ const DashboardLayout = ({ children }) => {
         );
     }
 
-    // --- HIGHLIGHT: The Core Logic ---
-    // Conditionally choose the correct sidebar component based on the user's role.
-    // Default to the main teacher's Sidebar if the role isn't 'assistant'.
     const SidebarComponent = user?.role === 'assistant' ? AssistantSidebar : Sidebar;
 
     return (

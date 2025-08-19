@@ -1,12 +1,13 @@
 // src/components/Welcome.js
 import React , { useState , useEffect } from 'react';
+import Modal from 'react-modal';
 import { Link, useNavigate } from 'react-router-dom';
 import '../styles/welcome.css';
-import {API_URL} from "../config";
 import useIntersectionObserver from '../utils/useIntersectionObserver';
 import WelcomeHeader from './WelcomeHeader';
 import WelcomeFooter from './WelcomeFooter';
 import FAQs from './pages/FAQs'
+const API_URL = process.env.REACT_APP_API_URL;
 
 const CheckmarkIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>;
 const BookIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>;
@@ -17,6 +18,58 @@ const ChartIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" heigh
 const Welcome = () => {
     const navigate = useNavigate();
     const [activeFaq, setActiveFaq] = useState(null);
+    const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+    const [reviewData, setReviewData] = useState({
+        rate: 0,
+        description: '',
+    });
+    const [reviewStatus, setReviewStatus] = useState({ message: '', type: '' });
+    const [hoverRating, setHoverRating] = useState(0); // For star hover effect
+
+    const handleReviewChange = (e) => {
+        const { name, value } = e.target;
+        setReviewData(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleReviewSubmit = async (e) => {
+        e.preventDefault();
+        if (reviewData.rate === 0) {
+            setReviewStatus({ message: 'Please select a star rating.', type: 'error' });
+            return;
+        }
+        setReviewStatus({ message: 'Submitting...', type: 'loading' });
+
+        try {
+            const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+            if (!token) {
+                throw new Error('You must be logged in to leave a review.');
+            }
+            
+            const response = await fetch(`${API_URL}/reviews`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `MonaEdu ${token}`, 
+                },
+                body: JSON.stringify(reviewData),
+            });
+
+            const result = await response.json();
+            if (!response.ok) {
+                throw new Error(result.message || 'Failed to submit review.');
+            }
+
+            setReviewStatus({ message: 'Review submitted for approval. Thank you!', type: 'success' });
+            setTimeout(() => {
+                setIsReviewModalOpen(false);
+                setReviewData({ rate: 0, description: '' });
+                setReviewStatus({ message: '', type: '' });
+            }, 2000);
+
+        } catch (error) {
+            setReviewStatus({ message: error.message, type: 'error' });
+        }
+    };
 
     const aboutRef = useIntersectionObserver({ threshold: 0.3 });
     const experienceRef = useIntersectionObserver({ threshold: 0.2 });
@@ -143,6 +196,7 @@ const Welcome = () => {
         }
     };
 
+
     return (
         <div className="welcome-page">
 
@@ -259,6 +313,7 @@ const Welcome = () => {
                         </div>
                     </div>
                     <div className="view-all-container">
+                    <button className="content-button secondary" onClick={() => setIsReviewModalOpen(true)}>Add a review</button>
                         <Link to="/testimonials" className="content-button">View All Testimonials</Link>
                     </div>
                 </section>
@@ -325,7 +380,7 @@ const Welcome = () => {
                         <Link to="/faqs" className="content-button">View All FAQs</Link>
                     </div>
                 </section> */}
-                <div className="faqs-page-container">
+                <div className="faqs-page-container" ref={faqsRef}>
                     <div className="faqs-main-content">
                         <h2 className="section-title">Frequently Asked Questions</h2>
                         <div className="container faqs-container">
@@ -387,6 +442,55 @@ const Welcome = () => {
             </main>
             
             <WelcomeFooter/>
+
+            <Modal
+                isOpen={isReviewModalOpen}
+                onRequestClose={() => setIsReviewModalOpen(false)}
+                contentLabel="Add a Review"
+                className="form-modal"
+                overlayClassName="form-modal-overlay"
+            >
+                <h2>Share Your Experience</h2>
+                <form onSubmit={handleReviewSubmit}>
+                    <div className="form-group">
+                        <label>Your Rating *</label>
+                        <div className="star-rating">
+                            {[1, 2, 3, 4, 5].map((star) => (
+                                <span
+                                    key={star}
+                                    className={`star ${hoverRating >= star || reviewData.rate >= star ? 'active' : ''}`}
+                                    onClick={() => setReviewData({ ...reviewData, rate: star })}
+                                    onMouseEnter={() => setHoverRating(star)}
+                                    onMouseLeave={() => setHoverRating(0)}
+                                >
+                                    ★
+                                </span>
+                            ))}
+                        </div>
+                    </div>
+                    <div className="form-group">
+                        <label>Your Review *</label>
+                        <textarea 
+                            name="description" 
+                            placeholder="Tell us about your experience..." 
+                            value={reviewData.description} 
+                            onChange={handleReviewChange} 
+                            required
+                        ></textarea>
+                    </div>
+
+                    {reviewStatus.message && (
+                        <p className={`submit-message ${reviewStatus.type}`}>{reviewStatus.message}</p>
+                    )}
+
+                    <div className="form-actions">
+                        <button type="button" className="cancel-btn" onClick={() => setIsReviewModalOpen(false)}>Cancel</button>
+                        <button type="submit" className="submit-button" disabled={reviewStatus.type === 'loading'}>
+                            {reviewStatus.type === 'loading' ? 'Submitting...' : 'Submit Review'}
+                        </button>
+                    </div>
+                </form>
+            </Modal>
         </div>
     );
 };

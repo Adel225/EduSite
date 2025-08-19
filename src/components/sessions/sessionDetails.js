@@ -1,8 +1,8 @@
 
     import React, { useState, useEffect, useCallback } from 'react';
     import { useParams , useNavigate , useLocation } from 'react-router-dom';
-    import { API_URL } from '../../config';
     import '../../styles/sessionDetails.css';
+    const API_URL = process.env.REACT_APP_API_URL;
 
     const SessionDetails = () => {
     const { sessionId } = useParams();

@@ -30,7 +30,7 @@ const Header = ({ onToggleSidebar, isMobile }) => {
         </button>
       )}
       <Link to="/" className="header-brand-link">
-          <h1 className="header-name">Mona AboElazm</h1>
+          <h1 className="header-name">MathSphere</h1>
       </Link>
       <button className="logout-button" onClick={handleLogout}>
         Logout

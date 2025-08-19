@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import './auth.css';
+const API_URL = process.env.REACT_APP_API_URL;
 
 const SignUp = () => {
     const navigate = useNavigate();
@@ -76,9 +77,8 @@ const SignUp = () => {
                 grade: parseInt(formData.grade, 10)
             };
             
-            console.log('Submitting signup data:', submittedData);
             
-            const response = await fetch('https://backend-edu-site-5cnm.vercel.app/student/signup', {
+            const response = await fetch(`${API_URL}/student/signup`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

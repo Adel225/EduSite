@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useMemo  } from 'react';
 import { useAuth } from '../../utils/AuthContext';
 import Modal from 'react-modal';
-import { API_URL } from '../../config';
 import PDFViewer from '../PDFAnnotationEditor/PDFViewer';
 import '../../styles/materials.css';
 import '../../styles/materialViewer.css';
+const API_URL = process.env.REACT_APP_API_URL;
 
 Modal.setAppElement('#root');
 
@@ -162,7 +162,7 @@ const Materials = () => {
   if (window.confirm('Are you sure you want to delete this material?')) {
     try {
       const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-      const response = await fetch(`https://backend-edu-site-5cnm.vercel.app/material/${materialId}`, {
+      const response = await fetch(`${API_URL}/material/${materialId}`, {
         method: 'DELETE',
         headers: { 'Authorization': `MonaEdu ${token}` }
       });

@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { API_URL } from '../../../config';
 import '../../../styles/studentSessions.css';
 import Modal from 'react-modal';
 import PDFViewer from '../../PDFAnnotationEditor/PDFViewer'; 
@@ -9,6 +8,7 @@ import ExamIconSrc from '../../../icons/exams.svg';
 import AssignmentIconSrc from '../../../icons/assignment.svg';
 import MaterialIconSrc from '../../../icons/materials.svg';
 import "../../../styles/materialViewer.css"
+const API_URL = process.env.REACT_APP_API_URL;
 
 Modal.setAppElement('#root');
 
