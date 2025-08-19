@@ -1,23 +1,24 @@
 {
   "files": {
-    "main.css": "/EduSite/static/css/main.a72a10c8.css",
-    "main.js": "/EduSite/static/js/main.f26612bc.js",
+    "main.css": "/EduSite/static/css/main.17f968b8.css",
+    "main.js": "/EduSite/static/js/main.9b133c0b.js",
     "static/js/453.dff87da4.chunk.js": "/EduSite/static/js/453.dff87da4.chunk.js",
     "static/media/dashboard.svg": "/EduSite/static/media/dashboard.06eec19f95e6ee4874aedb8b888f00ac.svg",
     "index.html": "/EduSite/index.html",
     "static/media/user.svg": "/EduSite/static/media/user.d95b55e9fe63eedb62df1a35029c9120.svg",
     "static/media/exams.svg": "/EduSite/static/media/exams.36f59b78fb11a79fc30e3e80247279d0.svg",
+    "static/media/bell.svg": "/EduSite/static/media/bell.d06a98db68d9c8faccaa6a4dcc0a212f.svg",
     "static/media/materials.svg": "/EduSite/static/media/materials.026eb556e178f44026648518f62bdafe.svg",
     "static/media/profile.svg": "/EduSite/static/media/profile.ad8d1a0632ad482edcb916941eaa4474.svg",
     "static/media/session.svg": "/EduSite/static/media/session.dd6535fb6ce40079a53ce6dcc78e3bac.svg",
     "static/media/groups.svg": "/EduSite/static/media/groups.d605d8a43f60476f91617b970206952f.svg",
     "static/media/assignment.svg": "/EduSite/static/media/assignment.b22e777e1b3d978faa73fd563c5cee62.svg",
-    "main.a72a10c8.css.map": "/EduSite/static/css/main.a72a10c8.css.map",
-    "main.f26612bc.js.map": "/EduSite/static/js/main.f26612bc.js.map",
+    "main.17f968b8.css.map": "/EduSite/static/css/main.17f968b8.css.map",
+    "main.9b133c0b.js.map": "/EduSite/static/js/main.9b133c0b.js.map",
     "453.dff87da4.chunk.js.map": "/EduSite/static/js/453.dff87da4.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.a72a10c8.css",
-    "static/js/main.f26612bc.js"
+    "static/css/main.17f968b8.css",
+    "static/js/main.9b133c0b.js"
   ]
 }
