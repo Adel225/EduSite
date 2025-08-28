@@ -26,7 +26,7 @@ const WelcomeHeader = () => {
                     </div>
                     <div className="contact-info">
                         <a href="https://wa.me/971508162674" target="_blank" rel="noopener noreferrer"><img src="https://img.icons8.com/?size=100&id=Funux8t3F8Ig&format=png&color=FFFFFF" width="24" height="24" />+971 50 816 2674</a>
-                    </div>
+                    </div> 
                 </div>
             </div>
 

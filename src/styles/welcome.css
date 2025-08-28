@@ -238,6 +238,8 @@
 .content-text { flex: 1; }
 .content-image { flex: 1; }
 .content-image img { max-width: 100%; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); border: 1px solid var(--primary-color); }
+.about-image { flex: 1; }
+.about-image img { max-width: 100%; border-radius: 12px; }
 .content-layout.reverse {
     flex-direction: row-reverse;
 }
@@ -441,7 +443,7 @@
     color: #383d41;
 }
 
-    @media (max-width: 768px) {
+    @media (max-width: 1040px) {
         .top-bar {
         display: none;
         }
@@ -524,7 +526,7 @@
     }
     
     /* Hero adjustments */
-    @media (max-width: 768px) {
+    @media (max-width: 900px) {
         .hero-title {
         font-size: 2rem;
         }
@@ -534,7 +536,7 @@
     }
     
     /* Content layout stacking */
-    @media (max-width: 768px) {
+    @media (max-width: 900px) {
         .about-container,
         .content-layout {
         flex-direction: column;
@@ -543,7 +545,7 @@
     }
     
     /* Grids to 1 column */
-    @media (max-width: 768px) {
+    @media (max-width: 900px) {
         .testimonial-grid,
         .features-grid {
         grid-template-columns: 1fr;
@@ -551,14 +553,14 @@
     }
     
     /* Form single column */
-    @media (max-width: 768px) {
+    @media (max-width: 900px) {
         .form-grid {
         grid-template-columns: 1fr;
         }
     }
     
     /* Footer 2-column */
-    @media (max-width: 768px) {
+    @media (max-width: 900px) {
         .footer-grid {
         grid-template-columns: repeat(2, 1fr);
         }

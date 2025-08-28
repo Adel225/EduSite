@@ -27,9 +27,9 @@ const About = () => {
                             <p>Discover how my approach to mathematics goes beyond formulas, equipping your child with the critical thinking skills to succeed.</p>
                             
                             {/* The Call-to-Action Button */}
-                            <Link to="/contact" className="content-button" style={{marginTop: '2rem'}}>
+                            {/* <Link to="/contact" className="content-button" style={{marginTop: '2rem'}}>
                                 WATCH FREE DEMO CLASS
-                            </Link>
+                            </Link> */}
                         </div>
                         <div className="content-image">
                             <div className="content-image-wrapper ">

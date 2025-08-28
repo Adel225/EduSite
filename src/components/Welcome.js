@@ -229,13 +229,13 @@ const Welcome = () => {
                             <p className="bold-p">Over 20 years of experience teaching Mathematics, with expertise in the Cambridge, Edexcel, and Oxford curricula across international schools.</p>
                             <p>My extensive experience ensures a holistic approach that builds critical thinking and problem-solving skills, making mathematics accessible and engaging for every student.</p>
                             <p>Discover how my approach to mathematics goes beyond formulas, equipping your child with the critical thinking skills to succeed.</p>
-                            <Link to="/about" className="content-button">Read More</Link>
                             
+                            <Link to="/about" className="content-button">Read More</Link>
                         </div>
                         <div className="about-image">
-                            <div className="content-image-wrapper ">
-                                <img src="https://res.cloudinary.com/dwcy6vc23/image/upload/v1755290433/EduSite/about_me_uelwkb.svg" alt="Mona AboElazm" />
-                            </div>
+                            {/* <div className="content-image-wrapper "> */}
+                                <img src="https://res.cloudinary.com/dwcy6vc23/image/upload/v1755290433/EduSite/about_me_uelwkb.svg" width="500" height="500" alt="Mrs. Mona Abouelazm"/>
+                            {/* </div> */}
                         </div>
                     </div>
                 </section>
