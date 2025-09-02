@@ -41,7 +41,7 @@ const StudentSessions = () => {
                 const groupId = profileData.data?.groupId?._id;
 
                 if (!groupId) throw new Error('Student is not assigned to a group.');
-                const sessionsRes = await fetch(`${API_URL}/sections?groupId=${groupId}`, {
+                const sessionsRes = await fetch(`${API_URL}/sections?groupIds=${groupId}`, {
                     headers: { 'Authorization': `MonaEdu ${token}` }
                 });
                 if (!sessionsRes.ok) throw new Error('Could not fetch sessions for your group.');
@@ -214,7 +214,7 @@ const StudentSessions = () => {
     return (
         <>
             <div className="sessions-student-page">
-            <h1>Your Sessions</h1>
+            <h1>My Sessions</h1>
             {sessions.length > 0 ? (
                 sessions.map(session => (
                     <div key={session._id} className="session-accordion">

@@ -2,12 +2,16 @@
 import React, { useState, useEffect, useCallback  } from 'react';
 import Modal from 'react-modal';
 import '../../styles/assistants.css';
+import { useConfirmation } from '../../utils/ConfirmationModal';
 const API_URL = process.env.REACT_APP_API_URL;
+
 
 const Assistants = () => {
     const [assistants, setAssistants] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const { showConfirmation } = useConfirmation();
+    const { showError } = useConfirmation();
 
     // State for the "Create Assistant" modal
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -18,10 +22,8 @@ const Assistants = () => {
     const [isPermissionsModalOpen, setIsPermissionsModalOpen] = useState(false);
     const [currentItem, setCurrentItem] = useState(null);
     const [permissions, setPermissions] = useState({});
-    const [allGrades, setAllGrades] = useState([6, 7, 8, 9, 10, 11, 12]);
-    const [groupsByGrade, setGroupsByGrade] = useState({});
-    const [activeTab, setActiveTab] = useState('assignments'); 
-    const [selectedGrades, setSelectedGrades] = useState({});
+    const [allAvailableGroups, setAllAvailableGroups] = useState([]);
+    const [activeTab, setActiveTab] = useState('assignments');
 
     const fetchAssistants = useCallback(async () => {
         setLoading(true);
@@ -76,7 +78,15 @@ const Assistants = () => {
     
     // --- Delete Assistant Logic ---
     const handleDeleteAssistant = async (assistantId) => {
-        if (window.confirm("Are you sure you want to delete this assistant? This action cannot be undone.")) {
+        const confirmed = await showConfirmation({
+            title: 'Delete Assistant',
+            message: 'This will permanently remove the Assistant from the system.',
+            confirmText: 'Delete',
+            cancelText: 'Cancel',
+            type: 'danger'
+        });
+        
+        if (confirmed){
             try {
                 const token = localStorage.getItem('token') || sessionStorage.getItem('token');
                 const response = await fetch(`${API_URL}/assistant/${assistantId}`, {
@@ -85,25 +95,44 @@ const Assistants = () => {
                 });
                 if (!response.ok) throw new Error("Failed to delete assistant");
                 
-                alert("Assistant deleted successfully.");
                 fetchAssistants();
             } catch (err) {
-                alert(`Error: ${err.message}`);
+                console.log(err);
+                await showError({
+                    title: 'Error deleting assistant',
+                    message: err.message || 'An error occured while deleting this assistant',
+                    confirmText: 'Cancel'
+                });
             }
         }
     };
 
     // --- Permissions Modal Logic ---
     const handleOpenPermissionsModal = async (assistant) => {
+        setActiveTab("groups");
         setCurrentItem(assistant);
-        setActiveTab('assignments');
         const initialPermissions = {};
-        for (const category in assistant.permissions) {
-            if (Array.isArray(assistant.permissions[category])) {
-                initialPermissions[category] = new Set(assistant.permissions[category].map(p => p.groupId));
+        const assistantPerms = assistant.permissions || {};
+        for (const category in assistantPerms) {
+            if (Array.isArray(assistantPerms[category])) {
+                initialPermissions[category] = new Set(assistantPerms[category].map(p => p.groupId));
             }
         }
-        setPermissions(initialPermissions || {}); 
+        setPermissions(initialPermissions);
+
+        try {
+            const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+            const response = await fetch(`${API_URL}/group/all`, { headers: { 'Authorization': `MonaEdu ${token}` }});
+            const data = await response.json();
+            if (data.Message === "Done") {
+                setAllAvailableGroups(data.groups || []);
+            } else {
+                throw new Error("Failed to fetch groups list.");
+            }
+        } catch (err) {
+            setError(err.message);
+        }
+
         setIsPermissionsModalOpen(true);
     };
 
@@ -111,29 +140,8 @@ const Assistants = () => {
         setIsPermissionsModalOpen(false);
         setCurrentItem(null);
         setPermissions({});
-        setGroupsByGrade({});
-        setSelectedGrades({});
         setActiveTab(null);
-    };
-
-    const handleGradePillClick = async (grade, category) => {
-        const currentSelected = selectedGrades[category] || [];
-        const newSelected = currentSelected.includes(grade)
-            ? currentSelected.filter(g => g !== grade)
-            : [...currentSelected, grade];
-        
-        setSelectedGrades(prev => ({ ...prev, [category]: newSelected }));
-
-        if (newSelected.includes(grade) && !groupsByGrade[grade]) {
-            try {
-                const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-                const response = await fetch(`${API_URL}/group/grades?grade=${grade}`, { headers: { 'Authorization': `MonaEdu ${token}` }});
-                const data = await response.json();
-                if (data.groups) {
-                    setGroupsByGrade(prev => ({ ...prev, [grade]: data.groups }));
-                }
-            } catch (err) { console.error("Failed to fetch groups for grade", grade, err); }
-        }
+        setSubmitStatus("");
     };
     
     const handlePermissionCheckboxChange = (groupId, category) => {
@@ -234,28 +242,17 @@ const Assistants = () => {
                         
                         {activeTab && (
                             <div className="permission-filters">
-                                <h5>Select Grades to View Groups:</h5>
-                                <div className="grade-pills">
-                                    {allGrades.map(grade => (
-                                        <div key={grade} className={`grade-pill ${selectedGrades[activeTab]?.includes(grade) ? 'active' : ''}`} onClick={() => handleGradePillClick(grade, activeTab)}>
-                                            Grade {grade}
-                                        </div>
-                                    ))}
-                                </div>
-                                <hr/>
                                 <h5>Grant Access to Groups:</h5>
                                 <div className="groups-checkbox-list">
-                                    {(selectedGrades[activeTab] || []).map(grade => (
-                                        (groupsByGrade[grade] || []).map(group => (
-                                            <label key={group._id} className="group-check-row"> 
-                                                <input 
-                                                    type="checkbox" 
-                                                    checked={permissions[activeTab]?.has(group._id)} 
-                                                    onChange={() => handlePermissionCheckboxChange(group._id, activeTab)} 
-                                                />
-                                                {group.groupname} (Grade {grade})
-                                            </label>
-                                        ))
+                                    {allAvailableGroups.map(group => (
+                                        <label key={group._id} className="group-check-row">
+                                            <input 
+                                                type="checkbox" 
+                                                checked={permissions[activeTab]?.has(group._id)} 
+                                                onChange={() => handlePermissionCheckboxChange(group._id, activeTab)} 
+                                            />
+                                            {group.groupname}
+                                        </label>
                                     ))}
                                 </div>
                             </div>

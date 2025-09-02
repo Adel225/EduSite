@@ -201,7 +201,6 @@
             throw new Error('Failed to delete session');
         }
 
-        alert('Section container deleted successfully.');
         if (selectedGroupId) {
             handleGroupClick(selectedGroupId);
         }

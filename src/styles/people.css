@@ -1,0 +1,178 @@
+/* src/styles/people.css */
+
+.people-page {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 1rem;
+}
+
+/* --- Section Header --- */
+.people-section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid var(--primary-color);
+    margin-bottom: 1rem;
+}
+
+.people-section-header h2 {
+    margin: 0;
+    font-size: 1.8rem;
+    color: var(--dark-text);
+}
+
+.invite-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 50%;
+}
+.invite-btn:hover {
+    background-color: var(--bg-light);
+}
+
+/* --- Action Bar --- */
+/* --- HIGHLIGHT: New styles for the main Action Bar Dropdown --- */
+
+.action-bar {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--border-light);
+    height: 48px; /* Give it a consistent height */
+}
+
+/* This is the dropdown container that appears when students are selected */
+.actions-dropdown {
+    position: relative;
+    margin-left: 1rem;
+}
+
+.actions-dropdown-button {
+    background-color: #fff;
+    border: 1px solid var(--border-light);
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: background-color 0.2s;
+}
+
+.actions-dropdown-button:hover {
+    background-color: var(--bg-light);
+}
+
+/* The actual dropdown menu that appears on click */
+.actions-dropdown-menu {
+    position: absolute;
+    top: 110%;
+    left: 0;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+    z-index: 10;
+    width: 150px;
+    overflow: hidden;
+    border: 1px solid var(--border-light);
+}
+
+.actions-dropdown-menu button {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 0.75rem 1rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+
+.actions-dropdown-menu button:hover {
+    background-color: var(--bg-light);
+}
+
+/* --- Student List --- */
+.student-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.student-list-item {
+    display: flex;
+    align-items: center;
+    padding: 1rem 0.5rem;
+    border-bottom: 1px solid var(--border-light);
+}
+
+.student-list-item:hover {
+    background-color: var(--bg-light);
+    border-radius: 8px;
+}
+
+.student-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background-color: var(--primary-color);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    margin: 0 1rem;
+}
+
+.student-name {
+    flex-grow: 1;
+    font-weight: 500;
+    color: var(--dark-text);
+}
+
+/* Using the custom checkbox styles from courseRequests.css */
+/* Ensure this component imports a shared CSS or these styles are global */
+
+/* --- Invite Modal Styles --- */
+.invite-modal .student-checklist {
+    max-height: 40vh;
+    overflow-y: auto;
+    border: 1px solid var(--border-light);
+    padding: 0.75rem;
+    border-radius: 6px;
+}
+.invite-modal .student-checklist label {
+    display: block;
+    padding: 0.5rem;
+    border-radius: 4px;
+}
+.invite-modal .student-checklist label:hover {
+    background-color: var(--bg-light);
+}
+.left {
+    margin-left: 1rem;
+}
+
+.unussigned-student-list-item:hover {
+    background-color: var(--bg-light);
+    border-radius: 8px;
+}
+.centered {
+    display: flex;
+    align-items: center;
+}
+.save-btn {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+}
+.save-btn:hover {
+    background-color: var(--primary-color-dark);
+}
