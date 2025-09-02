@@ -30,7 +30,6 @@ const AdminLogin = () => {
             const data = await response.json();
             
             if (data.token) {
-                // --- HIGHLIGHT: Call the central login function. No more navigating from here. ---
                 await login(data.token, rememberMe);
             } else {
                 setError(data.Message || 'Login failed');

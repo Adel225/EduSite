@@ -61,34 +61,6 @@ useEffect(() => {
 }, [fetchAssignmentAndSubmissions]);
 
 
-// const handleViewSubmission = async (studentId) => {
-//     try {
-//         const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-//         const response = await fetch(`${API_URL}/assignments/submissions?assignmentId=${assignmentId}&groupId=${groupId}&studentId=${studentId}`, { headers: { 'Authorization': `MonaEdu ${token}` } });
-//         const data = await response.json();
-        
-//         if (data.message === "Submissions fetched successfully." && data.data.length > 0) {
-//             const submission = data.data[0];
-//             if (submission.path) {
-//                 setSelectedSubmissionForViewing(submission); // Set data for the viewer
-//                 setIsViewerOpen(true); // Open the viewer modal
-//             } else {
-//                 alert('No PDF file found for this submission.');
-//             }
-//         } else {
-//             alert('No submission found for this student.');
-//         }
-//     } catch (error) {
-//         console.error('Error fetching submission:', error);
-//         alert('Error fetching submission. Please try again.');
-//     }
-// };
-
-// const handleCloseViewer = () => {
-//     setIsViewerOpen(false);
-//     setSelectedSubmissionForViewing(null);
-// };
-
     const getFilteredAndSortedSubmissions = () => {
     let filtered = [...submissions];
     

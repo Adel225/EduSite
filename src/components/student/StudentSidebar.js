@@ -17,6 +17,7 @@ const StudentSidebar = ({ isOpen, onNavLinkClick, isMobile }) => {
       <div className='menu'>Student Menu</div><br/><br/>
       <div>
         {/* <NavLink className={({ isActive }) => (isActive ? 'active-link' : 'li')} to="/student/" end onClick={onNavLinkClick}><img src={StudentDashboardIcon} alt="Dashboard" /> Dashboard</NavLink><br/><br/> */}
+        <NavLink className={({ isActive }) => (isActive ? 'active-link' : 'li')} to="/student/dashboard" onClick={onNavLinkClick}><img src={StudentDashboardIcon} alt="Sessions" /> Dashboard</NavLink><br/><br/>
         <NavLink className={({ isActive }) => (isActive ? 'active-link' : 'li')} to="/student/sessions" onClick={onNavLinkClick}><img src={StudentSessionsIcon} alt="Sessions" /> Sessions</NavLink><br/><br/>
         <NavLink className={({ isActive }) => (isActive ? 'active-link' : 'li')} to="/student/assignments" onClick={onNavLinkClick}><img src={StudentAssignmentsIcon} alt="Assignments" /> Assignments</NavLink><br/><br/>
         <NavLink className={({ isActive }) => (isActive ? 'active-link' : 'li')} to="/student/exams" onClick={onNavLinkClick}><img src={StudentExamsIcon} alt="Exams" /> Exams</NavLink><br/><br/>

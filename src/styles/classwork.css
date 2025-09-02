@@ -1,0 +1,548 @@
+/* src/styles/classwork.css */
+
+:root {
+    --primary-color: #5A67BA;
+    --primary-color-dark: #4A5BA8;
+    --bg-light: #f8f9fa;
+    --body-text: #333;
+}
+
+.classwork-page {
+    max-width: 900px;
+    margin: 0 auto; /* Center the content */
+}
+
+/* --- Action Header (Create Button) --- */
+.classwork-header {
+    display: flex;
+    justify-content: flex-end; /* Align button to the right */
+    margin-bottom: 2rem;
+    position: relative; /* For dropdown positioning */
+}
+
+.create-btn {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 0.8rem 1.5rem;
+    border-radius: 25px; /* Pill shape */
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    transition: all 0.2s ease;
+}
+.create-btn:hover {
+    box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+    transform: translateY(-2px);
+}
+.create-btn svg {
+    width: 20px;
+    height: 20px;
+}
+
+/* --- Create Dropdown Menu --- */
+.create-dropdown {
+    position: absolute;
+    top: 110%; /* Position below the button */
+    right: 0;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+    z-index: 100;
+    width: 220px;
+    overflow: hidden;
+    padding: 0.5rem 0;
+}
+
+/* --- Modal Styles --- */
+.form-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.6);
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.form-modal {
+    background: white;
+    padding: 2rem;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 600px;
+    outline: none;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #eee;
+}
+
+.modal-header h2 {
+    margin: 0;
+    color: #333;
+}
+
+.close-modal-btn {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #666;
+    padding: 0.5rem;
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+}
+
+.close-modal-btn:hover {
+    background-color: #f5f5f5;
+}
+
+.modal-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.form-group label {
+    font-weight: 500;
+    color: #333;
+}
+
+.form-group input,
+.form-group textarea {
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+    transition: border-color 0.2s ease;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+.form-group textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+.link-input-group {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.link-input-group input {
+    flex: 1;
+}
+
+.remove-link-btn {
+    background: #ff4444;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s ease;
+}
+
+.remove-link-btn:hover {
+    background: #cc0000;
+}
+
+.add-link-btn {
+    background-color: #2ecc71;
+    color: white;
+    margin-top: 0.5rem;
+    display: inline-block;
+    width: auto;
+}
+
+.add-link-btn:hover {
+    background: #26aa5d;
+}
+
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #eee;
+}
+
+.cancel-btn {
+    background: #6c757d;
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.2s ease;
+}
+
+.cancel-btn:hover {
+    background: #5a6268;
+}
+
+.submit-btn {
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.2s ease;
+}
+
+.submit-btn:hover:not(:disabled) {
+    background: var(--primary-color-dark);
+}
+
+.submit-btn:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+}
+
+.error-message {
+    background: #f8d7da;
+    color: #721c24;
+    padding: 0.75rem;
+    border-radius: 4px;
+    border: 1px solid #f5c6cb;
+}
+
+.submit-status {
+    background: #d4edda;
+    color: #155724;
+    padding: 0.75rem;
+    border-radius: 4px;
+    border: 1px solid #c3e6cb;
+}
+
+.create-dropdown button {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    width: 100%;
+    text-align: left;
+    padding: 0.75rem 1.5rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+}
+.create-dropdown button:hover {
+    background-color: var(--bg-light);
+}
+.create-dropdown button svg {
+    width: 20px;
+    height: 20px;
+    color: var(--body-text);
+}
+
+
+
+
+.classwork-content {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    padding: 1rem;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .topic-card {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    overflow: hidden;
+  }
+  
+  .topic-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.12);
+  }
+  
+  .topic-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.25rem 1.5rem;
+    cursor: pointer;
+  }
+  
+  .topic-header .topic-title h2 {
+    font-size: 1.8rem;
+    font-weight: 600;
+    color: #202124; /* Google Classroom dark text */
+    margin: 0;
+  }
+  .topic-header .topic-title h2:hover {
+    color: var(--primary-color); 
+    text-decoration: underline;
+  }
+  .topic-description {
+    font-size: 0.9rem;
+    color: #5f6368;
+    margin-top: 1.4rem;
+  }
+  
+  .delete-btn1 {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 6px;
+    transition: background 0.2s ease;
+  }
+  
+  .delete-btn1:hover {
+    background: rgba(211, 47, 47, 0.8);
+  }
+  
+  .chevron {
+    font-size: 1.2rem;
+    transition: transform 0.3s ease;
+    color: #5f6368; /* Google neutral gray */
+  }
+  
+  .chevron.rotated {
+    transform: rotate(180deg);
+  }
+
+
+  .topic-content {
+    background: #f8f9fa; /* light gray */
+    padding: 0.75rem;
+    border-top: 1px solid #e0e0e0;
+  }
+  .topic-content.expanded {
+    max-height: 1000px; 
+    padding: 1rem 1.25rem;
+}
+  
+  .classwork-item {
+    background: #fff;
+    border-radius: 10px;
+    border: 1px solid #e0e0e0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.6rem 0.9rem;
+    margin-bottom: 0.6rem;
+    transition: background 0.2s ease;
+  }
+  
+  .classwork-item:hover {
+    background: #f1f3f4; /* subtle hover */
+  }
+  
+  .classwork-item-info {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+  }
+
+  .classwork-item-info.clickable {
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+  }
+
+  .classwork-item-info.clickable:hover {
+    background-color: #f5f5f5;
+  }
+
+  .clickable-indicator {
+    color: #666;
+    font-size: 1.2rem;
+    margin-left: auto;
+    opacity: 0.7;
+    transition: opacity 0.2s ease;
+  }
+
+  .classwork-item-info.clickable:hover .clickable-indicator {
+    opacity: 1;
+    color: var(--primary-color);
+  }
+  
+  .classwork-item-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+    padding: 0.1rem;
+  }
+  
+  /* Example color coding (adjust to your types) */
+  .classwork-item-icon.type-assignment { background: #4fa2eb; } /* blue */
+  .classwork-item-icon.type-exam { background: #ee5654; }       /* red */
+  .classwork-item-icon.type-quiz { background: #5fa363; }       /* green */
+  .classwork-item-icon.type-material { background: #9040a7; }   /* purple */
+
+  .classwork-item-icon.type-assignment img { color: #ffffff; background: transparent; }
+  
+  .classwork-item-name {
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: #202124;
+  }
+  
+  /* Actions */
+  .classwork-item-actions {
+    position: relative;
+  }
+  
+  /* Three-dot button */
+  .card-menu-btn {
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+    color: #555;
+    padding: 0.3rem;
+    border-radius: 6px;
+    transition: background 0.2s ease;
+    position: relative;
+    z-index: 20;
+  }
+  
+  .card-menu-btn:hover {
+    background: rgba(0,0,0,0.05);
+  }
+  
+
+
+
+
+
+
+
+
+
+  /* --- HIGHLIGHT: New Styles for Search Bar --- */
+
+.search-bar-container {
+    margin-bottom: 2rem;
+}
+
+.classwork-search-input {
+    width: 100%;
+    padding: 0.8rem 1rem;
+    font-size: 1rem;
+    border: 1px solid var(--border-light);
+    border-radius: 8px;
+    box-sizing: border-box;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.classwork-search-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(90, 103, 186, 0.15);
+}
+
+
+
+
+/* Load more button area */
+.load-more-container {
+    display: flex;
+    justify-content: center;
+    padding: 1rem 0;
+  }
+  
+  .load-more-btn {
+    padding: 0.6rem 1rem;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    background: #fff;
+    cursor: pointer;
+    min-width: 120px;
+  }
+  
+  .load-more-btn:disabled {
+    opacity: 0.6;
+    cursor: default;
+  }
+  
+  .no-more-topics {
+    color: #666;
+    font-size: 0.95rem;
+  }
+
+
+
+
+  .dropdown-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    z-index: 1000;
+    min-width: 120px;
+    padding: 4px 0;
+}
+
+.dropdown-item {
+    width: 100%;
+    padding: 8px 16px;
+    border: none;
+    background: none;
+    text-align: left;
+    cursor: pointer;
+    font-size: 14px;
+    color: #333;
+    transition: background-color 0.2s;
+}
+
+.dropdown-item:hover {
+    background-color: #f5f5f5;
+}
+
+.dropdown-item.delete {
+    color: #dc3545;
+}
