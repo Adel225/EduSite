@@ -2,6 +2,11 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import './auth.css';
+import { useConfirmation } from '../../utils/ConfirmationModal';
+import PhoneInput from 'react-phone-number-input';
+import 'react-phone-number-input/style.css';
+import { isValidPhoneNumber } from 'react-phone-number-input';
+
 const API_URL = process.env.REACT_APP_API_URL;
 
 const SignUp = () => {
@@ -19,11 +24,35 @@ const SignUp = () => {
         grade: 9
     });
     const [error, setError] = useState('');
+    const { showError } = useConfirmation();
+    const { showSuccess } = useConfirmation();
     const [loading, setLoading] = useState(false);
+    const [phoneErrors, setPhoneErrors] = useState({
+        phone: '',
+        parentPhone: ''
+    });
     const [showPasswords, setShowPasswords] = useState({
         password: false,
         confirmPassword: false
     });
+
+    const handlePhoneChange = (value) => {
+        setFormData(prev => ({ ...prev, phone: value }));
+        if (value && !isValidPhoneNumber(value)) {
+            setPhoneErrors(prev => ({ ...prev, phone: 'Please enter a valid phone number.' }));
+        } else {
+            setPhoneErrors(prev => ({ ...prev, phone: '' })); 
+        }
+    };
+
+    const handleParentPhoneChange = (value) => {
+        setFormData(prev => ({ ...prev, parentPhone: value }));
+        if (value && !isValidPhoneNumber(value)) {
+            setPhoneErrors(prev => ({ ...prev, parentPhone: 'Please enter a valid parent phone number.' }));
+        } else {
+            setPhoneErrors(prev => ({ ...prev, parentPhone: '' })); 
+        }
+    };
 
     const handleChange = (e) => {
         const value = e.target.name === 'grade' ? parseInt(e.target.value, 10) : e.target.value;
@@ -32,6 +61,7 @@ const SignUp = () => {
             [e.target.name]: value,
         });
     };
+
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -43,14 +73,12 @@ const SignUp = () => {
             return;
         }
 
-        // Validate phone numbers
-        const phoneRegex = /^\d{10}$/;
-        if (!phoneRegex.test(formData.phoneNumber)) {
-            setError('Student phone number must be 10 digits');
+        if (phoneErrors.phone) {
+            setError('Please enter a valid student phone number');
             return;
         }
-        if (!phoneRegex.test(formData.parentPhoneNumber)) {
-            setError('Parent phone number must be 10 digits');
+        if (phoneErrors.parentPhone) {
+            setError('Please enter a valid parent phone number');
             return;
         }
 
@@ -72,9 +100,8 @@ const SignUp = () => {
                 parentemail: formData.parentEmail,
                 password: formData.password,
                 cPassword: formData.confirmPassword,
-                phone: formData.phoneNumber,
-                parentphone: formData.parentPhoneNumber,
-                grade: parseInt(formData.grade, 10)
+                phone: formData.phone ? formData.phone.replace(/\D/g, '') : '',
+                parentPhone: formData.parentPhone ? formData.parentPhone.replace(/\D/g, '') : '',
             };
             
             
@@ -178,7 +205,7 @@ const SignUp = () => {
                             className="form-input"
                         />
                     </div>
-                    <div className="form-group">
+                    {/* <div className="form-group">
                         <label htmlFor="phoneNumber">Student Phone Number:</label>
                         <input
                             type="tel"
@@ -190,19 +217,32 @@ const SignUp = () => {
                             placeholder="10 digits number"
                             className="form-input"
                         />
+                    </div> */}
+                    <div className="form-group">
+                        <label htmlFor="phoneNumber">Student Phone *</label>
+                        <PhoneInput
+                            id="phoneNumber"
+                            international
+                            defaultCountry="AE"
+                            placeholder="Enter phone number"
+                            value={formData.phoneNumber}
+                            onChange={handlePhoneChange}
+                            required
+                        />
+                        {phoneErrors.phone && <span className="validation-error">{phoneErrors.phone}</span>}
                     </div>
                     <div className="form-group">
-                        <label htmlFor="parentPhoneNumber">Parent Phone Number:</label>
-                        <input
-                            type="tel"
-                            id="parentPhoneNumber"
-                            name="parentPhoneNumber"
+                        <label htmlFor="phoneNumber">Parent Phone *</label>
+                        <PhoneInput
+                            id="phoneNumber"
+                            international
+                            defaultCountry="AE"
+                            placeholder="Enter phone number"
                             value={formData.parentPhoneNumber}
-                            onChange={handleChange}
+                            onChange={handleParentPhoneChange}
                             required
-                            placeholder="10 digits number"
-                            className="form-input"
                         />
+                        {phoneErrors.parentPhone && <span className="validation-error">{phoneErrors.parentPhone}</span>}
                     </div>
                     <div className="form-group">
                         <label htmlFor="grade">Grade:</label>
