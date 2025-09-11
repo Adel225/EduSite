@@ -28,6 +28,8 @@
     const [loadingTopics, setLoadingTopics] = useState(false);
     const [submitStatus, setSubmitStatus] = useState('');
     const [error, setError] = useState('');
+    const [isCreatingTopic, setIsCreatingTopic] = useState(false);
+    const [newTopicName, setNewTopicName] = useState('');
     const { showError } = useConfirmation();
     const { showSuccess } = useConfirmation();
 
@@ -184,6 +186,37 @@
         onClose();
     };
 
+    const handleCreateTopic = async () => {
+        if (!newTopicName.trim()) {
+            return;
+        }
+        setSubmitStatus('Creating topic...');
+        try {
+            const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+            const response = await fetch(`${API_URL}/sections/create`, {
+                method: 'POST',
+                headers: { 'Authorization': `MonaEdu ${token}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name: newTopicName,
+                    description : "",
+                    groupIds: [courseId]
+                })
+            });
+            const result = await response.json();
+            if (!response.ok) throw new Error(result.message || 'Failed to create topic');
+            
+            await fetchTopics(); 
+            setSelectedTopic(result.data._id);
+            setIsCreatingTopic(false);
+            setNewTopicName('');
+    
+        } catch (err) {
+            alert(`Error: ${err.message}`); 
+        } finally {
+            setSubmitStatus('');
+        }
+    };
+
     return (
         <Modal 
         isOpen={isOpen} 
@@ -253,20 +286,43 @@
             </div>
 
             <div className="form-group">
-                <label>Select Topic *</label>
-                <select
-                    value={selectedTopic}
-                    onChange={(e) => setSelectedTopic(e.target.value)}
-                    required
-                    disabled={loadingTopics}
-                >
-                    <option value="">{loadingTopics ? 'Loading topics...' : 'Choose a topic'}</option>
-                    {topics.map((topic) => (
-                        <option key={topic._id} value={topic._id}>
-                            {topic.name}
-                        </option>
-                    ))}
-                </select>
+            <label>Select Topic *</label>
+            {isCreatingTopic ? (
+                <div className="inline-create-topic">
+                    <input
+                        type="text"
+                        placeholder="Enter new topic name..."
+                        value={newTopicName}
+                        onChange={(e) => setNewTopicName(e.target.value)}
+                    />
+                    <button type="button" className="save-inline-btn" onClick={handleCreateTopic}>Save</button>
+                    <button type="button" className="cancel-inline-btn" onClick={() => setIsCreatingTopic(false)}>Cancel</button>
+                </div>
+            ) : (
+                <>
+                    <select
+                        value={selectedTopic}
+                        onChange={(e) => setSelectedTopic(e.target.value)}
+                        required
+                        disabled={loadingTopics}
+                    >
+                        <option value="">{loadingTopics ? 'Loading topics...' : 'Choose a topic'}</option>
+                        {topics.map((topic) => (
+                            <option key={topic._id} value={topic._id}>
+                                {topic.name}
+                            </option>
+                        ))}
+                    </select>
+                    <button 
+                        type="button" 
+                        className="create-topic-btn"
+                        onClick={() => setIsCreatingTopic(true)}
+                        disabled={loadingTopics}
+                    >
+                        Create New Topic
+                    </button>
+                </>
+            )}
             </div>
 
             {error && <div className="error-message">{error}</div>}
@@ -301,6 +357,8 @@
     const [loadingTopics, setLoadingTopics] = useState(false);
     const [submitStatus, setSubmitStatus] = useState('');
     const [error, setError] = useState('');
+    const [isCreatingTopic, setIsCreatingTopic] = useState(false);
+    const [newTopicName, setNewTopicName] = useState('');
     const { showError } = useConfirmation();
     const { showSuccess } = useConfirmation();
 
@@ -457,6 +515,37 @@
         onClose();
     };
 
+    const handleCreateTopic = async () => {
+        if (!newTopicName.trim()) {
+            return;
+        }
+        setSubmitStatus('Creating topic...');
+        try {
+            const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+            const response = await fetch(`${API_URL}/sections/create`, {
+                method: 'POST',
+                headers: { 'Authorization': `MonaEdu ${token}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name: newTopicName,
+                    description : "",
+                    groupIds: [courseId]
+                })
+            });
+            const result = await response.json();
+            if (!response.ok) throw new Error(result.message || 'Failed to create topic');
+            
+            await fetchTopics(); 
+            setSelectedTopic(result.data._id);
+            setIsCreatingTopic(false);
+            setNewTopicName('');
+    
+        } catch (err) {
+            alert(`Error: ${err.message}`); 
+        } finally {
+            setSubmitStatus('');
+        }
+    };
+
     return (
         <Modal 
         isOpen={isOpen} 
@@ -516,20 +605,43 @@
             </div>
 
             <div className="form-group">
-                <label>Select Topic *</label>
-                <select
-                    value={selectedTopic}
-                    onChange={(e) => setSelectedTopic(e.target.value)}
-                    required
-                    disabled={loadingTopics}
-                >
-                    <option value="">{loadingTopics ? 'Loading topics...' : 'Choose a topic'}</option>
-                    {topics.map((topic) => (
-                        <option key={topic._id} value={topic._id}>
-                            {topic.name}
-                        </option>
-                    ))}
-                </select>
+            <label>Select Topic *</label>
+            {isCreatingTopic ? (
+                <div className="inline-create-topic">
+                    <input
+                        type="text"
+                        placeholder="Enter new topic name..."
+                        value={newTopicName}
+                        onChange={(e) => setNewTopicName(e.target.value)}
+                    />
+                    <button type="button" className="save-inline-btn" onClick={handleCreateTopic}>Save</button>
+                    <button type="button" className="cancel-inline-btn" onClick={() => setIsCreatingTopic(false)}>Cancel</button>
+                </div>
+            ) : (
+                <>
+                    <select
+                        value={selectedTopic}
+                        onChange={(e) => setSelectedTopic(e.target.value)}
+                        required
+                        disabled={loadingTopics}
+                    >
+                        <option value="">{loadingTopics ? 'Loading topics...' : 'Choose a topic'}</option>
+                        {topics.map((topic) => (
+                            <option key={topic._id} value={topic._id}>
+                                {topic.name}
+                            </option>
+                        ))}
+                    </select>
+                    <button 
+                        type="button" 
+                        className="create-topic-btn"
+                        onClick={() => setIsCreatingTopic(true)}
+                        disabled={loadingTopics}
+                    >
+                        Create New Topic
+                    </button>
+                </>
+            )}
             </div>
 
             {error && <div className="error-message">{error}</div>}
@@ -565,6 +677,8 @@
     const [loadingTopics, setLoadingTopics] = useState(false);
     const [submitStatus, setSubmitStatus] = useState('');
     const [error, setError] = useState('');
+    const [isCreatingTopic, setIsCreatingTopic] = useState(false);
+    const [newTopicName, setNewTopicName] = useState('');
     const { showError } = useConfirmation();
     const { showSuccess } = useConfirmation();
 
@@ -743,6 +857,37 @@
         onClose();
     };
 
+    const handleCreateTopic = async () => {
+        if (!newTopicName.trim()) {
+            return;
+        }
+        setSubmitStatus('Creating topic...');
+        try {
+            const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+            const response = await fetch(`${API_URL}/sections/create`, {
+                method: 'POST',
+                headers: { 'Authorization': `MonaEdu ${token}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name: newTopicName,
+                    description : "",
+                    groupIds: [courseId]
+                })
+            });
+            const result = await response.json();
+            if (!response.ok) throw new Error(result.message || 'Failed to create topic');
+            
+            await fetchTopics(); 
+            setSelectedTopic(result.data._id);
+            setIsCreatingTopic(false);
+            setNewTopicName('');
+    
+        } catch (err) {
+            alert(`Error: ${err.message}`); 
+        } finally {
+            setSubmitStatus('');
+        }
+    };
+
     return (
         <Modal 
         isOpen={isOpen} 
@@ -792,19 +937,42 @@
 
             <div className="form-group">
                 <label>Select Topic *</label>
-                <select
-                    value={selectedTopic}
-                    onChange={(e) => setSelectedTopic(e.target.value)}
-                    required
-                    disabled={loadingTopics}
-                >
-                    <option value="">{loadingTopics ? 'Loading topics...' : 'Choose a topic'}</option>
-                    {topics.map((topic) => (
-                        <option key={topic._id} value={topic._id}>
-                            {topic.name}
-                        </option>
-                    ))}
-                </select>
+                {isCreatingTopic ? (
+                    <div className="inline-create-topic">
+                        <input
+                            type="text"
+                            placeholder="Enter new topic name..."
+                            value={newTopicName}
+                            onChange={(e) => setNewTopicName(e.target.value)}
+                        />
+                        <button type="button" className="save-inline-btn" onClick={handleCreateTopic}>Save</button>
+                        <button type="button" className="cancel-inline-btn" onClick={() => setIsCreatingTopic(false)}>Cancel</button>
+                    </div>
+                ) : (
+                    <>
+                        <select
+                            value={selectedTopic}
+                            onChange={(e) => setSelectedTopic(e.target.value)}
+                            required
+                            disabled={loadingTopics}
+                        >
+                            <option value="">{loadingTopics ? 'Loading topics...' : 'Choose a topic'}</option>
+                            {topics.map((topic) => (
+                                <option key={topic._id} value={topic._id}>
+                                    {topic.name}
+                                </option>
+                            ))}
+                        </select>
+                        <button 
+                            type="button" 
+                            className="create-topic-btn"
+                            onClick={() => setIsCreatingTopic(true)}
+                            disabled={loadingTopics}
+                        >
+                            Create New Topic
+                        </button>
+                    </>
+                )}
             </div>
 
             <div className="form-group">

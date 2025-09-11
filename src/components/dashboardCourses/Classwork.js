@@ -8,7 +8,9 @@
     import MaterialIcon from "../../icons/materials.svg";
     import TopicIcon from "../../icons/session.svg";
     import Trash from "../../icons/trash.svg";
+    import EditIcon from "../../icons/pencil.svg";
     import { AssignmentModal, ExamModal, MaterialModal } from './CreateModals';
+    import { useConfirmation } from '../../utils/ConfirmationModal';
 
     const API_URL = process.env.REACT_APP_API_URL;
 
@@ -29,6 +31,9 @@
     const createMenuRef = useRef(null);
 
     const [searchTerm, setSearchTerm] = useState('');
+    const { showError } = useConfirmation();
+    const { showConfirmation } = useConfirmation();
+    const { showSuccess } = useConfirmation();
 
     const [topics, setTopics] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
@@ -53,6 +58,33 @@
     const [isExamModalOpen, setIsExamModalOpen] = useState(false);
     const [isMaterialModalOpen, setIsMaterialModalOpen] = useState(false);
 
+    // Edit modal states
+const [isEditAssignmentModalOpen, setIsEditAssignmentModalOpen] = useState(false);
+const [isEditExamModalOpen, setIsEditExamModalOpen] = useState(false);
+
+const [examCurrentEditItem, setExamCurrentEditItem] = useState(null);
+const [assignmentCurrentEditItem, setAssignmentCurrentEditItem] = useState(null);
+// State specifically for the Assignment Edit form
+const [assignmentEditData, setAssignmentEditData] = useState({
+    name: '',
+    startDate: '',
+    endDate: '',
+    file: null,
+    answerFile: null,
+    allowSubmissionsAfterDueDate: false
+});
+
+// State specifically for the Exam Edit form
+const [examEditData, setExamEditData] = useState({
+    name: '',
+    startDate: '',
+    endDate: '',
+    file: null,
+    allowSubmissionsAfterDueDate: false
+});
+const [editSubmitStatus, setEditSubmitStatus] = useState('');
+const [editError, setEditError] = useState('');
+
 
     // Close create dropdown if click outside
     useEffect(() => {
@@ -62,6 +94,16 @@
         document.addEventListener('mousedown', handleClickOutside);
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
+
+    // Utility function to convert date to datetime-local format
+    const toDatetimeLocal = (dateString) => {
+        if (!dateString) return '';
+        const date = new Date(dateString);
+        if (isNaN(date.getTime())) return '';
+        const timezoneOffset = date.getTimezoneOffset() * 60000;
+        const localDate = new Date(date.getTime() - timezoneOffset);
+        return localDate.toISOString().slice(0, 16);
+    };
 
     // Fetch topics (page) — append when append=true
     const fetchTopics = async (page = 1, append = false) => {
@@ -76,7 +118,7 @@
         try {
         const token = localStorage.getItem('token') || sessionStorage.getItem('token');
         const response = await fetch(
-            `${API_URL}/sections?groupIds=${courseId}&page=${page}&size=${PAGE_SIZE}`,
+            `${API_URL}/sections?groupId=${courseId}&page=${page}&size=${PAGE_SIZE}`,
             {
             headers: { 'Authorization': `MonaEdu ${token}` }
             }
@@ -148,6 +190,7 @@
         if (!response.ok) throw new Error("Failed to load topic content.");
 
         const data = await response.json();
+        console.log(data.data.content );
         if (data.message === "Section content fetched successfully.") {
             setTopicContents(prev => ({ ...prev, [topicId]: data.data.content || [] }));
         } else {
@@ -294,6 +337,272 @@
         }
     };
 
+    // Assignment/Exam Edit Handlers
+    const handleEditAssignment = (assignment) => {
+        setAssignmentCurrentEditItem(assignment);
+        setAssignmentEditData({
+            name: assignment.name ,
+            startDate: toDatetimeLocal(assignment.startDate || assignment.startdate),
+            endDate: toDatetimeLocal(assignment.endDate || assignment.enddate),
+            file: null,
+            answerFile: null,
+            allowSubmissionsAfterDueDate: assignment.allowSubmissionsAfterDueDate || false
+        });
+        setEditSubmitStatus('');
+        setEditError('');
+        setIsEditAssignmentModalOpen(true);
+    };
+
+    const handleEditExam = (exam) => {
+        setExamCurrentEditItem(exam);
+        setExamEditData({
+            name: exam.name || exam.Name || '',
+            startDate: toDatetimeLocal(exam.startDate || exam.startdate),
+            endDate: toDatetimeLocal(exam.endDate || exam.enddate),
+            file: null,
+            allowSubmissionsAfterDueDate: exam.allowSubmissionsAfterDueDate || false
+        });
+        setEditSubmitStatus('');
+        setEditError('');
+        setIsEditExamModalOpen(true);
+    };
+
+
+    const handleEditAssignmentSubmit = async (e) => {
+        e.preventDefault();
+        setEditSubmitStatus('Updating assignment...');
+        setEditError('');
+    
+        try {
+        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        const formDataToSend = new FormData();
+    
+        // use whichever id exists (._id or .id)
+        const assignmentIdToSend = assignmentCurrentEditItem._id ?? assignmentCurrentEditItem.id;
+        formDataToSend.append('assignmentId', assignmentIdToSend);
+    
+        formDataToSend.append('name', assignmentEditData.name);
+        formDataToSend.append('startDate', assignmentEditData.startDate);
+        formDataToSend.append('endDate', assignmentEditData.endDate);
+        formDataToSend.append('allowSubmissionsAfterDueDate', assignmentEditData.allowSubmissionsAfterDueDate);
+    
+        if (assignmentEditData.file) {
+            formDataToSend.append('file', assignmentEditData.file);
+        }
+        if (assignmentEditData.answerFile) {
+            formDataToSend.append('answerFile', assignmentEditData.answerFile);
+        }
+    
+        const response = await fetch(`${API_URL}/assignments/edit`, {
+            method: 'PUT',
+            headers: { 'Authorization': `MonaEdu ${token}` },
+            body: formDataToSend,
+        });
+    
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.message || 'Failed to update assignment');
+    
+        setEditSubmitStatus('Assignment updated successfully!');
+    
+        // --- robust local update: match by either _id or id and update item fields ---
+        setTopicContents(prevContents => {
+            const newContents = {};
+            const editedId = assignmentCurrentEditItem._id ?? assignmentCurrentEditItem.id;
+    
+            Object.keys(prevContents).forEach(topicId => {
+            newContents[topicId] = prevContents[topicId].map(item => {
+                const candidateIds = [item._id, item.id].filter(Boolean);
+                if (candidateIds.includes(editedId)) {
+                // update common fields so UI reflects changes immediately
+                return {
+                    ...item,
+                    name: assignmentEditData.name,
+                    startDate: assignmentEditData.startDate ?? item.startDate,
+                    endDate: assignmentEditData.endDate ?? item.endDate,
+                    allowSubmissionsAfterDueDate: assignmentEditData.allowSubmissionsAfterDueDate ?? item.allowSubmissionsAfterDueDate
+                };
+                }
+                return item;
+            });
+            });
+    
+            return newContents;
+        });
+    
+        setTimeout(() => setIsEditAssignmentModalOpen(false), 1500);
+        } catch (err) {
+        setEditError(err.message || 'Error updating assignment.');
+        setEditSubmitStatus('');
+        }
+    };
+
+    const handleEditExamSubmit = async (e) => {
+        e.preventDefault();
+        setEditSubmitStatus('Updating exam...');
+        setEditError('');
+    
+        try {
+        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        const formDataToSend = new FormData();
+    
+        // use whichever id exists (._id or .id)
+        const examIdToSend = examCurrentEditItem._id ?? examCurrentEditItem.id;
+        formDataToSend.append('examId', examIdToSend);
+    
+        formDataToSend.append('Name', examEditData.name);
+        formDataToSend.append('startdate', examEditData.startDate);
+        formDataToSend.append('enddate', examEditData.endDate);
+        formDataToSend.append('allowSubmissionsAfterDueDate', examEditData.allowSubmissionsAfterDueDate);
+        formDataToSend.append('groupIds', courseId);
+    
+        if (examEditData.file) {
+            formDataToSend.append('file', examEditData.file);
+        }
+    
+        const response = await fetch(`${API_URL}/exams/edit`, {
+            method: 'PUT',
+            headers: { 'Authorization': `MonaEdu ${token}` },
+            body: formDataToSend,
+        });
+    
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.message || 'Failed to update exam');
+    
+        setEditSubmitStatus('Exam updated successfully!');
+    
+        // --- robust local update: match by either _id or id and update item fields ---
+        setTopicContents(prevContents => {
+            const newContents = {};
+            const editedId = examCurrentEditItem._id ?? examCurrentEditItem.id;
+        
+            Object.keys(prevContents).forEach(topicId => {
+            newContents[topicId] = prevContents[topicId].map(item => {
+                const candidateIds = [item._id, item.id].filter(Boolean);
+                if (candidateIds.includes(editedId)) {
+                return {
+                    ...item,
+                    // Update both versions of each field so UI reflects changes immediately
+                    Name: examEditData.name,
+                    name: examEditData.name,
+                    startdate: examEditData.startDate ?? item.startdate,
+                    startDate: examEditData.startDate ?? item.startDate,
+                    enddate: examEditData.endDate ?? item.enddate,
+                    endDate: examEditData.endDate ?? item.endDate,
+                    allowSubmissionsAfterDueDate:
+                    examEditData.allowSubmissionsAfterDueDate ?? item.allowSubmissionsAfterDueDate
+                };
+                }
+                return item;
+            });
+            });
+        
+            return newContents;
+        });
+    
+        setTimeout(() => setIsEditExamModalOpen(false), 1500);
+        } catch (err) {
+        setEditError(err.message || 'Error updating exam.');
+        setEditSubmitStatus('');
+        }
+    };
+
+    // Delete Handlers
+    const handleDeleteAssignment = async (assignment) => {
+        const confirmed = await showConfirmation({
+            title: 'Delete Assignment',
+            message: 'Are you sure you want to delete this assignment?',
+            confirmText: 'Delete',
+            cancelText: 'Cancel',
+            type: 'danger'
+        });
+        
+        if (confirmed) {
+            try {
+                const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+                const response = await fetch(`${API_URL}/assignments/delete`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `MonaEdu ${token}`,
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ assignmentId: assignment.id }),
+                });
+                
+                const result = await response.json();
+                if (!response.ok) throw new Error(result.message || 'Failed to delete assignment');
+    
+                // Update local state
+                setTopicContents(prev => {
+                    const updated = { ...prev };
+                    Object.keys(updated).forEach(topicId => {
+                        updated[topicId] = updated[topicId].filter(item => item.id !== assignment.id);
+                    });
+                    return updated;
+                });
+                
+                await showSuccess({
+                    title: 'Success',
+                    message: `Successfully deleted the assignment`,
+                    confirmText: 'Great!'
+                });
+            } catch (err) {
+                await showError({
+                    title: 'Error ',
+                    message: `Error: ${err.message}` || 'An error occurred while deleting.',
+                    confirmText: 'Cancel'
+                });
+            }
+        }
+    };
+
+    const handleDeleteExam = async (exam) => {
+        const confirmed = await showConfirmation({
+            title: 'Delete Assignment',
+            message: 'Are you sure you want to delete this exam?',
+            confirmText: 'Delete',
+            cancelText: 'Cancel',
+            type: 'danger'
+        });
+        
+        if (confirmed) {
+            try {
+                const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+                const response = await fetch(`${API_URL}/exams/delete`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `MonaEdu ${token}`,
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ examId: exam.id }),
+                });
+                
+                const result = await response.json();
+                if (!response.ok) throw new Error(result.message || 'Failed to delete exam');
+    
+                // Update local state
+                setTopicContents(prev => {
+                    const updated = { ...prev };
+                    Object.keys(updated).forEach(topicId => {
+                        updated[topicId] = updated[topicId].filter(item => item.id !== exam.id);
+                    });
+                    return updated;
+                });
+                
+                await showSuccess({
+                    title: 'Success',
+                    message: `Successfully deleted the exam`,
+                    confirmText: 'Great!'
+                });
+            } catch (err) {
+                await showError({
+                    title: 'Error ',
+                    message: `Error: ${err.message}` || 'An error occurred while deleting.',
+                    confirmText: 'Cancel'
+                });
+            }
+        }
+    };
+
     const getItemIcon = (type) => {
         switch(type) {
         case 'assignment': return <img src={AssignmentIcon} width="20" height="20" alt="Assignment" />;
@@ -392,11 +701,32 @@
                         </div>
 
                         <div className="classwork-item-actions">
-                            <div className="dropdown" >
-                                <button className="card-menu-btn">
-                                    &#x22EE;
-                                </button>
-                            </div>
+                            {(item.type === 'assignment' || item.type === 'exam') && (
+                                <>
+                                    <button 
+                                        className="edit-btn space-right"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            if (item.type === 'assignment')  handleEditAssignment(item);
+                                            else if (item.type === 'exam') handleEditExam(item);
+                                        }}
+                                        title={`Edit ${item.type}`}
+                                    >
+                                        <img src={EditIcon} width="16" height="16" alt="Edit"/>
+                                    </button>
+                                    <button 
+                                        className="delete-btn"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            if (item.type === 'assignment') handleDeleteAssignment(item);
+                                            else if (item.type === 'exam') handleDeleteExam(item);
+                                        }}
+                                        title={`Delete ${item.type}`}
+                                    >
+                                        <img src={Trash} width="16" height="16" alt="Delete"/>
+                                    </button>
+                                </>
+                            )}
                         </div>
                     </div>
                     ))}
@@ -416,7 +746,7 @@
                     onClick={loadMoreTopics}
                     disabled={loadingMore}
                 >
-                    {loadingMore ? 'Loading...' : 'Load more'}
+                    {loadingMore ? 'Loading...' : 'Load more'} 
                 </button>
                 ) : (
                 <p className="no-more-topics">No more topics.</p>
@@ -487,6 +817,192 @@
             courseId={courseId}
             onSuccess={handleCreationSuccess}
         />
+
+        {/* Edit Assignment Modal */}
+            <Modal
+                isOpen={isEditAssignmentModalOpen}
+                onRequestClose={() => setIsEditAssignmentModalOpen(false)}
+                contentLabel="Edit Assignment"
+                className="form-modal"
+                overlayClassName="form-modal-overlay"
+            >
+                <div className="modal-header">
+                    <h2>Edit Assignment</h2>
+                    <button onClick={() => setIsEditAssignmentModalOpen(false)} className="close-modal-btn">×</button>
+                </div>
+                
+                <form onSubmit={handleEditAssignmentSubmit} className="modal-form">
+                    <div className="form-group">
+                        <label>Assignment Name *</label>
+                        <input
+                            type="text"
+                            name="name"
+                            value={assignmentEditData.name}
+                            onChange={(e) => setAssignmentEditData({...assignmentEditData, name: e.target.value})}
+                            placeholder="Enter assignment name"
+                            required
+                        />
+                    </div>
+
+                    <div className="form-group">
+                        <label>Assignment File (PDF) - Optional</label>
+                        <input
+                            type="file"
+                            name="file"
+                            accept=".pdf"
+                            onChange={(e) => setAssignmentEditData({...assignmentEditData, file: e.target.files[0]})}
+                        />
+                    </div>
+
+                    <div className="form-group">
+                        <label>Answer File (PDF) - Optional</label>
+                        <input
+                            type="file"
+                            name="answerFile"
+                            accept=".pdf"
+                            onChange={(e) => setAssignmentEditData({...assignmentEditData, answerFile: e.target.files[0]})}
+                        />
+                    </div>
+
+                    <div className="form-group">
+                        <label>Start Date & Time *</label>
+                        <input
+                            type="datetime-local"
+                            name="startDate"
+                            value={assignmentEditData.startDate}
+                            onChange={(e) => setAssignmentEditData({...assignmentEditData, startDate: e.target.value})}
+                            required
+                        />
+                    </div>
+
+                    <div className="form-group">
+                        <label>End Date & Time *</label>
+                        <input
+                            type="datetime-local"
+                            name="endDate"
+                            value={assignmentEditData.endDate}
+                            onChange={(e) => setAssignmentEditData({...assignmentEditData, endDate: e.target.value})}
+                            required
+                        />
+                    </div>
+
+                    <div className="form-group">
+                        <label>
+                            <input
+                                type="checkbox"
+                                name="allowSubmissionsAfterDueDate"
+                                checked={assignmentEditData.allowSubmissionsAfterDueDate}
+                                onChange={(e) => setAssignmentEditData({...assignmentEditData, allowSubmissionsAfterDueDate: e.target.checked})}
+                            />
+                            Allow submissions after due date
+                        </label>
+                    </div>
+
+                    {editError && <div className="error-message">{editError}</div>}
+                    {editSubmitStatus && <div className="submit-status">{editSubmitStatus}</div>}
+
+                    <div className="form-actions">
+                        <button type="button" className="cancel-btn" onClick={() => setIsEditAssignmentModalOpen(false)}>
+                            Cancel
+                        </button>
+                        <button 
+                            type="submit" 
+                            className="submit-btn"
+                            disabled={editSubmitStatus && editSubmitStatus !== ''}
+                        >
+                            {editSubmitStatus && editSubmitStatus !== '' ? editSubmitStatus : 'Update Assignment'}
+                        </button>
+                    </div>
+                </form>
+            </Modal>
+
+            {/* Edit Exam Modal */}
+            <Modal
+                isOpen={isEditExamModalOpen}
+                onRequestClose={() => setIsEditExamModalOpen(false)}
+                contentLabel="Edit Exam"
+                className="form-modal"
+                overlayClassName="form-modal-overlay"
+            >
+                <div className="modal-header">
+                    <h2>Edit Exam</h2>
+                    <button onClick={() => setIsEditExamModalOpen(false)} className="close-modal-btn">×</button>
+                </div>
+                
+                <form onSubmit={handleEditExamSubmit} className="modal-form">
+                    <div className="form-group">
+                        <label>Exam Name *</label>
+                        <input
+                            type="text"
+                            name="name"
+                            value={examEditData.name}
+                            onChange={(e) => setExamEditData({...examEditData, name: e.target.value})}
+                            placeholder="Enter exam name"
+                            required
+                        />
+                    </div>
+
+                    <div className="form-group">
+                        <label>Exam File (PDF) - Optional</label>
+                        <input
+                            type="file"
+                            name="file"
+                            accept=".pdf"
+                            onChange={(e) => setExamEditData({...examEditData, file: e.target.files[0]})}
+                        />
+                    </div>
+
+                    <div className="form-group">
+                        <label>Start Date & Time *</label>
+                        <input
+                            type="datetime-local"
+                            name="startDate"
+                            value={examEditData.startDate}
+                            onChange={(e) => setExamEditData({...examEditData, startDate: e.target.value})}
+                            required
+                        />
+                    </div>
+
+                    <div className="form-group">
+                        <label>End Date & Time *</label>
+                        <input
+                            type="datetime-local"
+                            name="endDate"
+                            value={examEditData.endDate}
+                            onChange={(e) => setExamEditData({...examEditData, endDate: e.target.value})}
+                            required
+                        />
+                    </div>
+
+                    <div className="form-group">
+                        <label>
+                            <input
+                                type="checkbox"
+                                name="allowSubmissionsAfterDueDate"
+                                checked={examEditData.allowSubmissionsAfterDueDate}
+                                onChange={(e) => setExamEditData({...examEditData, allowSubmissionsAfterDueDate: e.target.checked})}
+                            />
+                            Allow submissions after due date
+                        </label>
+                    </div>
+
+                    {editError && <div className="error-message">{editError}</div>}
+                    {editSubmitStatus && <div className="submit-status">{editSubmitStatus}</div>}
+
+                    <div className="form-actions">
+                        <button type="button" className="cancel-btn" onClick={() => setIsEditExamModalOpen(false)}>
+                            Cancel
+                        </button>
+                        <button 
+                            type="submit" 
+                            className="submit-btn"
+                            disabled={editSubmitStatus && editSubmitStatus !== ''}
+                        >
+                            {editSubmitStatus && editSubmitStatus !== '' ? editSubmitStatus : 'Update Exam'}
+                        </button>
+                    </div>
+                </form>
+            </Modal>
         </div>
     );
     };

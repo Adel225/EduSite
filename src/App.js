@@ -41,7 +41,6 @@
 
     // Student Pages
     import StudentDashboard from './components/student/StudentDashboard';
-    import JoinCourse from './components/student/pages/JoinCourse';
     import StudentAssignments from './components/student/pages/Assignments';
     import StudentExams from './components/student/pages/Exams';
     import StudentMaterials from './components/student/pages/Materials';
@@ -118,7 +117,6 @@
             <Route path="/login" element={!user ? <Login /> : <Redirecting />} />
             <Route path="/signup" element={<SignUp />} />
 
-            <Route path="/join/:inviteCode" element={<Layout><JoinCourse /></Layout>} />
 
             {/* Private Routes */}
             <Route

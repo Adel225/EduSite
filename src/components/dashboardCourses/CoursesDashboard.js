@@ -18,6 +18,7 @@ const CoursesDashboard = () => {
     const [error, setError] = useState(null);
     const { showConfirmation } = useConfirmation();
     const { showError } = useConfirmation();
+    const { showSuccess } = useConfirmation();
     const { user } = useAuth();
     const [openMenuId, setOpenMenuId] = useState(null);
 
@@ -113,9 +114,14 @@ const CoursesDashboard = () => {
             const result = await response.json();
             if (!response.ok) throw new Error(result.message || 'Failed to create course');
 
-            setSubmitStatus('Course created successfully!');
+            setSubmitStatus('');
+            handleCloseCreateModal();
+            await showSuccess({
+                title: 'Success',
+                message: 'Course created successfully!',
+                confirmText: 'Great!'
+            });
             fetchCourses(); 
-            setTimeout(handleCloseCreateModal, 1500);
         } catch (err) {
             setSubmitStatus(`Error: ${err.message}`);
         }

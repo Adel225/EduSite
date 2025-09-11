@@ -121,8 +121,8 @@ const People = () => {
     const handleRemoveStudent = async (studentId, studentName) => {
         const confirmed = await showConfirmation({
             title: 'Delete Student',
-            message: 'Are you sure you want to delete this student?',
-            confirmText: 'Delete',
+            message: 'Are you sure you want to remove this student?',
+            confirmText: 'Remove',
             cancelText: 'Cancel',
             type: 'warning'
         });
