@@ -18,8 +18,22 @@ const StudentDashboard = () => {
     const { showSuccess } = useConfirmation();
     const { showError } = useConfirmation();
 
-    const course = user?.groupId;
+    const generateCardColors = () => {
+        const colorPairs = [
+            { primary: '#1976d2', secondary: '#1565c0' }, // Blue
+            { primary: '#388e3c', secondary: '#2e7d32' }, // Green
+            { primary: '#f57c00', secondary: '#ef6c00' }, // Orange
+            { primary: '#7b1fa2', secondary: '#6a1b9a' }, // Purple
+            { primary: '#c2185b', secondary: '#ad1457' }, // Pink
+            { primary: '#00796b', secondary: '#00695c' }, // Teal
+            { primary: '#5d4037', secondary: '#4e342e' }, // Brown
+            { primary: '#455a64', secondary: '#37474f' }, // Blue Grey
+        ];
+        
+        return colorPairs[Math.floor(Math.random() * colorPairs.length)];
+    };
 
+    const course = user?.groupId;
 
     const handleOpenJoinModal = () => {
         setJoinCode('');
@@ -64,6 +78,9 @@ const StudentDashboard = () => {
         }
     };
 
+
+    const courses = user?.groupIds || [];
+    console.log(courses);
     
     return (
         <>
@@ -78,26 +95,37 @@ const StudentDashboard = () => {
                 </div>
 
                 <div className="courses-grid">
-                    {course ? (
-                        <div className="course-card" key={course._id}>
-                            <div className="card-header">
-                                <Link to={`/student/courses/${course._id}`}>
-                                    <h3>{course.groupname}</h3>
-                                </Link>
-                                
-                            </div>
-                            <div className="card-body">
-                                {/* Placeholder for section/subject info */}
-                                {/* <p style={{color: '#777', fontSize: '0.9rem'}}>Section/Subject Placeholder</p> */}
-                            </div>
-                            <div className="card-footer">
-                                <button className="card-footer-btn">
-                                    <img src={Exit} width="20" length="20" alt="Archive" />
-                                </button>
-                            </div>
-                        </div>
+                    {courses.length > 0 ? (
+                        courses.map(course => {
+                            const colors = generateCardColors();
+                            
+                            return (
+                                <div 
+                                    className="course-card" 
+                                    key={course._id}
+                                    style={{
+                                        '--card-header-bg': colors.primary,
+                                        '--card-header-secondary': colors.secondary,
+                                        '--card-header-pattern': `linear-gradient(135deg, ${colors.primary} 0%, ${colors.secondary} 100%)`
+                                    }}
+                                >
+                                    <div className="card-header">
+                                        <Link to={`/dashboard/courses/${course._id}`}>
+                                            <h3>{course.groupname}</h3>
+                                        </Link>
+                                    </div>
+                                    <div className="card-body">
+                                    </div>
+                                    <div className="card-footer">
+                                        <button className="card-footer-btn">
+                                            <img src={Exit} width="20" height="20" alt="Archive" />
+                                        </button>
+                                    </div>
+                                </div>
+                            );
+                        })
                     ) : (
-                        <p>You are not currently enrolled in any course. Join a course to get started!</p>
+                        <p>You are not currently enrolled in any courses. Join a course to get started!</p>
                     )}
                 </div>
             </div>
