@@ -22,6 +22,7 @@
         answerFile: null,
         startDate: '',
         endDate: '', 
+        description : ''
     });
     const [selectedTopic, setSelectedTopic] = useState('');
     const [topics, setTopics] = useState([]);
@@ -71,7 +72,7 @@
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!formData.name || !formData.file || !formData.startDate || !formData.endDate || !selectedTopic) {
+        if (!formData.name || !formData.startDate || !formData.endDate || !selectedTopic) {
             setError('Please fill in all required fields and select a topic');
             return;
         }
@@ -89,6 +90,7 @@
             }
             formDataToSend.append('startDate', formData.startDate);
             formDataToSend.append('endDate', formData.endDate);
+            formDataToSend.append('teacherNotes', formData.teacherNotes);
             formDataToSend.append('groupIds', courseId);
             
             const createResponse = await fetch(`${API_URL}/assignments/create`, {
@@ -231,25 +233,34 @@
         
         <form onSubmit={handleSubmit} className="modal-form">
             <div className="form-group">
-            <label>Assignment Name *</label>
-        <input
-            type="text"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                placeholder="Enter assignment name"
-                required
-            />
+                <label>Assignment Name *</label>
+                <input
+                    type="text"
+                        name="name"
+                        value={formData.name}
+                        onChange={handleChange}
+                        placeholder="Enter assignment name"
+                        required
+                    />
             </div>
 
             <div className="form-group">
-            <label>Assignment File (PDF) *</label>
+            <label>Description *</label>
+                <textarea
+                    name="description"
+                    value={formData.teacherNotes}
+                    onChange={handleChange}
+                    placeholder="Enter assignment description"
+                />
+            </div>
+
+            <div className="form-group">
+            <label>Assignment File (PDF) - Optional</label>
             <input
                 type="file"
                 name="file"
                 accept=".pdf"
                 onChange={handleChange}
-                required
             />
             </div>
 
@@ -915,13 +926,13 @@
 
             <div className="form-group">
             <label>Description *</label>
-        <textarea
-            name="description"
-            value={formData.description}
-            onChange={handleChange}
-                placeholder="Enter material description"
-                required
-            />
+                <textarea
+                    name="description"
+                    value={formData.description}
+                    onChange={handleChange}
+                        placeholder="Enter material description"
+                        required
+                    />
             </div>
 
             <div className="form-group">

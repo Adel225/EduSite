@@ -8,6 +8,7 @@ import ExamIconSrc from '../../../icons/exams.svg';
 import AssignmentIconSrc from '../../../icons/assignment.svg';
 import MaterialIconSrc from '../../../icons/materials.svg';
 import "../../../styles/materialViewer.css"
+import { useAuth } from '../../../utils/AuthContext';
 const API_URL = process.env.REACT_APP_API_URL;
 
 Modal.setAppElement('#root');
@@ -16,6 +17,7 @@ const StudentSessions = () => {
     const [sessions, setSessions] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const { user } = useAuth();
     
     // State for the accordion functionality
     const [expandedSessionId, setExpandedSessionId] = useState(null);
@@ -33,15 +35,11 @@ const StudentSessions = () => {
             try {
                 const token = localStorage.getItem('token') || sessionStorage.getItem('token');
 
-                const profileRes = await fetch(`${API_URL}/student/profile`, {
-                    headers: { 'Authorization': `MonaEdu ${token}` }
-                });
-                if (!profileRes.ok) throw new Error('Could not fetch student profile.');
-                const profileData = await profileRes.json();
-                const groupId = profileData.data?.groupId?._id;
+                const groupId = user.groupIds[0]?._id;
+                console.log(user)
 
                 if (!groupId) throw new Error('Student is not assigned to a group.');
-                const sessionsRes = await fetch(`${API_URL}/sections?groupIds=${groupId}`, {
+                const sessionsRes = await fetch(`${API_URL}/sections?groupId=${groupId}`, {
                     headers: { 'Authorization': `MonaEdu ${token}` }
                 });
                 if (!sessionsRes.ok) throw new Error('Could not fetch sessions for your group.');

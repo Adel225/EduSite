@@ -117,7 +117,11 @@ const SignUp = () => {
             
             if (data.Message === "Done " || data.Message === "Done") {
                 // Show success message and redirect to login
-                alert('Registration successful! Please check your email and proceed to login.');
+                await showSuccess({
+                    title: 'Success',
+                    message: 'Registration successful! Please check your email and proceed to login.',
+                    confirmText: 'Great!'
+                });
                 navigate('/login');
             } else if (data.message === "User with this email, username, or phone already exists.") {
                 setError('Email, username, or phone number is already registered');

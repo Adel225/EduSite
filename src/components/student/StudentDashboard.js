@@ -18,7 +18,7 @@ const StudentDashboard = () => {
     const { showSuccess } = useConfirmation();
     const { showError } = useConfirmation();
 
-    const generateCardColors = () => {
+    const generateCardColors = (courseId) => {
         const colorPairs = [
             { primary: '#1976d2', secondary: '#1565c0' }, // Blue
             { primary: '#388e3c', secondary: '#2e7d32' }, // Green
@@ -30,7 +30,16 @@ const StudentDashboard = () => {
             { primary: '#455a64', secondary: '#37474f' }, // Blue Grey
         ];
         
-        return colorPairs[Math.floor(Math.random() * colorPairs.length)];
+        // Create a simple hash from courseId to get consistent index
+        let hash = 0;
+        for (let i = 0; i < courseId.length; i++) {
+            const char = courseId.charCodeAt(i);
+            hash = ((hash << 5) - hash) + char;
+            hash = hash & hash; // Convert to 32-bit integer
+        }
+        
+        const index = Math.abs(hash) % colorPairs.length;
+        return colorPairs[index];
     };
 
     const course = user?.groupId;
@@ -97,7 +106,7 @@ const StudentDashboard = () => {
                 <div className="courses-grid">
                     {courses.length > 0 ? (
                         courses.map(course => {
-                            const colors = generateCardColors();
+                            const colors = generateCardColors(course._id);
                             
                             return (
                                 <div 
