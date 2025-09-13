@@ -11,6 +11,8 @@ import { useConfirmation } from '../../utils/ConfirmationModal';
 const API_URL = process.env.REACT_APP_API_URL;
 
 
+const size = 20;
+
 
 const CoursesDashboard = () => {
     const [courses, setCourses] = useState([]);
@@ -26,13 +28,17 @@ const CoursesDashboard = () => {
     const [courseToAction, setCourseToAction] = useState(null); 
     const [actionToConfirm, setActionToConfirm] = useState(null); 
 
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const [loadingMore, setLoadingMore] = useState(false);
+
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [createFormData, setCreateFormData] = useState({
         name: ''
     });
     const [submitStatus, setSubmitStatus] = useState('');
 
-    const generateCardColors = () => {
+    const generateCardColors = (courseId) => {
         const colorPairs = [
             { primary: '#1976d2', secondary: '#1565c0' }, // Blue
             { primary: '#388e3c', secondary: '#2e7d32' }, // Green
@@ -44,19 +50,44 @@ const CoursesDashboard = () => {
             { primary: '#455a64', secondary: '#37474f' }, // Blue Grey
         ];
         
-        return colorPairs[Math.floor(Math.random() * colorPairs.length)];
+        // Create a simple hash from courseId to get consistent index
+        let hash = 0;
+        for (let i = 0; i < courseId.length; i++) {
+            const char = courseId.charCodeAt(i);
+            hash = ((hash << 5) - hash) + char;
+            hash = hash & hash; // Convert to 32-bit integer
+        }
+        
+        const index = Math.abs(hash) % colorPairs.length;
+        return colorPairs[index];
     };
 
-    const fetchCourses = useCallback(async () => {
-        setLoading(true);
+    const fetchCourses = useCallback(async (page = 1, append = false) => {
+        if (!append) setLoading(true);
+        else setLoadingMore(true);
+        
+        setError(null);
+        
         try {
             const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-            const response = await fetch(`${API_URL}/group/all`, {
+            const response = await fetch(`${API_URL}/group/all?page=${page}&size=${size}`, { // Using size=3 as an example
                 headers: { 'Authorization': `MonaEdu ${token}` }
             });
             const data = await response.json();
             if (data.Message === "Done") {
-                setCourses(data.groups || []);
+                const newCourses = data.groups || [];
+                
+                if (append) {
+                    setCourses(prev => [...prev, ...newCourses]);
+                } else {
+                    setCourses(newCourses);
+                }
+                
+                // --- THIS IS THE FIX ---
+                // Access pagination fields directly from the 'data' object
+                setCurrentPage(data.currentPage || page);
+                setTotalPages(data.totalPages || 1);
+
             } else {
                 throw new Error(data.Message || "Failed to fetch courses");
             }
@@ -64,19 +95,20 @@ const CoursesDashboard = () => {
             setError(err.message);
         } finally {
             setLoading(false);
+            setLoadingMore(false);
         }
     }, []);
+
+    const loadMoreCourses = () => {
+        if (!loadingMore && currentPage < totalPages) {
+            fetchCourses(currentPage + 1, true);
+        }
+    };
 
     useEffect(() => {
         fetchCourses();
     }, [fetchCourses]);
 
-     // --- HIGHLIGHT: New functions to manage the confirmation modal ---
-    const openConfirmationModal = (course, action) => {
-        setCourseToAction(course);
-        setActionToConfirm(action);
-        setIsConfirmModalOpen(true);
-    };
 
     const closeConfirmationModal = () => {
         setIsConfirmModalOpen(false);
@@ -162,7 +194,6 @@ const CoursesDashboard = () => {
         }
     };
 
-
     const handleArchive = async (course) => {
         const confirmed = await showConfirmation({
             title: 'Archive Course',
@@ -203,8 +234,6 @@ const CoursesDashboard = () => {
         }
     };
 
-    const handleGradebook = (course) => alert(`Opening gradebook for ${course.groupname}`);
-
 
     if (loading) return <div>Loading courses...</div>;
     if (error) return <div className="error">{error}</div>;
@@ -223,7 +252,7 @@ const CoursesDashboard = () => {
 
                 <div className="courses-grid">
                     {courses.map(course => {
-                        const colors = generateCardColors();
+                        const colors = generateCardColors(course._id);
                         
                         return (
                             <div 
@@ -241,10 +270,10 @@ const CoursesDashboard = () => {
                                     </Link>
                                 </div>
                                 <div className="card-body">
-                                    <p>{course.enrolledStudents?.length || 0} students</p>
+                                    <p>{course.studentCount || 0} students</p>
                                 </div>
                                 <div className="card-footer">
-                                    <button className="card-footer-btn" onClick={() => handleGradebook(course)}>
+                                    <button className="card-footer-btn">
                                         <img src={Trending} width="20" height="20" alt="Courses" />
                                     </button>
                                     {user?.role === 'main_teacher' && (
@@ -276,6 +305,23 @@ const CoursesDashboard = () => {
                         );
                     })}
                 </div>
+
+                {/* --- HIGHLIGHT: Add the "Load More" button section --- */}
+                    {!loading && courses.length > 0 && (
+                        <div className="load-more-container">
+                            {currentPage < totalPages ? (
+                                <button
+                                    className="load-more-btn"
+                                    onClick={loadMoreCourses}
+                                    disabled={loadingMore}
+                                >
+                                    {loadingMore ? 'Loading...' : 'Load More Courses'}
+                                </button>
+                            ) : (
+                                <p className="no-more-items">You've reached the end of the list.</p>
+                            )}
+                        </div>
+                    )}
             </div>
 
 

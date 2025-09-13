@@ -170,8 +170,8 @@ const Profile = () => {
                     <span>{user.parentPhone}</span>
                 </div>
                 <div className="info-group">
-                    <label>Group:</label>
-                    <span>{user.groupId?.groupname}</span>
+                    <label>Group(s):</label>
+                    <span>{user.groupIds[0]?.groupname}</span>
                 </div>
                 <div className="info-group">
                     <label>Email Confirmed:</label>

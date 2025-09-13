@@ -302,3 +302,52 @@
 .cancel-btn-confirm:hover {
     background-color: #5a6268;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+/* --- HIGHLIGHT: New styles for Load More Button --- */
+.load-more-container {
+    text-align: center;
+    margin-top: 2rem;
+    padding: 1rem 0;
+}
+
+.load-more-btn {
+    /* Outline Style */
+    background-color: transparent;
+    color: var(--primary-color);
+    border: 2px solid var(--primary-color);
+
+    /* Shared properties */
+    padding: 0.8rem 2.5rem; /* Increased padding for a better look */
+    border-radius: 30px; /* Fully rounded pill shape */
+    font-size: 1rem;
+    font-weight: 600; /* Bolder text */
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+/* Fill effect on hover */
+.load-more-btn:hover {
+    transform: translateY(-3px); /* Add a subtle lift */
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+/* Disabled state */
+.load-more-btn:disabled {
+    background-color: #e9ecef;
+    border-color: #e9ecef;
+    color: #adb5bd;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
