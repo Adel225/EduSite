@@ -71,7 +71,8 @@ const [assignmentEditData, setAssignmentEditData] = useState({
     endDate: '',
     file: null,
     answerFile: null,
-    allowSubmissionsAfterDueDate: false
+    allowSubmissionsAfterDueDate: false,
+    description : ''
 });
 
 // State specifically for the Exam Edit form
@@ -339,6 +340,7 @@ const [editError, setEditError] = useState('');
 
     // Assignment/Exam Edit Handlers
     const handleEditAssignment = (assignment) => {
+        // console.log(assignment)
         setAssignmentCurrentEditItem(assignment);
         setAssignmentEditData({
             name: assignment.name ,
@@ -346,6 +348,7 @@ const [editError, setEditError] = useState('');
             endDate: toDatetimeLocal(assignment.endDate || assignment.enddate),
             file: null,
             answerFile: null,
+            description : assignment.teacherNotes,
             allowSubmissionsAfterDueDate: assignment.allowSubmissionsAfterDueDate || false
         });
         setEditSubmitStatus('');
@@ -382,6 +385,7 @@ const [editError, setEditError] = useState('');
         formDataToSend.append('assignmentId', assignmentIdToSend);
     
         formDataToSend.append('name', assignmentEditData.name);
+        formDataToSend.append('teacherNotes', assignmentEditData.description);
         formDataToSend.append('startDate', assignmentEditData.startDate);
         formDataToSend.append('endDate', assignmentEditData.endDate);
         formDataToSend.append('allowSubmissionsAfterDueDate', assignmentEditData.allowSubmissionsAfterDueDate);
@@ -845,6 +849,16 @@ const [editError, setEditError] = useState('');
                     </div>
 
                     <div className="form-group">
+                        <label>Description *</label>
+                        <textarea
+                            name="description"
+                            value={assignmentEditData.description}
+                            onChange={(e) => setAssignmentEditData({...assignmentEditData, description: e.target.value})}
+                            placeholder="Edit assignment description"
+                        />
+                    </div>
+
+                    <div className="form-group">
                         <label>Assignment File (PDF) - Optional</label>
                         <input
                             type="file"
@@ -886,13 +900,14 @@ const [editError, setEditError] = useState('');
                         />
                     </div>
 
-                    <div className="form-group">
+                    <div className="form-group checkbox-group">
                         <label>
                             <input
                                 type="checkbox"
                                 name="allowSubmissionsAfterDueDate"
                                 checked={assignmentEditData.allowSubmissionsAfterDueDate}
                                 onChange={(e) => setAssignmentEditData({...assignmentEditData, allowSubmissionsAfterDueDate: e.target.checked})}
+                                style={{ marginRight: '0.5rem' }} /* Adds space between box and text */
                             />
                             Allow submissions after due date
                         </label>
@@ -974,13 +989,14 @@ const [editError, setEditError] = useState('');
                         />
                     </div>
 
-                    <div className="form-group">
+                    <div className="form-group checkbox-group">
                         <label>
                             <input
                                 type="checkbox"
                                 name="allowSubmissionsAfterDueDate"
                                 checked={examEditData.allowSubmissionsAfterDueDate}
                                 onChange={(e) => setExamEditData({...examEditData, allowSubmissionsAfterDueDate: e.target.checked})}
+                                style={{ marginRight: '0.5rem' }} /* Adds space between box and text */
                             />
                             Allow submissions after due date
                         </label>

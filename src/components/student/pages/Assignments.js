@@ -232,6 +232,7 @@ const Assignments = () => {
                         {assignments.map((assignment) => (
                             <div key={assignment._id} className="student-exam-card">
                                 <h3>{assignment.name}</h3>
+                                <p>{assignment.teacherNotes}</p>
                                 <div className="student-exam-dates">
                                     <p>Start: {formatDate(assignment.startDate)}</p>
                                     <p>End: {formatDate(assignment.endDate)}</p>

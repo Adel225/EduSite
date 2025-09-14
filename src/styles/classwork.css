@@ -150,6 +150,22 @@
     resize: vertical;
 }
 
+.form-group.checkbox-group label {
+  display: flex;       /* Use flexbox for alignment */
+  align-items: center; /* Vertically center the items */
+  cursor: pointer;
+  font-weight: 500;
+  color: var(--body-text);
+  width: fit-content; /* Make the label only as wide as its content */
+}
+/* Style the checkbox itself */
+.form-group.checkbox-group input[type="checkbox"] {
+  /* Make the checkbox larger and easier to click */
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
 .link-input-group {
     display: flex;
     gap: 0.5rem;

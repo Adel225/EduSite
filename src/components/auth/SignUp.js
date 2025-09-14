@@ -19,9 +19,9 @@ const SignUp = () => {
         parentEmail: '',
         password: '',
         confirmPassword: '',
-        phoneNumber: '',
-        parentPhoneNumber: '',
-        grade: 9
+        phone: '',
+        parentPhone: '',
+        grade: ''
     });
     const [error, setError] = useState('');
     const { showError } = useConfirmation();
@@ -101,7 +101,7 @@ const SignUp = () => {
                 password: formData.password,
                 cPassword: formData.confirmPassword,
                 phone: formData.phone ? formData.phone.replace(/\D/g, '') : '',
-                parentPhone: formData.parentPhone ? formData.parentPhone.replace(/\D/g, '') : '',
+                parentphone: formData.parentPhone ? formData.parentPhone.replace(/\D/g, '') : '',
             };
             
             

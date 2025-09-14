@@ -85,12 +85,12 @@
             const formDataToSend = new FormData();
             formDataToSend.append('name', formData.name);
             formDataToSend.append('file', formData.file);
+            formDataToSend.append('teacherNotes', formData.description);
             if (formData.answerFile) {
                 formDataToSend.append('answerFile', formData.answerFile);
             }
             formDataToSend.append('startDate', formData.startDate);
             formDataToSend.append('endDate', formData.endDate);
-            formDataToSend.append('teacherNotes', formData.teacherNotes);
             formDataToSend.append('groupIds', courseId);
             
             const createResponse = await fetch(`${API_URL}/assignments/create`, {
@@ -248,7 +248,7 @@
             <label>Description *</label>
                 <textarea
                     name="description"
-                    value={formData.teacherNotes}
+                    value={formData.description}
                     onChange={handleChange}
                     placeholder="Enter assignment description"
                 />
